@@ -51,7 +51,7 @@ export function TenantLayout() {
       {/* ───── Sidebar ───── */}
       {/* Desktop Sidebar (≥ 1024px) */}
       <aside className="hidden lg:flex flex-col w-[260px] bg-white border-l border-[#E0E0E0] flex-shrink-0 h-full">
-        <SidebarContent navigate={navigate} location={location} onClose={() => {}} />
+        <SidebarContent navigate={navigate} location={location} onClose={() => { }} />
       </aside>
 
       {/* Tablet Sidebar – icon-only (768–1023px) */}
@@ -71,9 +71,8 @@ export function TenantLayout() {
                 to={item.href}
                 end={item.exact}
                 title={item.label}
-                className={`relative w-12 h-12 flex items-center justify-center rounded-xl transition-all ${
-                  isActive ? 'bg-[#2D5A27] text-white' : 'text-[#888888] hover:bg-[#F4F6F9] hover:text-[#2D5A27]'
-                }`}
+                className={`relative w-12 h-12 flex items-center justify-center rounded-xl transition-all ${isActive ? 'bg-[#2D5A27] text-white' : 'text-[#888888] hover:bg-[#F4F6F9] hover:text-[#2D5A27]'
+                  }`}
               >
                 <span className="text-xl">{item.emoji}</span>
                 {item.badge && item.badge > 0 && (
@@ -256,18 +255,16 @@ function SidebarContent({ navigate, location, onClose }: {
                 to={item.href}
                 end={item.exact}
                 onClick={onClose}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all relative ${
-                  isActive
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all relative ${isActive
                     ? 'bg-[#2D5A27] text-white shadow-sm'
                     : 'text-[#888888] hover:bg-[#F4F6F9] hover:text-[#222222]'
-                }`}
+                  }`}
               >
                 <span className="text-lg">{item.emoji}</span>
                 <span className={`text-sm font-medium ${isActive ? 'text-white' : ''}`}>{item.label}</span>
                 {item.badge && item.badge > 0 && (
-                  <span className={`mr-auto w-5 h-5 text-[10px] rounded-full flex items-center justify-center font-bold ${
-                    isActive ? 'bg-white text-[#2D5A27]' : 'bg-[#E74C3C] text-white'
-                  }`}>
+                  <span className={`mr-auto w-5 h-5 text-[10px] rounded-full flex items-center justify-center font-bold ${isActive ? 'bg-white text-[#2D5A27]' : 'bg-[#E74C3C] text-white'
+                    }`}>
                     {item.badge}
                   </span>
                 )}
