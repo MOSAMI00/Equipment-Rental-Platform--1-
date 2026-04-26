@@ -1,8 +1,9 @@
-import { useState, useRef } from 'react';
-import { Upload, Clock, AlertTriangle, CheckCircle, Camera } from 'lucide-react';
+import { useState } from 'react';
+import { Clock, AlertTriangle, CheckCircle } from 'lucide-react';
+import { PhotoUploader } from './PhotoUploader';
+import { SignatureBox } from './SignatureBox';
 
 type Tab = 'receive' | 'in_use' | 'return';
-type ObjTab = 'objection';
 
 const CONDITION_OPTIONS = [
   { value: 'excellent', label: '✅ ممتاز – بحالة مثالية' },
@@ -10,62 +11,6 @@ const CONDITION_OPTIONS = [
   { value: 'fair', label: '⚠️ مقبول – يوجد تلف طفيف' },
   { value: 'damaged', label: '❌ تالف – يوجد ضرر واضح' },
 ];
-
-function PhotoUploader({ label }: { label: string }) {
-  const [photos, setPhotos] = useState<string[]>([]);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    files.forEach(file => {
-      const url = URL.createObjectURL(file);
-      setPhotos(prev => [...prev, url]);
-    });
-  };
-
-  return (
-    <div>
-      <p className="text-sm font-semibold text-[#222222] mb-2">{label}</p>
-      <div className="flex flex-wrap gap-2">
-        {photos.map((url, i) => (
-          <img key={i} src={url} alt="" className="w-20 h-20 rounded-xl object-cover border border-[#E0E0E0]" />
-        ))}
-        <button
-          onClick={() => inputRef.current?.click()}
-          className="w-20 h-20 rounded-xl border-2 border-dashed border-[#E0E0E0] flex flex-col items-center justify-center text-[#888888] hover:border-[#2D5A27] hover:text-[#2D5A27] hover:bg-[#EAF3E9] transition-all"
-        >
-          <Camera className="w-5 h-5 mb-1" />
-          <span className="text-[10px]">رفع صورة</span>
-        </button>
-        <input ref={inputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleUpload} />
-      </div>
-    </div>
-  );
-}
-
-function SignatureBox() {
-  const [signed, setSigned] = useState(false);
-  return (
-    <div>
-      <p className="text-sm font-semibold text-[#222222] mb-2">التوقيع</p>
-      <div
-        onClick={() => setSigned(true)}
-        className={`h-24 rounded-xl border-2 border-dashed flex items-center justify-center cursor-pointer transition-all ${
-          signed ? 'border-[#27AE60] bg-[#EAFAF1]' : 'border-[#E0E0E0] hover:border-[#2D5A27] bg-[#F4F6F9]'
-        }`}
-      >
-        {signed ? (
-          <div className="flex items-center gap-2 text-[#27AE60]">
-            <CheckCircle className="w-5 h-5" />
-            <span className="font-medium text-sm">تم التوقيع</span>
-          </div>
-        ) : (
-          <span className="text-[#888888] text-sm">انقر للتوقيع</span>
-        )}
-      </div>
-    </div>
-  );
-}
 
 export function DeliveryPage() {
   const [activeTab, setActiveTab] = useState<Tab>('receive');
@@ -225,7 +170,6 @@ export function DeliveryPage() {
               <AlertTriangle className="w-5 h-5 text-[#E74C3C]" />
               <h3 className="font-bold text-[#E74C3C]">تقديم اعتراض</h3>
             </div>
-            {/* Countdown */}
             <div className="p-3 bg-[#FDEDEC] rounded-xl mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-[#E74C3C]" />

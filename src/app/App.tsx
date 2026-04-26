@@ -1,18 +1,18 @@
 import { BrowserRouter, Routes, Route } from 'react-router';
 import { Toaster } from 'sonner';
-import { HomePage } from './components/HomePage';
-import { LoginPage } from './components/LoginPage';
-import { RegisterPage } from './components/RegisterPage';
-import { ProductDetailPage } from './components/ProductDetailPage';
-import { CartPage } from './components/CartPage';
-import { TenantLayout } from './components/tenant/TenantLayout';
-import { MyOrdersPage } from './components/tenant/MyOrdersPage';
-import { OrderDetailPage } from './components/tenant/OrderDetailPage';
-import { DeliveryPage } from './components/tenant/DeliveryPage';
-import { ContractsPage } from './components/tenant/ContractsPage';
-import { NotificationsPage } from './components/tenant/NotificationsPage';
-import { RatingsPage } from './components/tenant/RatingsPage';
-import { SettingsPage } from './components/tenant/SettingsPage';
+import { HomePage } from './components/main/home/HomePage';
+import { LoginPage } from './components/pages/LoginPage';
+import { RegisterPage } from './components/pages/RegisterPage';
+import { ProductDetailPage } from './components/pages/ProductDetailPage';
+import { CartPage } from './components/pages/CartPage';
+import { TenantLayout } from './components/tenant/layout/TenantLayout';
+import { MyOrdersPage } from './components/tenant/orders/MyOrdersPage';
+import { OrderDetailPage } from './components/tenant/orders/OrderDetailPage';
+import { DeliveryPage } from './components/tenant/orders/DeliveryPage';
+import { ContractsPage } from './components/tenant/contracts/ContractsPage';
+import { NotificationsPage } from './components/tenant/notifications/NotificationsPage';
+import { RatingsPage } from './components/tenant/ratings/RatingsPage';
+import { SettingsPage } from './components/tenant/settings/SettingsPage';
 
 export default function App() {
   return (

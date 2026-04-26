@@ -1,7 +1,7 @@
 import { ChevronLeft, ChevronRight, Star, MapPin, Lock, FileCheck } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
-import { products } from '../data/products';
+import { products } from '../../data/products';
 
 export function ProductDetailPage() {
   const { id } = useParams();

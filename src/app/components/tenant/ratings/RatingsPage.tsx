@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Star, Send } from 'lucide-react';
+import { StarRating } from './StarRating';
+import { RatingCard } from './RatingCard';
 
 type RatingTab = 'received' | 'sent' | 'pending';
 
@@ -26,54 +28,6 @@ const SENT: Rating[] = [
 const PENDING = [
   { id: '5', orderNum: 'OP-1048', equipment: 'حفارة صغيرة', lessor: 'محمد سالم', image: '🚧', date: '10 فبراير 2025' },
 ];
-
-function StarRating({ value, onChange }: { value: number; onChange?: (v: number) => void }) {
-  const [hover, setHover] = useState(0);
-  return (
-    <div className="flex items-center gap-1">
-      {[1, 2, 3, 4, 5].map(star => (
-        <button
-          key={star}
-          type="button"
-          onClick={() => onChange?.(star)}
-          onMouseEnter={() => setHover(star)}
-          onMouseLeave={() => setHover(0)}
-          className={`text-2xl transition-all ${onChange ? 'cursor-pointer hover:scale-110' : 'cursor-default'}`}
-        >
-          <Star
-            className="w-6 h-6 transition-colors"
-            fill={(hover || value) >= star ? '#F39C12' : 'none'}
-            stroke={(hover || value) >= star ? '#F39C12' : '#E0E0E0'}
-          />
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function RatingCard({ rating, type }: { rating: Rating; type: 'received' | 'sent' }) {
-  return (
-    <div className="bg-white rounded-2xl border border-[#E0E0E0] p-4">
-      <div className="flex items-start gap-3 mb-3">
-        <div className="w-12 h-12 rounded-xl bg-[#F4F6F9] flex items-center justify-center text-2xl flex-shrink-0">
-          {rating.image}
-        </div>
-        <div className="flex-1">
-          <p className="font-bold text-[#222222] text-sm">{rating.equipment}</p>
-          <p className="text-xs text-[#888888]">{rating.person}</p>
-          <div className="flex items-center gap-2 mt-1.5">
-            <StarRating value={rating.stars} />
-            <span className="font-bold text-[#F39C12] text-sm">{rating.stars}.0</span>
-          </div>
-        </div>
-        <span className="text-xs text-[#888888]">{rating.date}</span>
-      </div>
-      <p className="text-sm text-[#888888] bg-[#F4F6F9] rounded-xl p-3 leading-relaxed">
-        "{rating.comment}"
-      </p>
-    </div>
-  );
-}
 
 export function RatingsPage() {
   const [activeTab, setActiveTab] = useState<RatingTab>('pending');
@@ -146,13 +100,13 @@ export function RatingsPage() {
       {/* Tab Content */}
       {activeTab === 'received' && (
         <div className="flex flex-col gap-3">
-          {RECEIVED.map(r => <RatingCard key={r.id} rating={r} type="received" />)}
+          {RECEIVED.map(r => <RatingCard key={r.id} rating={r} />)}
         </div>
       )}
 
       {activeTab === 'sent' && (
         <div className="flex flex-col gap-3">
-          {SENT.map(r => <RatingCard key={r.id} rating={r} type="sent" />)}
+          {SENT.map(r => <RatingCard key={r.id} rating={r} />)}
         </div>
       )}
 
