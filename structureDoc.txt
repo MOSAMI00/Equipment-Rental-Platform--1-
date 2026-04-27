@@ -1,0 +1,164 @@
+Page: Home
+* Header
+* Main
+  * HeroSection
+  * TrustStrip
+  * EquipmentSection
+  * HowItWorks
+  * JoinCTA
+  * ReviewsSection
+* Footer
+* ProductDetailsModal
+
+Page: Login
+* Main
+  * FormSection
+    * Logo
+    * Title
+    * Form
+      * PhoneInput
+      * PasswordInput
+      * LoginButton
+      * SocialButtons
+  * PromoSection
+    * Headlines
+    * FeaturesList
+
+Page: Register
+* Main
+  * FormSection
+    * UserTypeToggle
+    * Form
+      * PersonalInputs
+      * PasswordStrengthBar
+      * LocationSelectors
+      * OwnerInputs
+      * TermsCheckbox
+      * RegisterButton
+  * InfoSection
+    * FeaturesCards
+
+Page: Product Details
+* Header
+* Breadcrumb
+* Main
+  * Gallery
+    * ImageDisplay
+    * Thumbnails
+  * Tabs
+    * Description
+    * Terms
+    * Reviews
+  * BookingSidebar
+    * PriceCard
+    * DatePickers
+    * BookingButton
+    * TrustBadges
+  * OwnerCard
+* MobileBottomBar
+
+Page: Cart
+* Header
+* Stepper
+* Main
+  * StepContent
+    * ReviewItems
+    * DeliveryForm
+    * PaymentMethods
+    * ContractCheckbox
+  * SummarySidebar
+    * ItemsList
+    * PricingBreakdown
+    * Total
+    * CheckoutButton
+
+Page: Dashboard: My Orders
+* Sidebar
+* Topbar
+* Main
+  * OrderHeader
+    * Stats
+    * SearchBar
+  * ActionBanner
+  * FilterTabs
+  * OrdersGrid
+    * OrderCard
+* MobileBottomNav
+
+Page: Dashboard: Order Details
+* Sidebar
+* Topbar
+* Main
+  * Breadcrumb
+  * OrderInfoCard
+  * RentalInfoCard
+  * OrderTimeline
+  * ActionButtons
+  * OrderSummary
+  * EscrowStatus
+* MobileBottomNav
+
+Page: Dashboard: Delivery
+* Sidebar
+* Topbar
+* Main
+  * EquipmentBanner
+  * StatusTabs
+  * TabContent
+    * PhotoUploader
+    * ConditionPicker
+    * SignatureBox
+    * StatusTimeline
+    * DamageCheck
+    * ObjectionForm
+* MobileBottomNav
+
+Page: Dashboard: Contracts
+* Sidebar
+* Topbar
+* Main
+  * ContractHeader
+  * ContractTable
+  * ContractCards
+* MobileBottomNav
+
+Page: Dashboard: Notifications
+* Sidebar
+* Topbar
+* Main
+  * Header
+    * Title
+    * MarkAllRead
+  * FilterTabs
+  * NotificationList
+    * NotificationItem
+* MobileBottomNav
+
+Page: Dashboard: Ratings
+* Sidebar
+* Topbar
+* Main
+  * SummaryCard
+    * AverageScore
+    * DistributionBars
+  * FilterTabs
+  * RatingsList
+    * RatingCard
+  * PendingForms
+    * OrderInfo
+    * StarPicker
+    * CommentArea
+    * SubmitButton
+* MobileBottomNav
+
+Page: Dashboard: Settings
+* Sidebar
+* Topbar
+* Main
+  * SettingsLayout
+    * NavTabs
+    * ContentArea
+      * ProfileForm
+      * SecurityForm
+      * KYCUploaders
+* MobileBottomNav
