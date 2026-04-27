@@ -1,4 +1,4 @@
-import { Search, Bell, MapPin, Menu, X, ShoppingCart, LogOut, ClipboardList, Package, FileText, Star, Settings } from 'lucide-react';
+import { Search, Bell, MapPin, Menu, X, ShoppingCart, LogOut, ClipboardList, Package, FileText, Star, Settings, Heart, HelpCircle, Globe, ChevronDown, Phone, Mail } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
 
@@ -14,14 +14,25 @@ const accountMenuItems = [
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [locationMenuOpen, setLocationMenuOpen] = useState(false);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [notificationCount] = useState(3);
+  const [wishlistCount] = useState(2);
   const navigate = useNavigate();
   const accountMenuRef = useRef<HTMLDivElement>(null);
+  const locationMenuRef = useRef<HTMLDivElement>(null);
+  const langMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (accountMenuRef.current && !accountMenuRef.current.contains(e.target as Node)) {
         setAccountMenuOpen(false);
+      }
+      if (locationMenuRef.current && !locationMenuRef.current.contains(e.target as Node)) {
+        setLocationMenuOpen(false);
+      }
+      if (langMenuRef.current && !langMenuRef.current.contains(e.target as Node)) {
+        setLangMenuOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -30,8 +41,50 @@ export function Header() {
 
   return (
     <>
+      {/* Top Bar */}
+      <div className="hidden md:block bg-primary/5 border-b border-primary/10">
+        <div className="container mx-auto px-4 py-2">
+          <div className="flex items-center justify-between text-[13px] text-muted-foreground">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-1.5 hover:text-primary transition-colors cursor-pointer">
+                <Phone className="w-3.5 h-3.5" />
+                <span>+967 777 000 000</span>
+              </div>
+              <div className="flex items-center gap-1.5 hover:text-primary transition-colors cursor-pointer">
+                <Mail className="w-3.5 h-3.5" />
+                <span>support@rental.ye</span>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-1.5">
+                <span className="text-primary font-medium">عروض خاصة!</span>
+                <span>خصم 20% على المولدات هذا الأسبوع</span>
+              </div>
+              <div className="w-px h-3 bg-border" />
+              <div className="relative" ref={langMenuRef}>
+                <button 
+                  onClick={() => setLangMenuOpen(!langMenuOpen)}
+                  className="flex items-center gap-1.5 hover:text-primary transition-colors"
+                >
+                  <Globe className="w-3.5 h-3.5" />
+                  <span>العربية (اليمن)</span>
+                  <ChevronDown className="w-3 h-3" />
+                </button>
+                {langMenuOpen && (
+                  <div className="absolute left-0 top-full mt-2 w-32 bg-white border border-border rounded-lg shadow-lg z-[60] overflow-hidden">
+                    <button className="w-full text-right px-3 py-2 hover:bg-muted text-sm transition-colors">العربية</button>
+                    <button className="w-full text-right px-3 py-2 hover:bg-muted text-sm transition-colors">English</button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Desktop & Tablet Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-border">
+      <header className="sticky top-0 z-50 bg-white border-b border-border shadow-sm">
         {/* Main Header Bar */}
         <div className="hidden md:block">
           <div className="container mx-auto px-4">
@@ -58,9 +111,43 @@ export function Header() {
 
               {/* Left: Location, Notifications, Login, Add, Account */}
               <div className="flex items-center gap-4">
-                <button className="flex items-center gap-2 px-3 h-10 rounded-lg hover:bg-muted transition-colors">
-                  <MapPin className="w-4 h-4" />
-                  <span className="text-sm">المحافظة</span>
+                <div className="relative" ref={locationMenuRef}>
+                  <button 
+                    onClick={() => setLocationMenuOpen(!locationMenuOpen)}
+                    className="flex items-center gap-2 px-3 h-10 rounded-lg border border-transparent hover:border-border hover:bg-muted/50 transition-all"
+                  >
+                    <MapPin className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-medium">صنعاء</span>
+                    <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                  </button>
+                  
+                  {locationMenuOpen && (
+                    <div className="absolute left-0 top-full mt-2 w-48 bg-white border border-border rounded-lg shadow-lg z-[60] overflow-hidden">
+                      <div className="px-3 py-2 border-b border-border bg-muted/30">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase">اختر المحافظة</p>
+                      </div>
+                      {['صنعاء', 'عدن', 'تعز', 'حضرموت', 'الحديدة', 'إب'].map((city) => (
+                        <button key={city} className="w-full text-right px-3 py-2 hover:bg-primary/5 hover:text-primary text-sm transition-colors">
+                          {city}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="w-px h-6 bg-border mx-1" />
+
+                <button className="p-2 rounded-lg hover:bg-muted transition-colors group">
+                  <HelpCircle className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                </button>
+
+                <button className="relative p-2 rounded-lg hover:bg-muted transition-colors group">
+                  <Heart className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                  {wishlistCount > 0 && (
+                    <span className="absolute top-1 left-1 w-4 h-4 bg-primary text-white text-[9px] rounded-full flex items-center justify-center">
+                      {wishlistCount}
+                    </span>
+                  )}
                 </button>
 
                 <button className="relative p-2 rounded-lg hover:bg-muted transition-colors">
@@ -237,6 +324,12 @@ export function Header() {
                 <p className="text-xs font-semibold text-[#888888] uppercase tracking-wide mb-2">عام</p>
                 <Link to="/" onClick={() => setMobileMenuOpen(false)} className="p-3 rounded-lg hover:bg-muted text-sm">الرئيسية</Link>
                 <Link to="/" onClick={() => setMobileMenuOpen(false)} className="p-3 rounded-lg hover:bg-muted text-sm">تصفح المعدات</Link>
+                <button onClick={() => setMobileMenuOpen(false)} className="w-full text-right p-3 rounded-lg hover:bg-muted text-sm flex items-center gap-2">
+                  <HelpCircle className="w-4 h-4" /> مركز المساعدة
+                </button>
+                <button onClick={() => setMobileMenuOpen(false)} className="w-full text-right p-3 rounded-lg hover:bg-muted text-sm flex items-center gap-2">
+                  <Globe className="w-4 h-4" /> اللغة: العربية
+                </button>
                 <hr className="my-3 border-border" />
                 <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="p-3 text-right rounded-lg bg-muted block text-sm">تسجيل الدخول</Link>
                 <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="p-3 text-right rounded-lg bg-primary text-white block text-sm">أضف معدتك</Link>

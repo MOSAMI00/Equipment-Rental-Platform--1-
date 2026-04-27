@@ -1,5 +1,26 @@
 Page: Home
 * Header
+  * TopBar (Contact info, Offers, Language selector)
+  * DesktopHeader
+    * LogoSection
+    * SearchBar
+    * ActionCenter
+      * LocationSelector (Dropdown)
+      * HelpCenter
+      * Wishlist
+      * NotificationBell
+      * CartButton
+      * AuthButtons (Login/Register)
+      * UserProfileMenu
+  * MobileHeader
+    * MainBar (Menu, Logo, QuickActions)
+    * MobileSearchBar
+  * MobileDrawer
+    * UserHeader
+    * DashboardLinks
+    * GeneralLinks (Home, Browse, Help, Language)
+    * AuthActions
+  * CategoryStrip (Sticky Categories)
 * Main
   * HeroSection
   * TrustStrip
