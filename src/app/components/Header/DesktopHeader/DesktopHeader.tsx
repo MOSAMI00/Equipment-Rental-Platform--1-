@@ -1,0 +1,18 @@
+import { LogoSection } from './LogoSection';
+import { SearchBar } from './SearchBar';
+import { ActionCenter } from './ActionCenter/ActionCenter';
+
+export function DesktopHeader() {
+  return (
+    <div className="hidden md:block">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-[72px]">
+          <LogoSection />
+          <SearchBar />
+          <ActionCenter />
+        </div>
+      </div>
+    </div>
+  );
+}
+
