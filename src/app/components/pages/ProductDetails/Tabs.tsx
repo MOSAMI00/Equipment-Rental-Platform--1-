@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { TabDescription } from './TabsContent/TabDescription';
-import { TabTerms } from './TabsContent/TabTerms';
-import { TabReviews } from './TabsContent/TabReviews';
+import { TabDescription } from './Tabs/Description';
+import { TabTerms } from './Tabs/Terms';
+import { TabReviews } from './Tabs/Reviews';
 
 interface TabsProps {
   product: any;
@@ -40,4 +40,3 @@ export function Tabs({ product }: TabsProps) {
     </div>
   );
 }
-

@@ -1,18 +1,18 @@
 import { BrowserRouter, Routes, Route } from 'react-router';
 import { Toaster } from 'sonner';
-import { HomePage } from './components/main/home/HomePage';
-import { LoginPage } from './components/pages/LoginPage';
-import { RegisterPage } from './components/pages/RegisterPage';
-import { ProductDetailPage } from './components/pages/ProductDetailPage';
-import { CartPage } from './components/pages/CartPage';
-import { TenantLayout } from './components/tenant/layout/TenantLayout';
-import { MyOrdersPage } from './components/tenant/orders/MyOrdersPage';
-import { OrderDetailPage } from './components/tenant/orders/OrderDetailPage';
-import { DeliveryPage } from './components/tenant/orders/DeliveryPage';
-import { ContractsPage } from './components/tenant/contracts/ContractsPage';
-import { NotificationsPage } from './components/tenant/notifications/NotificationsPage';
-import { RatingsPage } from './components/tenant/ratings/RatingsPage';
-import { SettingsPage } from './components/tenant/settings/SettingsPage';
+import { HomePage } from './components/pages/Home/HomePage';
+import { LoginPage } from './components/pages/Login/LoginPage';
+import { RegisterPage } from './components/pages/Register/RegisterPage';
+import { ProductDetailPage } from './components/pages/ProductDetails/ProductDetailPage';
+import { CartPage } from './components/pages/Cart/CartPage';
+import { TenantLayout } from './components/tenant/Dashboard/TenantLayout';
+import { MyOrdersPage } from './components/tenant/Dashboard/MyOrders/MyOrdersPage';
+import { OrderDetailPage } from './components/tenant/Dashboard/OrderDetails/OrderDetailPage';
+import { DeliveryPage } from './components/tenant/Dashboard/Delivery/DeliveryPage';
+import { ContractsPage } from './components/tenant/Dashboard/Contracts/ContractsPage';
+import { NotificationsPage } from './components/tenant/Dashboard/Notifications/NotificationsPage';
+import { RatingsPage } from './components/tenant/Dashboard/Ratings/RatingsPage';
+import { SettingsPage } from './components/tenant/Dashboard/Settings/SettingsPage';
 
 export default function App() {
   return (
