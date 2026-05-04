@@ -12,6 +12,9 @@ interface PaymentMethodsProps {
   onBack: () => void;
   onConfirm: () => void;
   requestOnly?: boolean;
+  /** بعد قبول المؤجر: عرض وسائل الدفع وبيانات البطاقة */
+  payAfterLessorApproval?: boolean;
+  hideBack?: boolean;
 }
 
 const METHODS = [
@@ -20,21 +23,59 @@ const METHODS = [
   { value: 'cash', icon: Wallet, label: 'دفع عند الاستلام', desc: 'كاش' },
 ];
 
-export function PaymentMethods({ paymentMethod, setPaymentMethod, agreeToContract, setAgreeToContract, onBack, onConfirm, requestOnly = false }: PaymentMethodsProps) {
+export function PaymentMethods({
+  paymentMethod,
+  setPaymentMethod,
+  agreeToContract,
+  setAgreeToContract,
+  onBack,
+  onConfirm,
+  requestOnly = false,
+  payAfterLessorApproval = false,
+  hideBack = false,
+}: PaymentMethodsProps) {
   const [cardDetails, setCardDetails] = useState({ number: '', expiry: '', cvv: '', name: '' });
+
+  const bookingRequestMode = requestOnly && !payAfterLessorApproval;
+  const showPaymentPickers = !bookingRequestMode;
+
+  const cardComplete =
+    cardDetails.number.trim().length >= 12 &&
+    cardDetails.expiry.trim().length >= 4 &&
+    cardDetails.cvv.trim().length >= 3 &&
+    cardDetails.name.trim().length > 1;
+
+  const payConfirmDisabled =
+    !agreeToContract ||
+    (bookingRequestMode
+      ? false
+      : payAfterLessorApproval
+        ? !paymentMethod || (paymentMethod === 'card' && !cardComplete)
+        : !paymentMethod);
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">{requestOnly ? 'تأكيد الطلب' : 'وسيلة الدفع'}</h2>
+      <h2 className="text-2xl font-bold">
+        {payAfterLessorApproval ? 'إتمام الدفع' : bookingRequestMode ? 'تأكيد الطلب' : 'وسيلة الدفع'}
+      </h2>
 
-      {requestOnly ? (
+      {payAfterLessorApproval && (
+        <div className="rounded-xl border border-border bg-muted/30 p-5">
+          <p className="font-semibold mb-1">وافق المؤجر على طلبك</p>
+          <p className="text-sm text-muted-foreground">
+            اختر وسيلة الدفع وأكمل البيانات المطلوبة لتأكيد الحجز وحفظ المبلغ في الضمان.
+          </p>
+        </div>
+      )}
+
+      {bookingRequestMode ? (
         <div className="rounded-xl border border-border bg-muted/30 p-5">
           <p className="font-semibold mb-1">سيتم إرسال الطلب للمؤجر أولاً</p>
           <p className="text-sm text-muted-foreground">
             بعد الموافقة سيظهر لك إشعار وزر إتمام الدفع. لن يتم إنشاء عملية دفع في هذه الخطوة.
           </p>
         </div>
-      ) : (
+      ) : showPaymentPickers ? (
         <div className="space-y-3">
           {METHODS.map(({ value, icon: Icon, label, desc }) => (
             <button
@@ -55,9 +96,9 @@ export function PaymentMethods({ paymentMethod, setPaymentMethod, agreeToContrac
             </button>
           ))}
         </div>
-      )}
+      ) : null}
 
-      {!requestOnly && paymentMethod === 'card' && (
+      {showPaymentPickers && paymentMethod === 'card' && (
         <div className="border border-border rounded-xl p-6 space-y-4 bg-muted/30">
           <h3 className="font-bold text-lg">بيانات البطاقة البنكية</h3>
           <div className="space-y-4">
@@ -86,15 +127,18 @@ export function PaymentMethods({ paymentMethod, setPaymentMethod, agreeToContrac
       <ContractCheckbox agreeToContract={agreeToContract} setAgreeToContract={setAgreeToContract} />
 
       <div className="flex gap-3">
-        <button onClick={onBack} className="flex-1 h-12 border border-border rounded-lg hover:bg-muted transition-colors">
-          → رجوع
-        </button>
+        {!hideBack && (
+          <button type="button" onClick={onBack} className="flex-1 h-12 border border-border rounded-lg hover:bg-muted transition-colors">
+            → رجوع
+          </button>
+        )}
         <button
+          type="button"
           onClick={onConfirm}
-          disabled={(!requestOnly && !paymentMethod) || !agreeToContract}
-          className="flex-1 h-12 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90 transition-colors disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
+          disabled={payConfirmDisabled}
+          className={`h-12 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90 transition-colors disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed ${hideBack ? 'w-full' : 'flex-1'}`}
         >
-          {requestOnly ? 'إرسال طلب الحجز للمؤجّر ←' : 'تأكيد الحجز ودفع ←'}
+          {bookingRequestMode ? 'إرسال طلب الحجز للمؤجّر ←' : payAfterLessorApproval ? 'تأكيد الدفع وحجز الضمان ←' : 'تأكيد الحجز ودفع ←'}
         </button>
       </div>
     </div>
