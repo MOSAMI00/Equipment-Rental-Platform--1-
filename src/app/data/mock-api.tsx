@@ -227,6 +227,8 @@ interface RentalPlatformContextValue {
   getHandoverReportsForRental: (rentalOpId?: string) => HandoverReport[];
   getDisputesForRental: (rentalOpId?: string) => Dispute[];
   getReviewsForRental: (rentalOpId?: string) => Review[];
+  resolveDispute: (disputeId: string) => void;
+  escalateDispute: (disputeId: string) => void;
 }
 
 /** وضع العرض: حساب تسجيل الدخول التجريبي للمؤجر هو owner-1؛ توحيد الملاك يضمن ظهور كل الطلبات في لوحة المؤجر */
@@ -615,7 +617,7 @@ const INITIAL_NOTIFICATIONS: TenantNotification[] = [
     message: 'تم فتح نزاع على طلب #OP-1043. الفريق يراجع القضية.',
     time: 'منذ يومين',
     read: true,
-    action: { label: 'عرض النزاع', href: '/dashboard/order/6' },
+    action: { label: 'عرض النزاع', href: '/dashboard/order/6/delivery' },
   },
   {
     id: 'notif-6',
@@ -1108,7 +1110,7 @@ export function RentalPlatformProvider({ children }: { children: ReactNode }) {
           message: `أضاف المؤجر رداً على النزاع للطلب #${rental.orderNum}. يرجى المراجعة.`,
           referenceType: 'dispute',
           referenceId: disputeId,
-          action: { label: 'عرض النزاع', href: `/dashboard/order/${rental.id}` },
+          action: { label: 'عرض النزاع', href: `/dashboard/order/${rental.id}/delivery` },
         });
       },
       createDispute: (input) => {
@@ -1161,7 +1163,7 @@ export function RentalPlatformProvider({ children }: { children: ReactNode }) {
             message: `تم فتح نزاع على الطلب #${rental.orderNum}. سيتم مراجعته من قبل الإدارة.`,
             referenceType: 'dispute',
             referenceId: dispute.id,
-            action: { label: 'عرض النزاع', href: `/dashboard/order/${rental.id}` },
+            action: { label: 'عرض النزاع', href: `/dashboard/order/${rental.id}/delivery` },
           });
           addOwnerNotification({
             type: 'dispute',
@@ -1195,6 +1197,44 @@ export function RentalPlatformProvider({ children }: { children: ReactNode }) {
           referenceType: 'dispute',
           referenceId: disputeId,
           action: { label: 'مراجعة', href: '/owner/delivery' },
+        });
+      },
+      resolveDispute: (disputeId) => {
+        setDisputes((existing) =>
+          existing.map((d) =>
+            d.id === disputeId ? { ...d, status: 'resolved', resolvedAt: new Date().toISOString() } : d
+          )
+        );
+        const dispute = disputes.find((d) => d.id === disputeId);
+        if (dispute) {
+          setRentals((existing) =>
+            existing.map((item) =>
+              item.id === dispute.rentalOpId ? { ...item, status: 'completed', escrowStatus: 'released' } : item
+            )
+          );
+          addOwnerNotification({
+            type: 'dispute',
+            emoji: '✅',
+            title: 'نزاع تم حله',
+            message: `وافق المستأجر على التسوية للنزاع المتعلق بالطلب. تم إغلاق النزاع.`,
+            referenceType: 'dispute',
+            referenceId: disputeId,
+          });
+        }
+      },
+      escalateDispute: (disputeId) => {
+        setDisputes((existing) =>
+          existing.map((d) =>
+            d.id === disputeId ? { ...d, status: 'under_review' } : d
+          )
+        );
+        addOwnerNotification({
+          type: 'dispute',
+          emoji: '⏳',
+          title: 'تصعيد النزاع',
+          message: `رفض المستأجر التسوية المقترحة للنزاع. تم رفع الأمر للإدارة.`,
+          referenceType: 'dispute',
+          referenceId: disputeId,
         });
       },
       submitReview: (input) => {

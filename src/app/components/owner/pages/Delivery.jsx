@@ -545,13 +545,17 @@ const Delivery = () => {
                         <button
                           className="owner-btn owner-btn-danger"
                           style={{ flex: 1 }}
-                          onClick={() => createDispute({
-                            rentalOpId: selectedRental.id,
-                            equipmentHandoverId: returnReport.id,
-                            reason: 'damage',
-                            details: ownerNotes || 'اعتراض المؤجر على حالة المعدة عند الإرجاع.',
-                            openedByRole: 'owner',
-                          })}
+                          onClick={() => {
+                            const deduction = ownerDecision === 'full_refund' ? 0 : ownerDecision === 'partial_refund' ? Number(proposedDeduction || 0) : selectedRental.insuranceAmount;
+                            createDispute({
+                              rentalOpId: selectedRental.id,
+                              equipmentHandoverId: returnReport.id,
+                              reason: 'damage',
+                              details: returnExtraDescription || 'اعتراض المؤجر على حالة المعدة عند الإرجاع.',
+                              openedByRole: 'owner',
+                              requestedAmount: deduction,
+                            });
+                          }}
                         >
                           <AlertTriangle size={14} /> فتح نزاع
                         </button>

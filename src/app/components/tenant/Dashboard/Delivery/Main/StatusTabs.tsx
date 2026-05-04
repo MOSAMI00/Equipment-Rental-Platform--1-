@@ -11,8 +11,10 @@ interface StatusTabsProps {
 export function StatusTabs({ activeTab, setActiveTab, submitted }: StatusTabsProps) {
   const tabs: { key: Tab; label: string; emoji: string }[] = [
     { key: 'receive', label: 'استلام', emoji: '📦' },
-    { key: 'in_use', label: 'قيد الاستخدام', emoji: '🔧' },
-    { key: 'return', label: 'إرجاع', emoji: '🔄' },
+    ...(submitted.receive ? [
+      { key: 'in_use' as Tab, label: 'قيد الاستخدام', emoji: '🔧' },
+      { key: 'return' as Tab, label: 'إرجاع', emoji: '🔄' },
+    ] : []),
   ];
 
   return (

@@ -45,7 +45,7 @@ function ActionButton({ rental, readyForDelivery }: { rental: TenantRental; read
     },
     in_use: { label: 'التسليم والإرجاع', color: '#FFFFFF', bg: '#3498DB', onClick: () => navigate(`/dashboard/order/${id}/delivery`) },
     completed: { label: 'قيّم', color: '#FFFFFF', bg: '#27AE60', onClick: () => navigate(`/dashboard/ratings?orderId=${id}`) },
-    disputed: { label: 'عرض النزاع', color: '#FFFFFF', bg: '#E74C3C', onClick: () => navigate(`/dashboard/order/${id}`) },
+    disputed: { label: 'عرض النزاع', color: '#FFFFFF', bg: '#E74C3C', onClick: () => navigate(`/dashboard/order/${id}/delivery`) },
   };
   const config = configs[status];
   if (!config) return null;
