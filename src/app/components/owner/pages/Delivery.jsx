@@ -238,45 +238,47 @@ const Delivery = () => {
                       </div>
                     )}
 
-                    <div className="owner-grid-2" style={{ gap: 12 }}>
-                      <textarea
-                        className="owner-input"
-                        placeholder="أضف ملاحظاتك ووجهة نظرك..."
-                        rows={3}
-                        value={dispute.id === selectedRentalId ? disputeNotes : (dispute.ownerNotes ?? '')}
-                        onChange={(e) => { setSelectedRentalId(dispute.id); setDisputeNotes(e.target.value); }}
-                        style={{ width: '100%', resize: 'vertical', fontFamily: 'Cairo, sans-serif' }}
-                      />
-                      <div>
-                        <select
-                          className="owner-input w-full mb-2"
-                          value={ownerDecision}
-                          onChange={(e) => setOwnerDecision(e.target.value)}
-                          style={{ width: '100%' }}
-                        >
-                          <option value="full_refund">استرداد كامل للتأمين</option>
-                          <option value="partial_refund">استرداد جزئي</option>
-                          <option value="no_refund">لا استرداد</option>
-                        </select>
-                        {ownerDecision === 'partial_refund' && (
-                          <input
-                            type="number"
+                    {!dispute.ownerNotes && dispute.openedByRole !== 'owner' && (
+                      <div className="owner-grid-2" style={{ gap: 12 }}>
+                        <textarea
+                          className="owner-input"
+                          placeholder="أضف ملاحظاتك ووجهة نظرك..."
+                          rows={3}
+                          value={dispute.id === selectedRentalId ? disputeNotes : (dispute.ownerNotes ?? '')}
+                          onChange={(e) => { setSelectedRentalId(dispute.id); setDisputeNotes(e.target.value); }}
+                          style={{ width: '100%', resize: 'vertical', fontFamily: 'Cairo, sans-serif' }}
+                        />
+                        <div>
+                          <select
                             className="owner-input w-full mb-2"
-                            placeholder="مبلغ الخصم بالريال"
-                            value={proposedDeduction}
-                            onChange={(e) => setProposedDeduction(e.target.value)}
+                            value={ownerDecision}
+                            onChange={(e) => setOwnerDecision(e.target.value)}
                             style={{ width: '100%' }}
-                          />
-                        )}
-                        <button
-                          className="owner-btn owner-btn-primary w-full"
-                          style={{ width: '100%' }}
-                          onClick={() => handleSaveDisputeNotes(dispute.id)}
-                        >
-                          حفظ الرد
-                        </button>
+                          >
+                            <option value="full_refund">استرداد كامل للتأمين</option>
+                            <option value="partial_refund">استرداد جزئي</option>
+                            <option value="no_refund">لا استرداد</option>
+                          </select>
+                          {ownerDecision === 'partial_refund' && (
+                            <input
+                              type="number"
+                              className="owner-input w-full mb-2"
+                              placeholder="مبلغ الخصم بالريال"
+                              value={proposedDeduction}
+                              onChange={(e) => setProposedDeduction(e.target.value)}
+                              style={{ width: '100%' }}
+                            />
+                          )}
+                          <button
+                            className="owner-btn owner-btn-primary w-full"
+                            style={{ width: '100%' }}
+                            onClick={() => handleSaveDisputeNotes(dispute.id)}
+                          >
+                            حفظ الرد
+                          </button>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 );
               })}
@@ -555,6 +557,7 @@ const Delivery = () => {
                               openedByRole: 'owner',
                               requestedAmount: deduction,
                             });
+                            setActiveTab('disputes');
                           }}
                         >
                           <AlertTriangle size={14} /> فتح نزاع
