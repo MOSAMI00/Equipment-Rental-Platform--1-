@@ -1,7 +1,8 @@
 import { OrderCard } from './OrderCard';
+import type { TenantRental } from '../../../../../../data/mock-api';
 
 interface OrdersGridProps {
-  filtered: any[];
+  filtered: TenantRental[];
 }
 
 export function OrdersGrid({ filtered }: OrdersGridProps) {

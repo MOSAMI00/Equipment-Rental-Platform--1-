@@ -1,15 +1,24 @@
 import { useState, useRef } from 'react';
 import { Camera } from 'lucide-react';
 
-export function PhotoUploader({ label }: { label: string }) {
+interface PhotoUploaderProps {
+  label: string;
+  onChange?: (photos: string[]) => void;
+}
+
+export function PhotoUploader({ label, onChange }: PhotoUploaderProps) {
   const [photos, setPhotos] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    files.forEach(file => {
+    files.forEach((file) => {
       const url = URL.createObjectURL(file);
-      setPhotos(prev => [...prev, url]);
+      setPhotos((prev) => {
+        const next = [...prev, url];
+        onChange?.(next);
+        return next;
+      });
     });
   };
 

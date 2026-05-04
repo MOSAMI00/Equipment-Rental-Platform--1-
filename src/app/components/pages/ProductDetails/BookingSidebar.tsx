@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
+import type { ProductCardProps } from '../Home/Main/EquipmentSection/ProductCard';
+import { calculateRentalDays, useRentalPlatform } from '../../../data/mock-api';
 import { PriceCard } from './BookingSidebar/PriceCard';
 import { DatePickers } from './BookingSidebar/DatePickers';
 import { BookingButton } from './BookingSidebar/BookingButton';
 import { TrustBadges } from './BookingSidebar/TrustBadges';
 
 interface BookingSidebarProps {
-  product: any;
+  product: ProductCardProps;
 }
 
 export function BookingSidebar({ product }: BookingSidebarProps) {
@@ -14,22 +16,18 @@ export function BookingSidebar({ product }: BookingSidebarProps) {
   const [endDate, setEndDate] = useState('');
   const [notes, setNotes] = useState('');
   const navigate = useNavigate();
+  const { addToCartFromProduct } = useRentalPlatform();
 
-  const calculateDays = () => {
-    if (!startDate || !endDate) return 0;
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const diffTime = Math.abs(end.getTime() - start.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays || 0;
-  };
-
-  const days = calculateDays();
+  const days = calculateRentalDays(startDate, endDate);
   const dailyRate = product.price;
   const deposit = product.insurance;
   const serviceFee = days * dailyRate * 0.05;
   const totalRental = days * dailyRate;
   const grandTotal = totalRental + deposit + serviceFee;
+  const handleBook = () => {
+    const item = addToCartFromProduct({ product, startDate, endDate, notes });
+    if (item) navigate('/cart');
+  };
 
   return (
     <div className="bg-white border border-border rounded-xl p-6 space-y-4">
@@ -54,11 +52,10 @@ export function BookingSidebar({ product }: BookingSidebarProps) {
         grandTotal={grandTotal} 
         startDate={startDate} 
         endDate={endDate} 
-        onBook={() => navigate('/cart')} 
+        onBook={handleBook}
       />
 
       <TrustBadges />
     </div>
   );
 }
-

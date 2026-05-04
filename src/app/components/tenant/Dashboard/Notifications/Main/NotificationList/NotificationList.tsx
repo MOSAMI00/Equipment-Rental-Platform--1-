@@ -1,8 +1,8 @@
 import { NotificationItem } from './NotificationItem';
-import { Notification } from '../../NotificationTypes';
+import type { TenantNotification } from '../../../../../../data/mock-api';
 
 interface NotificationListProps {
-  displayed: Notification[];
+  displayed: TenantNotification[];
   markRead: (id: string) => void;
   activeTab: 'all' | 'unread';
 }

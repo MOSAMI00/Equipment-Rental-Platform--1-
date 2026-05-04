@@ -4,9 +4,10 @@ import { PhotoUploader } from './PhotoUploader';
 interface ObjectionFormProps {
   objectionText: string;
   setObjectionText: (text: string) => void;
+  onSubmit: () => void;
 }
 
-export function ObjectionForm({ objectionText, setObjectionText }: ObjectionFormProps) {
+export function ObjectionForm({ objectionText, setObjectionText, onSubmit }: ObjectionFormProps) {
   return (
     <div className="bg-white rounded-2xl border border-[#E74C3C]/30 p-5">
       <div className="flex items-center gap-2 mb-4">
@@ -28,7 +29,11 @@ export function ObjectionForm({ objectionText, setObjectionText }: ObjectionForm
         className="w-full p-3 rounded-xl border border-[#E0E0E0] text-sm focus:outline-none focus:border-[#E74C3C] resize-none transition-colors"
       />
       <PhotoUploader label="صور الاعتراض" />
-      <button className="mt-4 w-full h-12 bg-[#E74C3C] text-white rounded-xl font-bold text-sm hover:bg-red-700 transition-colors flex items-center justify-center gap-2">
+      <button
+        onClick={onSubmit}
+        disabled={!objectionText.trim()}
+        className="mt-4 w-full h-12 bg-[#E74C3C] text-white rounded-xl font-bold text-sm hover:bg-red-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
         <AlertTriangle className="w-4 h-4" />
         تقديم اعتراض
       </button>

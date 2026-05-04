@@ -3,13 +3,23 @@ import { StarPicker } from './StarPicker';
 import { CommentArea } from './CommentArea';
 import { SubmitButton } from './SubmitButton';
 
+export interface PendingRatingItem {
+  id: string;
+  orderNum: string;
+  equipment: string;
+  lessor: string;
+  ownerId: string;
+  image: string;
+  date: string;
+}
+
 interface PendingFormsProps {
-  pendingRatings: any[];
+  pendingRatings: PendingRatingItem[];
   ratingValues: Record<string, number>;
   setRatingValues: React.Dispatch<React.SetStateAction<Record<string, number>>>;
   comments: Record<string, string>;
   setComments: React.Dispatch<React.SetStateAction<Record<string, string>>>;
-  setPendingRatings: React.Dispatch<React.SetStateAction<any[]>>;
+  onSubmit: (item: PendingRatingItem) => void;
 }
 
 export function PendingForms({
@@ -18,7 +28,7 @@ export function PendingForms({
   setRatingValues,
   comments,
   setComments,
-  setPendingRatings,
+  onSubmit,
 }: PendingFormsProps) {
   if (pendingRatings.length === 0) {
     return (
@@ -48,7 +58,7 @@ export function PendingForms({
             />
             <SubmitButton
               disabled={!ratingValues[item.id]}
-              onSubmit={() => setPendingRatings((pending) => pending.filter((rating) => rating.id !== item.id))}
+              onSubmit={() => onSubmit(item)}
             />
           </div>
         </div>

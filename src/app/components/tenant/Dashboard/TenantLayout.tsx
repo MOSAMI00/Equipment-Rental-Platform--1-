@@ -7,6 +7,7 @@ import {
 import { SidebarContent } from './Sidebar/Sidebar';
 import { DashboardTopbar } from './Topbar/Topbar';
 import { MobileBottomNav } from './MobileBottomNav/MobileBottomNav';
+import { useRentalPlatform } from '../../../data/mock-api';
 
 const navItems = [
   { icon: ClipboardList, label: 'طلباتي', href: '/dashboard', emoji: '📋', exact: true },
@@ -30,6 +31,13 @@ export function TenantLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { notifications } = useRentalPlatform();
+  const unreadNotifications = notifications.filter((notification) => !notification.read).length;
+  const navItemsWithBadges = navItems.map((item) =>
+    item.href === '/dashboard/notifications'
+      ? { ...item, badge: unreadNotifications || undefined }
+      : item,
+  );
 
   useEffect(() => {
     const checkTablet = () => {
@@ -42,7 +50,11 @@ export function TenantLayout() {
 
   useEffect(() => { setSidebarOpen(false); }, [location.pathname]);
 
-  const currentTitle = Object.entries(pageTitles)
+  const currentTitle = location.pathname.includes('/delivery')
+    ? 'التسليم والإرجاع'
+    : location.pathname.startsWith('/dashboard/order/')
+      ? 'تفاصيل الطلب'
+      : Object.entries(pageTitles)
     .sort((a, b) => b[0].length - a[0].length)
     .find(([path]) => location.pathname === path || location.pathname.startsWith(path + '/'))?.[1] ?? 'لوحة التحكم';
 
@@ -51,7 +63,7 @@ export function TenantLayout() {
 
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-col w-[260px] bg-white border-l border-[#E0E0E0] flex-shrink-0 h-full">
-        <SidebarContent navItems={navItems} onClose={() => { }} />
+        <SidebarContent navItems={navItemsWithBadges} onClose={() => { }} />
       </aside>
 
       {/* Tablet Sidebar – icon-only */}
@@ -60,7 +72,7 @@ export function TenantLayout() {
           <div className="w-10 h-10 rounded-lg bg-[#2D5A27] flex items-center justify-center mb-4">
             <span className="text-white font-bold text-xl">م</span>
           </div>
-          {navItems.map((item) => {
+          {navItemsWithBadges.map((item) => {
             const isActive = item.exact
               ? location.pathname === item.href
               : location.pathname === item.href || location.pathname.startsWith(item.href + '/');
@@ -105,14 +117,18 @@ export function TenantLayout() {
             >
               <X className="w-5 h-5 text-[#888888]" />
             </button>
-            <SidebarContent navItems={navItems} onClose={() => setSidebarOpen(false)} />
+            <SidebarContent navItems={navItemsWithBadges} onClose={() => setSidebarOpen(false)} />
           </div>
         </div>
       )}
 
       {/* Main Area */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-        <DashboardTopbar title={currentTitle} onOpenSidebar={() => setSidebarOpen(true)} />
+        <DashboardTopbar
+          title={currentTitle}
+          onOpenSidebar={() => setSidebarOpen(true)}
+          unreadNotifications={unreadNotifications}
+        />
         <main className="flex-1 overflow-y-auto">
           <Outlet />
         </main>

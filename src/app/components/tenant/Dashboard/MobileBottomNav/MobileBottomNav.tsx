@@ -1,4 +1,5 @@
 import { NavLink, useLocation } from 'react-router';
+import { useRentalPlatform } from '../../../../data/mock-api';
 
 const bottomNavItems = [
   { emoji: '🏠', label: 'طلباتي', href: '/dashboard', exact: true },
@@ -10,10 +11,17 @@ const bottomNavItems = [
 
 export function MobileBottomNav() {
   const location = useLocation();
+  const { notifications } = useRentalPlatform();
+  const unreadNotifications = notifications.filter((notification) => !notification.read).length;
+  const items = bottomNavItems.map((item) =>
+    item.href === '/dashboard/notifications'
+      ? { ...item, badge: unreadNotifications || undefined }
+      : item,
+  );
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-[#E0E0E0] z-40 flex items-stretch h-16">
-      {bottomNavItems.map((item) => {
+      {items.map((item) => {
         const isActive = item.exact
           ? location.pathname === item.href
           : location.pathname.startsWith(item.href);

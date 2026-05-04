@@ -11,6 +11,7 @@ interface PaymentMethodsProps {
   setAgreeToContract: (val: boolean) => void;
   onBack: () => void;
   onConfirm: () => void;
+  requestOnly?: boolean;
 }
 
 const METHODS = [
@@ -19,35 +20,44 @@ const METHODS = [
   { value: 'cash', icon: Wallet, label: 'دفع عند الاستلام', desc: 'كاش' },
 ];
 
-export function PaymentMethods({ paymentMethod, setPaymentMethod, agreeToContract, setAgreeToContract, onBack, onConfirm }: PaymentMethodsProps) {
+export function PaymentMethods({ paymentMethod, setPaymentMethod, agreeToContract, setAgreeToContract, onBack, onConfirm, requestOnly = false }: PaymentMethodsProps) {
   const [cardDetails, setCardDetails] = useState({ number: '', expiry: '', cvv: '', name: '' });
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">وسيلة الدفع</h2>
+      <h2 className="text-2xl font-bold">{requestOnly ? 'تأكيد الطلب' : 'وسيلة الدفع'}</h2>
 
-      <div className="space-y-3">
-        {METHODS.map(({ value, icon: Icon, label, desc }) => (
-          <button
-            key={value}
-            onClick={() => setPaymentMethod(value as PaymentMethod)}
-            className={`w-full p-4 rounded-lg border-2 transition-all text-right flex items-center gap-4 ${
-              paymentMethod === value ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
-            }`}
-          >
-            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${paymentMethod === value ? 'border-primary' : 'border-border'}`}>
-              {paymentMethod === value && <div className="w-3 h-3 rounded-full bg-primary" />}
-            </div>
-            <Icon className="w-6 h-6 text-muted-foreground" />
-            <div className="flex-1">
-              <div className="font-semibold">{label}</div>
-              <div className="text-sm text-muted-foreground">{desc}</div>
-            </div>
-          </button>
-        ))}
-      </div>
+      {requestOnly ? (
+        <div className="rounded-xl border border-border bg-muted/30 p-5">
+          <p className="font-semibold mb-1">سيتم إرسال الطلب للمؤجر أولاً</p>
+          <p className="text-sm text-muted-foreground">
+            بعد الموافقة سيظهر لك إشعار وزر إتمام الدفع. لن يتم إنشاء عملية دفع في هذه الخطوة.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {METHODS.map(({ value, icon: Icon, label, desc }) => (
+            <button
+              key={value}
+              onClick={() => setPaymentMethod(value as PaymentMethod)}
+              className={`w-full p-4 rounded-lg border-2 transition-all text-right flex items-center gap-4 ${
+                paymentMethod === value ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+              }`}
+            >
+              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${paymentMethod === value ? 'border-primary' : 'border-border'}`}>
+                {paymentMethod === value && <div className="w-3 h-3 rounded-full bg-primary" />}
+              </div>
+              <Icon className="w-6 h-6 text-muted-foreground" />
+              <div className="flex-1">
+                <div className="font-semibold">{label}</div>
+                <div className="text-sm text-muted-foreground">{desc}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
 
-      {paymentMethod === 'card' && (
+      {!requestOnly && paymentMethod === 'card' && (
         <div className="border border-border rounded-xl p-6 space-y-4 bg-muted/30">
           <h3 className="font-bold text-lg">بيانات البطاقة البنكية</h3>
           <div className="space-y-4">
@@ -81,10 +91,10 @@ export function PaymentMethods({ paymentMethod, setPaymentMethod, agreeToContrac
         </button>
         <button
           onClick={onConfirm}
-          disabled={!paymentMethod || !agreeToContract}
+          disabled={(!requestOnly && !paymentMethod) || !agreeToContract}
           className="flex-1 h-12 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90 transition-colors disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
         >
-          تأكيد الحجز ودفع ←
+          {requestOnly ? 'إرسال طلب الحجز للمؤجّر ←' : 'تأكيد الحجز ودفع ←'}
         </button>
       </div>
     </div>

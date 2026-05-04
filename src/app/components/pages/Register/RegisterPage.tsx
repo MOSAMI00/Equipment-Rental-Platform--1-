@@ -1,11 +1,15 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
+import { makeMockUser, useAuth } from '../../../auth/AuthContext';
 import { FormSection } from './FormSection/FormSection';
 import { InfoSection } from './InfoSection/InfoSection';
 
 type UserType = 'tenant' | 'owner';
 
 export function RegisterPage() {
+  const navigate = useNavigate();
+  const auth = useAuth();
   const [userType, setUserType] = useState<UserType>('tenant');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
@@ -43,7 +47,15 @@ export function RegisterPage() {
       return;
     }
 
+    const newUser = makeMockUser({
+      type: userType,
+      fullName: formData.fullName,
+      phone: formData.phone,
+    });
+
+    auth.registerUser(newUser);
     toast.success('تم إنشاء حسابك بنجاح');
+    navigate(userType === 'tenant' ? '/dashboard' : '/owner');
   };
 
   return (

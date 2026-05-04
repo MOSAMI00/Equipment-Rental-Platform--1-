@@ -16,7 +16,14 @@ interface TabContentProps {
   setHasDamage: (hasDamage: boolean) => void;
   objectionText: string;
   setObjectionText: (text: string) => void;
-  setSubmitted: React.Dispatch<React.SetStateAction<Partial<Record<Tab, boolean>>>>;
+  onConfirmReceive: () => void;
+  onConfirmReturn: () => void;
+  onSubmitObjection: () => void;
+  ownerDeliveryDone?: boolean;
+  receivePhotos: string[];
+  setReceivePhotos: (photos: string[]) => void;
+  returnPhotos: string[];
+  setReturnPhotos: (photos: string[]) => void;
 }
 
 function StepLabel({ number, label }: { number: number; label: string }) {
@@ -38,14 +45,26 @@ export function TabContent({
   setHasDamage,
   objectionText,
   setObjectionText,
-  setSubmitted,
+  onConfirmReceive,
+  onConfirmReturn,
+  onSubmitObjection,
+  ownerDeliveryDone = false,
+  receivePhotos,
+  setReceivePhotos,
+  returnPhotos,
+  setReturnPhotos,
 }: TabContentProps) {
   if (activeTab === 'receive') {
     return (
       <div className="bg-white rounded-2xl border border-[#E0E0E0] p-5 flex flex-col gap-5">
+        {!ownerDeliveryDone && (
+          <div className="bg-[#FEF9E7] border border-[#F39C12]/30 rounded-xl p-3 text-sm text-[#8A5A00]">
+            بانتظار تسليم المؤجر للمعدة أولاً مع صورة التوثيق.
+          </div>
+        )}
         <div>
           <StepLabel number={1} label="رفع صور المعدة" />
-          <PhotoUploader label="صور حالة المعدة عند الاستلام" />
+          <PhotoUploader label="صور حالة المعدة عند الاستلام" onChange={setReceivePhotos} />
         </div>
         <div>
           <StepLabel number={2} label="تقييم الحالة" />
@@ -56,7 +75,8 @@ export function TabContent({
           <SignatureBox />
         </div>
         <button
-          onClick={() => setSubmitted(s => ({ ...s, receive: true }))}
+          onClick={onConfirmReceive}
+          disabled={!ownerDeliveryDone || !condition || receivePhotos.length === 0}
           className="w-full h-12 bg-[#2D5A27] text-white rounded-xl font-bold text-sm hover:bg-[#3D7A35] transition-colors flex items-center justify-center gap-2"
         >
           <CheckCircle className="w-4 h-4" />
@@ -76,14 +96,15 @@ export function TabContent({
         <div className="bg-white rounded-2xl border border-[#E0E0E0] p-5 flex flex-col gap-5">
           <div>
             <StepLabel number={1} label="صور الإرجاع" />
-            <PhotoUploader label="صور حالة المعدة عند الإرجاع" />
+            <PhotoUploader label="صور حالة المعدة عند الإرجاع" onChange={setReturnPhotos} />
           </div>
           <div>
             <StepLabel number={2} label="هل يوجد ضرر؟" />
             <DamageCheck hasDamage={hasDamage} setHasDamage={setHasDamage} />
           </div>
           <button
-            onClick={() => setSubmitted(s => ({ ...s, return: true }))}
+            onClick={onConfirmReturn}
+            disabled={hasDamage === null || returnPhotos.length === 0}
             className="w-full h-12 bg-[#2D5A27] text-white rounded-xl font-bold text-sm hover:bg-[#3D7A35] transition-colors flex items-center justify-center gap-2"
           >
             <CheckCircle className="w-4 h-4" />
@@ -91,7 +112,11 @@ export function TabContent({
           </button>
         </div>
 
-        <ObjectionForm objectionText={objectionText} setObjectionText={setObjectionText} />
+        <ObjectionForm
+          objectionText={objectionText}
+          setObjectionText={setObjectionText}
+          onSubmit={onSubmitObjection}
+        />
       </div>
     );
   }

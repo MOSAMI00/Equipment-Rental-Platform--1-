@@ -3,9 +3,10 @@ import { ItemsList } from './ItemsList';
 import { PricingBreakdown } from './PricingBreakdown';
 import { Total } from './Total';
 import { TrustInfo } from './TrustInfo';
+import type { CartRentalItem } from '../../../../data/mock-api';
 
 interface SummarySidebarProps {
-  cartItems: any[];
+  cartItems: CartRentalItem[];
   rentalCost: number;
   deposit: number;
   serviceFee: number;

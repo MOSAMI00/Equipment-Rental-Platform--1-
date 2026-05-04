@@ -1,8 +1,9 @@
 import { Edit, Trash2, ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router';
+import { formatRentalDateRange, type CartRentalItem } from '../../../../data/mock-api';
 
 interface ReviewItemsProps {
-  cartItems: any[];
+  cartItems: CartRentalItem[];
   onDelete: (id: number) => void;
   onNext: () => void;
 }
@@ -37,7 +38,7 @@ export function ReviewItems({ cartItems, onDelete, onNext }: ReviewItemsProps) {
                   <div className="text-sm text-muted-foreground space-y-1">
                     <p className="flex items-center gap-2"><span>📍</span><span>{item.location}</span></p>
                     <p className="flex items-center gap-2"><span>👤</span><span>{item.owner}</span></p>
-                    <p className="flex items-center gap-2"><span>📅</span><span>{item.startDate} → {item.endDate}</span></p>
+                    <p className="flex items-center gap-2"><span>📅</span><span>{formatRentalDateRange(item.startDate, item.endDate)}</span></p>
                     <p className="flex items-center gap-2"><span>⏱️</span><span>{item.days} أيام</span></p>
                   </div>
                 </div>

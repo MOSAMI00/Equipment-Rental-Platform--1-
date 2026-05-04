@@ -1,9 +1,10 @@
-import { Status, TABS, Rental } from '../../shared/OrderTypes';
+import { Status, TABS } from '../../shared/OrderTypes';
+import type { TenantRental } from '../../../../../data/mock-api';
 
 interface OrderTabsProps {
   activeTab: Status | 'all';
   onTabChange: (tab: Status | 'all') => void;
-  rentals: Rental[];
+  rentals: TenantRental[];
 }
 
 export function OrderTabs({ activeTab, onTabChange, rentals }: OrderTabsProps) {

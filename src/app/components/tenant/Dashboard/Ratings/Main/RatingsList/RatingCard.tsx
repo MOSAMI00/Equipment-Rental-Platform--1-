@@ -11,11 +11,13 @@ interface Rating {
 }
 
 export function RatingCard({ rating }: { rating: Rating }) {
+  const isImageUrl = rating.image.startsWith('http');
+
   return (
     <div className="bg-white rounded-2xl border border-[#E0E0E0] p-4">
       <div className="flex items-start gap-3 mb-3">
-        <div className="w-12 h-12 rounded-xl bg-[#F4F6F9] flex items-center justify-center text-2xl flex-shrink-0">
-          {rating.image}
+        <div className="w-12 h-12 rounded-xl bg-[#F4F6F9] flex items-center justify-center text-2xl flex-shrink-0 overflow-hidden">
+          {isImageUrl ? <img src={rating.image} alt={rating.equipment} className="w-full h-full object-cover" /> : rating.image}
         </div>
         <div className="flex-1">
           <p className="font-bold text-[#222222] text-sm">{rating.equipment}</p>

@@ -6,31 +6,20 @@ import { ReviewItems } from './StepContent/ReviewItems';
 import { DeliveryForm } from './StepContent/DeliveryForm';
 import { PaymentMethods } from './StepContent/PaymentMethods';
 import { SummarySidebar } from './SummarySidebar/SummarySidebar';
+import { useRentalPlatform, type PaymentMethod, type TimeSlot } from '../../../data/mock-api';
+import { useAuth } from '../../../auth/AuthContext';
 
 type Step = 1 | 2 | 3;
-type PaymentMethod = 'card' | 'wallet' | 'cash' | null;
-type TimeSlot = 'morning' | 'afternoon' | 'evening' | null;
+type SelectedPaymentMethod = PaymentMethod | null;
 
 export function CartPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { cartItems, removeCartItem, createRentalFromCart } = useRentalPlatform();
   const [currentStep, setCurrentStep] = useState<Step>(1);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(null);
+  const [paymentMethod, setPaymentMethod] = useState<SelectedPaymentMethod>(null);
   const [timeSlot, setTimeSlot] = useState<TimeSlot>(null);
   const [agreeToContract, setAgreeToContract] = useState(false);
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: 'مولد كهرباء 10KVA',
-      image: 'https://images.unsplash.com/photo-1759692071712-adc78a8516c8?w=150&h=150&fit=crop',
-      owner: 'أحمد علي',
-      location: 'صنعاء',
-      startDate: '01/02/2025',
-      endDate: '04/02/2025',
-      days: 3,
-      dailyRate: 15000,
-      deposit: 50000,
-    },
-  ]);
   const [deliveryInfo, setDeliveryInfo] = useState({
     governorate: 'صنعاء',
     district: '',
@@ -40,11 +29,16 @@ export function CartPage() {
 
   const rentalCost = cartItems.reduce((acc, item) => acc + item.dailyRate * item.days, 0);
   const deposit = cartItems.reduce((acc, item) => acc + item.deposit, 0);
-  const serviceFee = rentalCost * 0.05;
-  const total = rentalCost + deposit + serviceFee;
+  const serviceFee = cartItems.reduce((acc, item) => acc + item.serviceFee, 0);
+  const total = cartItems.reduce((acc, item) => acc + item.totalAmount, 0);
 
   const handleDelete = (id: number) => {
-    setCartItems((items) => items.filter((item) => item.id !== id));
+    removeCartItem(id);
+  };
+
+  const handleConfirm = () => {
+    const rental = createRentalFromCart({ deliveryInfo, timeSlot, tenantId: user?.id });
+    if (rental) navigate(`/dashboard/order/${rental.id}`);
   };
 
   return (
@@ -80,7 +74,8 @@ export function CartPage() {
                   agreeToContract={agreeToContract}
                   setAgreeToContract={setAgreeToContract}
                   onBack={() => setCurrentStep(2)}
-                  onConfirm={() => navigate('/')}
+                  onConfirm={handleConfirm}
+                  requestOnly
                 />
               )}
             </section>

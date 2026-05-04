@@ -1,7 +1,8 @@
-import { Notification, TYPE_COLORS } from '../../NotificationTypes';
+import { TYPE_COLORS } from '../../NotificationTypes';
+import type { TenantNotification } from '../../../../../../data/mock-api';
 
 interface NotificationItemProps {
-  notif: Notification;
+  notif: TenantNotification;
   onMarkRead: (id: string) => void;
 }
 

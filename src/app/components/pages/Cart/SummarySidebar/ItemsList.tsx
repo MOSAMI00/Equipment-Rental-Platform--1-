@@ -1,5 +1,7 @@
+import type { CartRentalItem } from '../../../../data/mock-api';
+
 interface ItemsListProps {
-  cartItems: any[];
+  cartItems: CartRentalItem[];
 }
 
 export function ItemsList({ cartItems }: ItemsListProps) {

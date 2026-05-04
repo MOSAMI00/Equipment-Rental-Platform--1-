@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router';
+import { BrowserRouter, Navigate, Routes, Route } from 'react-router';
 import { Toaster } from 'sonner';
 import { HomePage } from './components/pages/Home/HomePage';
 import { LoginPage } from './components/pages/Login/LoginPage';
@@ -13,31 +13,82 @@ import { ContractsPage } from './components/tenant/Dashboard/Contracts/Contracts
 import { NotificationsPage } from './components/tenant/Dashboard/Notifications/NotificationsPage';
 import { RatingsPage } from './components/tenant/Dashboard/Ratings/RatingsPage';
 import { SettingsPage } from './components/tenant/Dashboard/Settings/SettingsPage';
+import OwnerLayout from './components/owner/OwnerLayout';
+import OwnerOverview from './components/owner/pages/Overview';
+import OwnerMyEquipment from './components/owner/pages/MyEquipment';
+import OwnerAddEquipment from './components/owner/pages/AddEquipment';
+import OwnerRequests from './components/owner/pages/Requests';
+import OwnerRentals from './components/owner/pages/Rentals';
+import OwnerDelivery from './components/owner/pages/Delivery';
+import OwnerInsurance from './components/owner/pages/Insurance';
+import OwnerEarnings from './components/owner/pages/Earnings';
+import OwnerContracts from './components/owner/pages/Contracts';
+import OwnerNotifications from './components/owner/pages/Notifications';
+import OwnerReviews from './components/owner/pages/Reviews';
+import OwnerProfile from './components/owner/pages/Profile';
+import { RentalPlatformProvider } from './data/mock-api';
+import { AuthProvider, RequireOwner, RequireTenant } from './auth/AuthContext';
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/product" element={<ProductDetailPage />} />
-        <Route path="/product/:id" element={<ProductDetailPage />} />
-        <Route path="/cart" element={<CartPage />} />
+    <AuthProvider>
+      <RentalPlatformProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/product" element={<ProductDetailPage />} />
+            <Route path="/product/:id" element={<ProductDetailPage />} />
+            <Route path="/cart" element={<CartPage />} />
 
-        {/* Tenant Dashboard Routes */}
-        <Route path="/dashboard" element={<TenantLayout />}>
-          <Route index element={<MyOrdersPage />} />
-          <Route path="order/:id" element={<OrderDetailPage />} />
-          <Route path="delivery" element={<DeliveryPage />} />
-          <Route path="contracts" element={<ContractsPage />} />
-          <Route path="notifications" element={<NotificationsPage />} />
-          <Route path="ratings" element={<RatingsPage />} />
-          <Route path="settings" element={<SettingsPage />} />
-        </Route>
-      </Routes>
-      <Toaster position="top-center" richColors />
-    </BrowserRouter>
+            {/* Tenant Dashboard Routes */}
+            <Route
+              path="/dashboard"
+              element={(
+                <RequireTenant>
+                  <TenantLayout />
+                </RequireTenant>
+              )}
+            >
+              <Route index element={<MyOrdersPage />} />
+              <Route path="order/:id" element={<OrderDetailPage />} />
+              <Route path="order/:id/delivery" element={<DeliveryPage />} />
+              <Route path="delivery" element={<DeliveryPage />} />
+              <Route path="contracts" element={<ContractsPage />} />
+              <Route path="notifications" element={<NotificationsPage />} />
+              <Route path="ratings" element={<RatingsPage />} />
+              <Route path="settings" element={<SettingsPage />} />
+            </Route>
+
+            {/* Owner Dashboard Routes */}
+            <Route
+              path="/owner"
+              element={(
+                <RequireOwner>
+                  <OwnerLayout />
+                </RequireOwner>
+              )}
+            >
+              <Route index element={<Navigate to="/owner/overview" replace />} />
+              <Route path="overview" element={<OwnerOverview />} />
+              <Route path="equipment" element={<OwnerMyEquipment />} />
+              <Route path="equipment/add" element={<OwnerAddEquipment />} />
+              <Route path="requests" element={<OwnerRequests />} />
+              <Route path="rentals" element={<OwnerRentals />} />
+              <Route path="delivery" element={<OwnerDelivery />} />
+              <Route path="insurance" element={<OwnerInsurance />} />
+              <Route path="earnings" element={<OwnerEarnings />} />
+              <Route path="contracts" element={<OwnerContracts />} />
+              <Route path="notifications" element={<OwnerNotifications />} />
+              <Route path="reviews" element={<OwnerReviews />} />
+              <Route path="profile" element={<OwnerProfile />} />
+            </Route>
+          </Routes>
+          <Toaster position="top-center" richColors />
+        </BrowserRouter>
+      </RentalPlatformProvider>
+    </AuthProvider>
   );
 }

@@ -1,16 +1,25 @@
 import { X, AlertTriangle, Send } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface DisputeModalProps {
   isOpen: boolean;
   onClose: () => void;
   orderId?: string;
+  onSubmit?: (payload: { reason: string; details: string }) => void;
 }
 
-export function DisputeModal({ isOpen, onClose, orderId = 'OP-1048' }: DisputeModalProps) {
+export function DisputeModal({ isOpen, onClose, orderId = 'OP-1048', onSubmit }: DisputeModalProps) {
   const [reason, setReason] = useState('');
   const [details, setDetails] = useState('');
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setReason('');
+      setDetails('');
+      setSubmitted(false);
+    }
+  }, [isOpen, orderId]);
 
   if (!isOpen) return null;
 
@@ -82,7 +91,10 @@ export function DisputeModal({ isOpen, onClose, orderId = 'OP-1048' }: DisputeMo
 
               <div className="pt-4 mt-2 border-t border-border flex gap-3">
                 <button
-                  onClick={() => setSubmitted(true)}
+                  onClick={() => {
+                    onSubmit?.({ reason, details });
+                    setSubmitted(true);
+                  }}
                   disabled={!reason || !details}
                   className="flex-1 h-12 bg-[#E74C3C] text-white rounded-xl font-bold hover:bg-[#C0392B] transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >

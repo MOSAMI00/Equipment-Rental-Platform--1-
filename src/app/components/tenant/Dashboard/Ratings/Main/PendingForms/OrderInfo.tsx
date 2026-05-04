@@ -3,10 +3,12 @@ interface OrderInfoProps {
 }
 
 export function OrderInfo({ item }: OrderInfoProps) {
+  const isImageUrl = item.image.startsWith('http');
+
   return (
     <div className="flex items-center gap-3 mb-4 pb-4 border-b border-[#E0E0E0]">
-      <div className="w-12 h-12 rounded-xl bg-[#F4F6F9] flex items-center justify-center text-2xl">
-        {item.image}
+      <div className="w-12 h-12 rounded-xl bg-[#F4F6F9] flex items-center justify-center text-2xl overflow-hidden">
+        {isImageUrl ? <img src={item.image} alt={item.equipment} className="w-full h-full object-cover" /> : item.image}
       </div>
       <div>
         <p className="font-bold text-[#222222]">{item.equipment}</p>
