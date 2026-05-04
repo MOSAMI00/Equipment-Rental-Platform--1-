@@ -30,7 +30,7 @@ export function EquipmentSection({ onDetailsClick }: EquipmentSectionProps) {
                 onRentClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  navigate('/cart');
+                  navigate(`/product/${product.id}`);
                 }}
               />
             </Link>

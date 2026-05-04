@@ -78,7 +78,7 @@ export function ProductDetailsModal({ isOpen, onClose, product }: ProductDetails
           <button 
             onClick={() => {
               onClose();
-              navigate('/cart');
+              navigate(`/product/${product.id}`);
             }}
             className="h-11 px-8 bg-[#de8c54] text-white rounded-full hover:bg-[#c97d49] transition-colors font-semibold"
           >

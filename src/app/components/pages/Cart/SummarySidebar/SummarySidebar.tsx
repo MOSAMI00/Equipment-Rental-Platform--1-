@@ -1,4 +1,3 @@
-import { CheckoutButton } from './CheckoutButton';
 import { ItemsList } from './ItemsList';
 import { PricingBreakdown } from './PricingBreakdown';
 import { Total } from './Total';
@@ -20,7 +19,6 @@ export function SummarySidebar({ cartItems, rentalCost, deposit, serviceFee, tot
       <ItemsList cartItems={cartItems} />
       <PricingBreakdown rentalCost={rentalCost} deposit={deposit} serviceFee={serviceFee} />
       <Total total={total} />
-      <CheckoutButton disabled={cartItems.length === 0} />
       <TrustInfo />
     </div>
   );
