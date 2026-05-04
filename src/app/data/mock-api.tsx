@@ -202,6 +202,7 @@ interface RentalPlatformContextValue {
   }) => HandoverReport | null;
   confirmHandoverReport: (handoverId: string, ownerId: string) => void;
   updateDisputeOwnerNotes: (disputeId: string, ownerNotes: string, proposedSolution?: string) => void;
+  submitTenantDisputeResponse: (disputeId: string, tenantResponse: string) => void;
   createDispute: (input: {
     rentalOpId: string;
     equipmentHandoverId?: string;
@@ -1133,28 +1134,68 @@ export function RentalPlatformProvider({ children }: { children: ReactNode }) {
         setRentals((existing) =>
           existing.map((item) => (item.id === input.rentalOpId ? { ...item, status: 'disputed' } : item)),
         );
-        // Notify tenant
-        addNotification({
-          type: 'dispute',
-          emoji: '⚠️',
-          title: 'تم فتح نزاع',
-          message: `تم فتح نزاع على الطلب #${rental.orderNum}. سيتم مراجعته من قبل الإدارة.`,
-          referenceType: 'dispute',
-          referenceId: dispute.id,
-          action: { label: 'عرض النزاع', href: `/dashboard/order/${rental.id}` },
-        });
-        // Notify owner
-        addOwnerNotification({
-          type: 'dispute',
-          emoji: '⚠️',
-          title: 'مطالبة من مستأجر',
-          message: `تم فتح نزاع على الطلب #${rental.orderNum} من قِبل المستأجر. يرجى الرد على المطالبة.`,
-          referenceType: 'dispute',
-          referenceId: dispute.id,
-          action: { label: 'عرض النزاع', href: '/owner/requests' },
-        });
+        if (openedByRole === 'owner') {
+          addNotification({
+            type: 'dispute',
+            emoji: '⚠️',
+            title: 'نزاع من المؤجر',
+            message: `أبلغ المؤجر عن نزاع على الطلب #${rental.orderNum}. راجع التفاصيل وقدّم ردك أو اعتراضك من صفحة التسليم والإرجاع.`,
+            referenceType: 'dispute',
+            referenceId: dispute.id,
+            action: { label: 'الرد على النزاع', href: `/dashboard/order/${rental.id}/delivery` },
+          });
+          addOwnerNotification({
+            type: 'dispute',
+            emoji: '⚠️',
+            title: 'تم تسجيل النزاع',
+            message: `تم تسجيل نزاعك على الطلب #${rental.orderNum}.`,
+            referenceType: 'dispute',
+            referenceId: dispute.id,
+            action: { label: 'متابعة', href: '/owner/delivery' },
+          });
+        } else {
+          addNotification({
+            type: 'dispute',
+            emoji: '⚠️',
+            title: 'تم فتح نزاع',
+            message: `تم فتح نزاع على الطلب #${rental.orderNum}. سيتم مراجعته من قبل الإدارة.`,
+            referenceType: 'dispute',
+            referenceId: dispute.id,
+            action: { label: 'عرض النزاع', href: `/dashboard/order/${rental.id}` },
+          });
+          addOwnerNotification({
+            type: 'dispute',
+            emoji: '⚠️',
+            title: 'مطالبة من مستأجر',
+            message: `تم فتح نزاع على الطلب #${rental.orderNum} من قِبل المستأجر. يرجى الرد على المطالبة.`,
+            referenceType: 'dispute',
+            referenceId: dispute.id,
+            action: { label: 'عرض النزاع', href: '/owner/requests' },
+          });
+        }
 
         return dispute;
+      },
+      submitTenantDisputeResponse: (disputeId, tenantResponse) => {
+        const before = disputes.find((x) => x.id === disputeId);
+        setDisputes((existing) =>
+          existing.map((d) =>
+            d.id === disputeId
+              ? { ...d, tenantClaim: tenantResponse, status: d.status === 'resolved' ? d.status : 'under_review' }
+              : d,
+          ),
+        );
+        const rental = before ? getRentalByIdFromState(before.rentalOpId) : undefined;
+        if (!rental || !before) return;
+        addOwnerNotification({
+          type: 'dispute',
+          emoji: '💬',
+          title: 'رد المستأجر على النزاع',
+          message: `قدّم المستأجر رداً على النزاع للطلب #${rental.orderNum}.`,
+          referenceType: 'dispute',
+          referenceId: disputeId,
+          action: { label: 'مراجعة', href: '/owner/delivery' },
+        });
       },
       submitReview: (input) => {
         const rental = getRentalByIdFromState(input.rentalOpId);

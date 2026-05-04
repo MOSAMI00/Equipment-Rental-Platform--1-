@@ -38,6 +38,8 @@ const Delivery = () => {
   const [disputeNotes, setDisputeNotes] = useState('');
   const [deliveryEvidence, setDeliveryEvidence] = useState([]);
   const [returnEvidence, setReturnEvidence] = useState([]);
+  const [deliveryExtraDescription, setDeliveryExtraDescription] = useState('');
+  const [returnExtraDescription, setReturnExtraDescription] = useState('');
 
   // Rentals belonging to the current owner
   const ownerRentals = useMemo(
@@ -131,19 +133,22 @@ const Delivery = () => {
 
   const handleConfirmDelivery = () => {
     if (!selectedRental || deliveryEvidence.length === 0) return;
+    const extra = deliveryExtraDescription.trim();
     createHandoverReport({
       rentalOpId: selectedRental.id,
       phase: 'delivery',
       submittedByRole: 'owner',
       hasIssues: false,
-      notes: `صور توثيق تسليم المؤجر: ${deliveryEvidence.length}`,
+      notes: `صور توثيق تسليم المؤجر: ${deliveryEvidence.length}${extra ? ` — وصف إضافي: ${extra}` : ''}`,
       evidencePhotos: deliveryEvidence,
     });
     setDeliveryEvidence([]);
+    setDeliveryExtraDescription('');
   };
 
   const handleConfirmReturn = () => {
     if (!selectedRental || !returnReport || returnEvidence.length === 0) return;
+    const extra = returnExtraDescription.trim();
     createHandoverReport({
       rentalOpId: selectedRental.id,
       phase: 'return',
@@ -152,11 +157,12 @@ const Delivery = () => {
       hasDamage: Boolean(returnReport.hasDamage),
       ownerDecision,
       proposedDeduction: ownerDecision === 'partial_refund' ? Number(proposedDeduction || 0) : 0,
-      notes: `صور توثيق استلام المؤجر: ${returnEvidence.length}`,
+      notes: `صور توثيق استلام المؤجر بعد الإرجاع: ${returnEvidence.length}${extra ? ` — وصف إضافي: ${extra}` : ''}`,
       evidencePhotos: returnEvidence,
     });
     confirmHandoverReport(returnReport.id, user?.id);
     setReturnEvidence([]);
+    setReturnExtraDescription('');
   };
 
   const handleSaveDisputeNotes = (disputeId) => {
@@ -393,6 +399,16 @@ const Delivery = () => {
                       className="owner-input mb-3"
                       onChange={(e) => setDeliveryEvidence(Array.from(e.target.files || []).map((file) => file.name))}
                     />
+                    <label className="text-muted" style={{ fontSize: 12, display: 'block', marginBottom: 6 }}>
+                      وصف إضافي (اختياري)
+                    </label>
+                    <textarea
+                      className="owner-input mb-3"
+                      rows={3}
+                      placeholder="مثال: حالة المعدة عند التسليم، ملاحظات على الموقع، إلخ."
+                      value={deliveryExtraDescription}
+                      onChange={(e) => setDeliveryExtraDescription(e.target.value)}
+                    />
                     <button
                       className="owner-btn owner-btn-success w-full"
                       style={{ width: '100%' }}
@@ -488,6 +504,16 @@ const Delivery = () => {
                           multiple
                           className="owner-input"
                           onChange={(e) => setReturnEvidence(Array.from(e.target.files || []).map((file) => file.name))}
+                        />
+                        <label className="text-muted" style={{ fontSize: 12 }}>
+                          وصف إضافي (اختياري)
+                        </label>
+                        <textarea
+                          className="owner-input"
+                          rows={3}
+                          placeholder="مثال: ملاحظات على الأضرار الملموسة، مطابقة للصور، إلخ."
+                          value={returnExtraDescription}
+                          onChange={(e) => setReturnExtraDescription(e.target.value)}
                         />
                         <select
                           className="owner-input"
