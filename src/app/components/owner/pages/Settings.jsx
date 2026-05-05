@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { User, Lock, CreditCard, Bell, Camera, Save } from 'lucide-react';
+import { useAuth } from '../../../auth/AuthContext';
 
 const Settings = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
+  const ownerInitial = (user?.fullName ?? '؟').charAt(0);
 
   return (
     <div>
@@ -30,7 +33,9 @@ const Settings = () => {
               <div>
                 <h3 className="mb-6">الملف الشخصي</h3>
                 <div className="flex-center gap-6 mb-8" style={{justifyContent: 'flex-start'}}>
-                  <img src="https://i.pravatar.cc/150?img=11" alt="Profile" style={{ width: 80, height: 80, borderRadius: '50%' }} />
+                  <div className="flex-center" style={{ width: 80, height: 80, borderRadius: '50%', backgroundColor: 'var(--color-page-bg)', fontWeight: 700, fontSize: 24 }}>
+                    {ownerInitial}
+                  </div>
                   <button className="owner-btn owner-btn-outline"><Camera size={16} /> تغيير الصورة</button>
                 </div>
                 <div className="owner-grid-2">

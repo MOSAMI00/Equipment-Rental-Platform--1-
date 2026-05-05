@@ -8,9 +8,19 @@ const AddEquipment = () => {
   const [step, setStep] = useState(0);
   const [specs, setSpecs] = useState([{ key: '', value: '' }]);
   const [images, setImages] = useState([]);
+  const [draft, setDraft] = useState({
+    name: '',
+    category: '',
+    governorate: '',
+    address: '',
+    dailyRate: '',
+    insuranceAmount: '',
+  });
 
   const addSpec = () => setSpecs([...specs, { key: '', value: '' }]);
   const removeSpec = (i) => setSpecs(specs.filter((_, idx) => idx !== i));
+  const updateDraft = (key) => (event) => setDraft((current) => ({ ...current, [key]: event.target.value }));
+  const displayValue = (value) => value || '—';
 
   return (
     <div>
@@ -42,11 +52,11 @@ const AddEquipment = () => {
             <div className="owner-grid-2">
               <div className="mb-4">
                 <label className="owner-label">اسم المعدة *</label>
-                <input type="text" className="owner-input" placeholder="مثال: مولد كهرباء 10KVA" />
+                <input type="text" className="owner-input" placeholder="مثال: مولد كهرباء 10KVA" value={draft.name} onChange={updateDraft('name')} />
               </div>
               <div className="mb-4">
                 <label className="owner-label">الفئة *</label>
-                <select className="owner-input">
+                <select className="owner-input" value={draft.category} onChange={updateDraft('category')}>
                   <option value="">اختر الفئة</option>
                   <option>مولدات كهربائية</option>
                   <option>معدات بناء</option>
@@ -84,7 +94,7 @@ const AddEquipment = () => {
             <div className="owner-grid-2">
               <div className="mb-4">
                 <label className="owner-label">المحافظة *</label>
-                <select className="owner-input">
+                <select className="owner-input" value={draft.governorate} onChange={updateDraft('governorate')}>
                   <option value="">اختر المحافظة</option>
                   <option>صنعاء</option>
                   <option>عدن</option>
@@ -111,7 +121,7 @@ const AddEquipment = () => {
               </div>
               <div className="mb-4">
                 <label className="owner-label">العنوان التفصيلي *</label>
-                <input type="text" className="owner-input" placeholder="مثال: صنعاء - شارع الستين - بجوار..." />
+                <input type="text" className="owner-input" placeholder="مثال: صنعاء - شارع الستين - بجوار..." value={draft.address} onChange={updateDraft('address')} />
               </div>
             </div>
 
@@ -182,7 +192,7 @@ const AddEquipment = () => {
             <div className="owner-grid-2">
               <div className="mb-4">
                 <label className="owner-label">💰 السعر اليومي * (ر.ي)</label>
-                <input type="number" className="owner-input" placeholder="مثال: 15000" />
+                <input type="number" className="owner-input" placeholder="مثال: 15000" value={draft.dailyRate} onChange={updateDraft('dailyRate')} />
               </div>
               <div className="mb-4">
                 <label className="owner-label">السعر الأسبوعي (ر.ي) <span className="text-muted" style={{ fontWeight: 400 }}>— اختياري</span></label>
@@ -194,7 +204,7 @@ const AddEquipment = () => {
               </div>
               <div className="mb-4">
                 <label className="owner-label">🛡️ مبلغ التأمين * (ر.ي)</label>
-                <input type="number" className="owner-input" placeholder="مثال: 50000" />
+                <input type="number" className="owner-input" placeholder="مثال: 50000" value={draft.insuranceAmount} onChange={updateDraft('insuranceAmount')} />
                 <span className="text-muted" style={{ fontSize: 12, marginTop: 4, display: 'block' }}>
                   يُحتجز من المستأجر عبر Escrow ويُرد بعد التسليم السليم
                 </span>
@@ -232,27 +242,26 @@ const AddEquipment = () => {
                 </div>
                 <div className="equipment-details">
                   <div className="flex-between mb-2">
-                    <h3 className="equipment-title" style={{ margin: 0 }}>مولد كهرباء 10KVA</h3>
+                    <h3 className="equipment-title" style={{ margin: 0 }}>{displayValue(draft.name)}</h3>
                     <span className="badge badge-available">● متاح</span>
                   </div>
-                  <div className="equipment-info-row">📍 صنعاء - الوحدة</div>
-                  <div className="equipment-info-row">💰 15,000 ر.ي / اليوم</div>
-                  <div className="equipment-info-row">🛡️ تأمين: 50,000 ر.ي</div>
-                  <div className="equipment-info-row">⭐ جديدة | 0 تأجير</div>
+                  <div className="equipment-info-row">📍 {displayValue([draft.governorate, draft.address].filter(Boolean).join(' - '))}</div>
+                  <div className="equipment-info-row">💰 {displayValue(draft.dailyRate)} ر.ي / اليوم</div>
+                  <div className="equipment-info-row">🛡️ تأمين: {displayValue(draft.insuranceAmount)} ر.ي</div>
                 </div>
               </div>
             </div>
 
             <div className="owner-card mb-6" style={{ backgroundColor: 'var(--color-page-bg)', boxShadow: 'none' }}>
               <h4 className="mb-4">ملخص البيانات</h4>
-              <div className="review-row"><span className="text-muted">الاسم:</span> مولد كهرباء 10KVA</div>
-              <div className="review-row"><span className="text-muted">الفئة:</span> مولدات كهربائية</div>
-              <div className="review-row"><span className="text-muted">الموقع:</span> صنعاء - الوحدة</div>
+              <div className="review-row"><span className="text-muted">الاسم:</span> {displayValue(draft.name)}</div>
+              <div className="review-row"><span className="text-muted">الفئة:</span> {displayValue(draft.category)}</div>
+              <div className="review-row"><span className="text-muted">الموقع:</span> {displayValue([draft.governorate, draft.address].filter(Boolean).join(' - '))}</div>
               <div className="review-row"><span className="text-muted">الحالة:</span> ممتاز</div>
               <div className="review-row"><span className="text-muted">التسليم:</span> كلاهما</div>
-              <div className="review-row"><span className="text-muted">السعر اليومي:</span> 15,000 ر.ي</div>
-              <div className="review-row"><span className="text-muted">التأمين:</span> 50,000 ر.ي</div>
-              <div className="review-row"><span className="text-muted">الصور:</span> 6 صور مرفوعة</div>
+              <div className="review-row"><span className="text-muted">السعر اليومي:</span> {displayValue(draft.dailyRate)} ر.ي</div>
+              <div className="review-row"><span className="text-muted">التأمين:</span> {displayValue(draft.insuranceAmount)} ر.ي</div>
+              <div className="review-row"><span className="text-muted">الصور:</span> {images.length || '—'}</div>
             </div>
           </div>
         )}

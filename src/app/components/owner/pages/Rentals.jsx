@@ -3,8 +3,6 @@ import { Search, Eye, User, Calendar } from 'lucide-react';
 import { useAuth } from '../../../auth/AuthContext';
 import {
   useRentalPlatform,
-  getEquipmentSnapshot,
-  getTenantProfile,
   formatCurrency,
   formatRentalDateRange,
 } from '../../../data/mock-api';
@@ -21,6 +19,10 @@ const TABS = [
   { id: 'cancelled', label: 'ملغية' },
   { id: 'disputed', label: 'نزاعات' },
 ];
+
+const getStatusConfig = (status) => STATUS_CONFIG[status] ?? { label: status ?? 'غير معروف' };
+const fallbackEquipment = (rental) => rental?.equipment ?? { name: 'معدة غير معروفة', image: '', location: '—' };
+const fallbackTenant = (rental) => rental?.tenant ?? { name: 'مستخدم غير معروف', phone: '—' };
 
 const Rentals = () => {
   const { user } = useAuth();
@@ -41,12 +43,12 @@ const Rentals = () => {
       .filter((r) => r.ownerId === user?.id)
       .filter((r) => activeTab === 'all' || r.status === activeTab)
       .filter((r) => {
-        const eq = getEquipmentSnapshot(r.equipmentId);
-        const tenant = getTenantProfile(r.tenantId);
+        const eq = fallbackEquipment(r);
+        const tenant = fallbackTenant(r);
         return (
-          eq.name.toLowerCase().includes(search.toLowerCase()) ||
-          r.orderNum.toLowerCase().includes(search.toLowerCase()) ||
-          tenant.name.includes(search)
+          (eq.name ?? '').toLowerCase().includes(search.toLowerCase()) ||
+          (r.orderNum ?? '').toLowerCase().includes(search.toLowerCase()) ||
+          (tenant.name ?? '').includes(search)
         );
       })
   ), [activeTab, rentals, search, user?.id]);
@@ -56,9 +58,8 @@ const Rentals = () => {
     [rentals, selectedRentalId]
   );
 
-  const selectedEquipment = selectedRental
-    ? getEquipmentSnapshot(selectedRental.equipmentId)
-    : null;
+  const selectedEquipment = selectedRental ? fallbackEquipment(selectedRental) : null;
+  const selectedTenant = selectedRental ? fallbackTenant(selectedRental) : null;
 
   const selectedHandovers = selectedRental
     ? getHandoverReportsForRental(selectedRental.id)
@@ -138,18 +139,19 @@ const Rentals = () => {
               </tr>
             ) : (
               ownerRentals.map((rental) => {
-                const eq = getEquipmentSnapshot(rental.equipmentId);
-                const status = STATUS_CONFIG[rental.status];
+                const eq = fallbackEquipment(rental);
+                const tenant = fallbackTenant(rental);
+                const status = getStatusConfig(rental.status);
                 return (
                   <tr key={rental.id} style={{ cursor: 'pointer', backgroundColor: selectedRentalId === rental.id ? 'rgba(45,90,39,0.04)' : '' }}>
-                    <td>{rental.orderNum}</td>
-                    <td>{getTenantProfile(rental.tenantId).name}</td>
-                    <td>{eq.name}</td>
-                    <td style={{ fontSize: 12 }}>{formatRentalDateRange(rental.startDate, rental.endDate)}</td>
+                    <td>{rental.orderNum ?? '—'}</td>
+                    <td>{tenant.name ?? '\u0645\u0633\u062a\u062e\u062f\u0645 \u063a\u064a\u0631 \u0645\u0639\u0631\u0648\u0641'}</td>
+                    <td>{eq.name ?? '\u0645\u0639\u062f\u0629 \u063a\u064a\u0631 \u0645\u0639\u0631\u0648\u0641\u0629'}</td>
+                    <td style={{ fontSize: 12 }}>{formatRentalDateRange(rental.startDate ?? '', rental.endDate ?? '')}</td>
                     <td>{formatCurrency(rental.totalAmount)} ر.ي</td>
                     <td>
-                      <span className={`badge badge-${rental.status.replace('_', '-')}`}>
-                        {status.label}
+                      <span className={`badge badge-${(rental.status ?? 'unknown').replace('_', '-')}`}>
+                        {status.label ?? rental.status ?? '\u063a\u064a\u0631 \u0645\u0639\u0631\u0648\u0641'}
                       </span>
                     </td>
                     <td>
@@ -192,12 +194,12 @@ const Rentals = () => {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
                 <div>
                   <span className="text-muted" style={{ fontSize: 12 }}>المستأجر</span>
-                  <p style={{ fontWeight: 600, margin: '2px 0' }}>{getTenantProfile(selectedRental.tenantId).name}</p>
+                  <p style={{ fontWeight: 600, margin: '2px 0' }}>{selectedTenant?.name ?? '\u0645\u0633\u062a\u062e\u062f\u0645 \u063a\u064a\u0631 \u0645\u0639\u0631\u0648\u0641'}</p>
                 </div>
                 <div>
                   <span className="text-muted" style={{ fontSize: 12 }}>الهاتف</span>
                   <p style={{ fontWeight: 600, margin: '2px 0', direction: 'ltr', textAlign: 'right' }}>
-                    {getTenantProfile(selectedRental.tenantId).phone}
+                    {selectedTenant?.phone ?? '—'}
                   </p>
                 </div>
                 <div>

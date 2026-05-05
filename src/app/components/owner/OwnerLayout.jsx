@@ -16,6 +16,7 @@ const OwnerLayout = () => {
   const pathname = window.location.pathname;
   const pendingRequests = rentals.filter((rental) => rental.ownerId === user?.id && rental.status === 'pending').length;
   const unreadOwnerNotifs = ownerNotifications.filter((n) => !n.read).length;
+  const ownerInitial = (user?.fullName ?? '؟').charAt(0);
 
   const navItems = [
     { path: '/owner/overview', name: 'الرئيسية', icon: <Home size={20} /> },
@@ -56,7 +57,9 @@ const OwnerLayout = () => {
           <h2 style={{ margin: 0 }}>منصة التأجير</h2>
           <div className="owner-profile-summary">
             <div className="owner-profile-pic">
-              <img src="https://i.pravatar.cc/150?img=11" alt="Owner" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+              <div className="flex-center" style={{ width: '100%', height: '100%', borderRadius: '50%', backgroundColor: 'var(--color-page-bg)', fontWeight: 700 }}>
+                {ownerInitial}
+              </div>
             </div>
             <h3 style={{ margin: '8px 0 2px', fontSize: '16px' }}>{user?.fullName ?? 'أحمد المؤجر'}</h3>
             <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}>
@@ -128,7 +131,9 @@ const OwnerLayout = () => {
               className="topbar-profile"
               onClick={() => setIsProfileOpen(!isProfileOpen)}
             >
-              <img src="https://i.pravatar.cc/150?img=11" alt="Profile" />
+              <div className="flex-center" style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: 'var(--color-page-bg)', fontWeight: 700 }}>
+                {ownerInitial}
+              </div>
               <span>{user?.fullName?.split(' ')[0] ?? 'أحمد'}</span>
               <ChevronDown size={16} />
               {isProfileOpen && (

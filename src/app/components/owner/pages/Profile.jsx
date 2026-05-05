@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { User, Lock, CreditCard, Bell, Camera, Save, MapPin } from 'lucide-react';
+import { useAuth } from '../../../auth/AuthContext';
 
 const Profile = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
+  const ownerInitial = (user?.fullName ?? '؟').charAt(0);
 
   const tabs = [
     { id: 'profile', name: 'ملفي الشخصي', icon: <User size={18} /> },
@@ -36,7 +39,9 @@ const Profile = () => {
                 <h3 className="mb-6">المعلومات الشخصية</h3>
                 <div className="flex-center gap-6 mb-8" style={{ justifyContent: 'flex-start' }}>
                   <div style={{ position: 'relative' }}>
-                    <img src="https://i.pravatar.cc/150?img=11" alt="Profile" style={{ width: 80, height: 80, borderRadius: '50%', border: '3px solid var(--color-active-sidebar-bg)' }} />
+                    <div className="flex-center" style={{ width: 80, height: 80, borderRadius: '50%', border: '3px solid var(--color-active-sidebar-bg)', backgroundColor: 'var(--color-page-bg)', fontWeight: 700, fontSize: 24 }}>
+                      {ownerInitial}
+                    </div>
                     <button style={{ position: 'absolute', bottom: 0, left: 0, width: 28, height: 28, borderRadius: '50%', backgroundColor: 'var(--color-primary-green)', color: 'white', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <Camera size={14} />
                     </button>

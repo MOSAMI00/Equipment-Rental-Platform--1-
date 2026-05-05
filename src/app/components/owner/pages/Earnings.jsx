@@ -2,10 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { DollarSign, CreditCard, Plus, Edit2, Download, TrendingUp } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '../../../auth/AuthContext';
-import { formatCurrency, getTenantProfile } from '../../../data/mock-api';
+import { formatCurrency } from '../../../data/mock-api';
 import KPICard from '../shared/KPICard';
 import { ChartSkeleton, KPICardSkeleton } from '../shared/OwnerSkeletons';
 import { useOwnerPageProps } from '../../../inertia/owner-page-props';
+import EmptyState from '../shared/EmptyState';
 
 const Earnings = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -162,15 +163,15 @@ const Earnings = () => {
                 </tr>
               ) : paymentsRows.length === 0 ? (
                 <tr>
-                  <td colSpan="6" style={{ textAlign: 'center', padding: 24, color: 'var(--color-text-muted)' }}>
-                    لا توجد مدفوعات حتى الآن
+                  <td colSpan="6">
+                    <EmptyState compact type="empty" title="لا توجد مدفوعات حتى الآن" />
                   </td>
                 </tr>
               ) : (
                 paymentsRows.map((rental) => {
                   const fee = Math.round(rental.rentalAmount * 0.05);
                   const net = rental.rentalAmount - fee;
-                  const tenant = getTenantProfile(rental.tenantId);
+                  const tenant = rental.tenant ?? { name: '\u0645\u0633\u062a\u062e\u062f\u0645 \u063a\u064a\u0631 \u0645\u0639\u0631\u0648\u0641' };
                   return (
                     <tr key={rental.id}>
                       <td>{rental.orderNum}</td>

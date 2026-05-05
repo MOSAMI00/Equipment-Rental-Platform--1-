@@ -14,10 +14,17 @@ export interface AuthUser {
 interface AuthContextValue {
   user: AuthUser | null;
   users: AuthUser[];
+  authSource: 'external' | 'mock';
   login: (user: AuthUser) => void;
   logout: () => void;
   registerUser: (user: AuthUser) => void;
   findUserByPhone: (phone: string) => AuthUser | undefined;
+}
+
+interface AuthProviderProps {
+  children: ReactNode;
+  initialUser?: AuthUser | null;
+  initialUsers?: AuthUser[];
 }
 
 const AUTH_USER_KEY = 'equipment-platform.auth-user';
@@ -51,16 +58,32 @@ function writeStorage<T>(key: string, value: T) {
   window.localStorage.setItem(key, JSON.stringify(value));
 }
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(() => readStorage<AuthUser | null>(AUTH_USER_KEY, null));
-  const [users, setUsers] = useState<AuthUser[]>(() => readStorage<AuthUser[]>(AUTH_USERS_KEY, SEED_USERS));
+export function AuthProvider({ children, initialUser, initialUsers }: AuthProviderProps) {
+  const hasExternalUser = initialUser !== undefined;
+  const [user, setUser] = useState<AuthUser | null>(() => (
+    hasExternalUser ? initialUser ?? null : readStorage<AuthUser | null>(AUTH_USER_KEY, null)
+  ));
+  const [users, setUsers] = useState<AuthUser[]>(() => (
+    initialUsers ?? readStorage<AuthUser[]>(AUTH_USERS_KEY, SEED_USERS)
+  ));
 
-  useEffect(() => writeStorage(AUTH_USER_KEY, user), [user]);
+  useEffect(() => {
+    if (initialUser !== undefined) setUser(initialUser);
+  }, [initialUser]);
+
+  useEffect(() => {
+    if (initialUsers) setUsers(initialUsers);
+  }, [initialUsers]);
+
+  useEffect(() => {
+    if (!hasExternalUser) writeStorage(AUTH_USER_KEY, user);
+  }, [hasExternalUser, user]);
   useEffect(() => writeStorage(AUTH_USERS_KEY, users), [users]);
 
   const value = useMemo<AuthContextValue>(() => ({
     user,
     users,
+    authSource: hasExternalUser ? 'external' : 'mock',
     login: (nextUser) => {
       setUsers((existing) => {
         const normalized = normalizePhone(nextUser.phone ?? '');
@@ -84,7 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const normalized = normalizePhone(phone);
       return users.find((item) => normalizePhone(item.phone ?? '') === normalized);
     },
-  }), [user, users]);
+  }), [hasExternalUser, user, users]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
