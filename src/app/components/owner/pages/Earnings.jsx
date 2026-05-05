@@ -1,18 +1,57 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { DollarSign, CreditCard, Plus, Edit2, Download, TrendingUp } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-
-const dataEarnings = [
-  { name: 'مايو', amount: 45000 }, { name: 'يونيو', amount: 60000 },
-  { name: 'يوليو', amount: 72000 }, { name: 'أغسطس', amount: 55000 },
-  { name: 'سبتمبر', amount: 68000 }, { name: 'أكتوبر', amount: 80000 },
-  { name: 'نوفمبر', amount: 90000 }, { name: 'ديسمبر', amount: 75000 },
-  { name: 'يناير', amount: 85000 }, { name: 'فبراير', amount: 70000 },
-  { name: 'مارس', amount: 88000 }, { name: 'أبريل', amount: 85000 },
-];
+import { useAuth } from '../../../auth/AuthContext';
+import { formatCurrency, getTenantProfile } from '../../../data/mock-api';
+import KPICard from '../shared/KPICard';
+import { ChartSkeleton, KPICardSkeleton } from '../shared/OwnerSkeletons';
+import { useOwnerPageProps } from '../../../inertia/owner-page-props';
 
 const Earnings = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
+  const { rentals } = useOwnerPageProps();
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setIsLoading(false), 350);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  const ownerRentals = useMemo(
+    () => rentals.filter((rental) => rental.ownerId === user?.id),
+    [rentals, user?.id],
+  );
+
+  const dataEarnings = useMemo(() => {
+    const formatter = new Intl.DateTimeFormat('ar-YE', { month: 'short' });
+    const now = new Date();
+    const rows = [];
+    for (let i = 11; i >= 0; i -= 1) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const month = date.getMonth();
+      const year = date.getFullYear();
+      const amount = ownerRentals
+        .filter((rental) => {
+          const created = new Date(rental.createdAt);
+          return created.getMonth() === month && created.getFullYear() === year;
+        })
+        .reduce((total, rental) => total + rental.rentalAmount, 0);
+      rows.push({ name: formatter.format(date), amount });
+    }
+    return rows;
+  }, [ownerRentals]);
+
+  const thisMonth = dataEarnings[dataEarnings.length - 1]?.amount ?? 0;
+  const total = ownerRentals.reduce((sum, rental) => sum + rental.rentalAmount, 0);
+  const pendingTransfer = ownerRentals
+    .filter((rental) => rental.paymentStatus === 'paid' && rental.escrowStatus === 'held')
+    .reduce((sum, rental) => sum + rental.rentalAmount, 0);
+  const transferred = Math.max(0, total - pendingTransfer);
+  const paymentsRows = ownerRentals
+    .slice()
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 8);
 
   return (
     <div>
@@ -20,42 +59,43 @@ const Earnings = () => {
 
       {/* 4 KPI Cards */}
       <div className="owner-grid-4">
-        <div className="owner-card owner-kpi-card">
-          <div className="owner-kpi-info">
-            <h4>💰 هذا الشهر</h4>
-            <p className="kpi-value">85,000 ر.ي</p>
-          </div>
-          <div className="owner-kpi-icon" style={{ color: 'var(--color-completed)', backgroundColor: 'rgba(39, 174, 96, 0.1)' }}>
-            <DollarSign />
-          </div>
-        </div>
-        <div className="owner-card owner-kpi-card">
-          <div className="owner-kpi-info">
-            <h4>📊 الإجمالي</h4>
-            <p className="kpi-value">750,000 ر.ي</p>
-          </div>
-          <div className="owner-kpi-icon" style={{ color: 'var(--color-confirmed)', backgroundColor: 'rgba(52, 152, 219, 0.1)' }}>
-            <TrendingUp />
-          </div>
-        </div>
-        <div className="owner-card owner-kpi-card">
-          <div className="owner-kpi-info">
-            <h4>⏳ قيد التحويل</h4>
-            <p className="kpi-value text-warning">45,000 ر.ي</p>
-          </div>
-          <div className="owner-kpi-icon" style={{ color: 'var(--color-pending)', backgroundColor: 'rgba(243, 156, 18, 0.1)' }}>
-            <DollarSign />
-          </div>
-        </div>
-        <div className="owner-card owner-kpi-card">
-          <div className="owner-kpi-info">
-            <h4>✅ محوّل</h4>
-            <p className="kpi-value text-success">705,000 ر.ي</p>
-          </div>
-          <div className="owner-kpi-icon" style={{ color: 'var(--color-completed)', backgroundColor: 'rgba(39, 174, 96, 0.1)' }}>
-            <DollarSign />
-          </div>
-        </div>
+        {isLoading ? (
+          <>
+            <KPICardSkeleton />
+            <KPICardSkeleton />
+            <KPICardSkeleton />
+            <KPICardSkeleton />
+          </>
+        ) : (
+          <>
+            <KPICard
+              title="💰 هذا الشهر"
+              value={`${formatCurrency(thisMonth)} ر.ي`}
+              icon={<DollarSign />}
+              iconStyle={{ color: 'var(--color-completed)', backgroundColor: 'rgba(39, 174, 96, 0.1)' }}
+            />
+            <KPICard
+              title="📊 الإجمالي"
+              value={`${formatCurrency(total)} ر.ي`}
+              icon={<TrendingUp />}
+              iconStyle={{ color: 'var(--color-confirmed)', backgroundColor: 'rgba(52, 152, 219, 0.1)' }}
+            />
+            <KPICard
+              title="⏳ قيد التحويل"
+              value={`${formatCurrency(pendingTransfer)} ر.ي`}
+              valueClassName="text-warning"
+              icon={<DollarSign />}
+              iconStyle={{ color: 'var(--color-pending)', backgroundColor: 'rgba(243, 156, 18, 0.1)' }}
+            />
+            <KPICard
+              title="✅ محوّل"
+              value={`${formatCurrency(transferred)} ر.ي`}
+              valueClassName="text-success"
+              icon={<DollarSign />}
+              iconStyle={{ color: 'var(--color-completed)', backgroundColor: 'rgba(39, 174, 96, 0.1)' }}
+            />
+          </>
+        )}
       </div>
 
       <div className="owner-grid-2">
@@ -78,19 +118,21 @@ const Earnings = () => {
         </div>
 
         {/* Bar Chart — 12 months */}
-        <div className="owner-card">
-          <h4 className="mb-6">📊 الأرباح — آخر 12 شهراً</h4>
-          <div style={{ width: '100%', height: 220 }}>
-            <ResponsiveContainer>
-              <BarChart data={dataEarnings}>
-                <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                <YAxis tick={{ fontSize: 10 }} />
-                <Tooltip formatter={(v) => `${v.toLocaleString()} ر.ي`} />
-                <Bar dataKey="amount" fill="#2D5A27" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+        {isLoading ? <ChartSkeleton height={220} /> : (
+          <div className="owner-card">
+            <h4 className="mb-6">📊 الأرباح — آخر 12 شهراً</h4>
+            <div style={{ width: '100%', height: 220 }}>
+              <ResponsiveContainer>
+                <BarChart data={dataEarnings}>
+                  <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                  <YAxis tick={{ fontSize: 10 }} />
+                  <Tooltip formatter={(v) => `${Number(v).toLocaleString()} ر.ي`} />
+                  <Bar dataKey="amount" fill="#2D5A27" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Payments Table */}
@@ -112,30 +154,43 @@ const Earnings = () => {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>#OP-1047</td>
-                <td>أحمد محمد</td>
-                <td>45,000 ر.ي</td>
-                <td className="text-muted">2,250 ر.ي</td>
-                <td style={{ fontWeight: 700 }}>42,750 ر.ي</td>
-                <td><span style={{ color: 'var(--color-completed)', fontWeight: 600 }}>Paid ✅</span></td>
-              </tr>
-              <tr>
-                <td>#OP-1048</td>
-                <td>سارة أحمد</td>
-                <td>24,000 ر.ي</td>
-                <td className="text-muted">1,200 ر.ي</td>
-                <td style={{ fontWeight: 700 }}>22,800 ر.ي</td>
-                <td><span style={{ color: 'var(--color-pending)', fontWeight: 600 }}>Processing ⏳</span></td>
-              </tr>
-              <tr>
-                <td>#OP-1045</td>
-                <td>خالد ناصر</td>
-                <td>30,000 ر.ي</td>
-                <td className="text-muted">1,500 ر.ي</td>
-                <td style={{ fontWeight: 700 }}>28,500 ر.ي</td>
-                <td><span style={{ color: 'var(--color-text-muted)', fontWeight: 600 }}>Pending</span></td>
-              </tr>
+              {isLoading ? (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: 'center', padding: 24, color: 'var(--color-text-muted)' }}>
+                    جاري تحميل السجل...
+                  </td>
+                </tr>
+              ) : paymentsRows.length === 0 ? (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: 'center', padding: 24, color: 'var(--color-text-muted)' }}>
+                    لا توجد مدفوعات حتى الآن
+                  </td>
+                </tr>
+              ) : (
+                paymentsRows.map((rental) => {
+                  const fee = Math.round(rental.rentalAmount * 0.05);
+                  const net = rental.rentalAmount - fee;
+                  const tenant = getTenantProfile(rental.tenantId);
+                  return (
+                    <tr key={rental.id}>
+                      <td>{rental.orderNum}</td>
+                      <td>{tenant.name}</td>
+                      <td>{formatCurrency(rental.rentalAmount)} ر.ي</td>
+                      <td className="text-muted">{formatCurrency(fee)} ر.ي</td>
+                      <td style={{ fontWeight: 700 }}>{formatCurrency(net)} ر.ي</td>
+                      <td>
+                        {rental.escrowStatus === 'released' ? (
+                          <span style={{ color: 'var(--color-completed)', fontWeight: 600 }}>Paid ✅</span>
+                        ) : rental.escrowStatus === 'held' ? (
+                          <span style={{ color: 'var(--color-pending)', fontWeight: 600 }}>Processing ⏳</span>
+                        ) : (
+                          <span style={{ color: 'var(--color-text-muted)', fontWeight: 600 }}>Pending</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

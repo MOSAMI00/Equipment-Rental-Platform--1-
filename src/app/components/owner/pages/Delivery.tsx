@@ -4,10 +4,17 @@ import { useAuth } from '../../../auth/AuthContext';
 import {
   useRentalPlatform,
   getEquipmentSnapshot,
+  getTenantProfile,
   formatCurrency,
   formatRentalDateRange,
+  TenantRental,
+  HandoverReport,
+  Dispute,
+  HandoverPhase
 } from '../../../data/mock-api';
 import { STATUS_CONFIG } from '../../tenant/Dashboard/shared/OrderTypes';
+import { useOwnerPageProps } from '../../../inertia/owner-page-props';
+import DeliveryTabs from './delivery/DeliveryTabs';
 
 const CONDITION_LABELS = {
   excellent: '✨ ممتازة',
@@ -16,40 +23,36 @@ const CONDITION_LABELS = {
   poor: '❌ سيئة',
 };
 
-const TENANT_NAMES = { 'tenant-1': 'أحمد محمد' };
-
 const Delivery = () => {
   const { user } = useAuth();
   const {
-    rentals,
-    handoverReports,
-    disputes,
     createHandoverReport,
     confirmHandoverReport,
     updateDisputeOwnerNotes,
     createDispute,
   } = useRentalPlatform();
+  const { rentals, handoverReports, disputes } = useOwnerPageProps();
 
   const [activeTab, setActiveTab] = useState('pending_delivery');
-  const [selectedRentalId, setSelectedRentalId] = useState(null);
+  const [selectedRentalId, setSelectedRentalId] = useState<string | null>(null);
   const [ownerNotes, setOwnerNotes] = useState('');
   const [proposedDeduction, setProposedDeduction] = useState('');
-  const [ownerDecision, setOwnerDecision] = useState('full_refund');
+  const [ownerDecision, setOwnerDecision] = useState<'full_refund' | 'partial_refund' | 'no_refund'>('full_refund');
   const [disputeNotes, setDisputeNotes] = useState('');
-  const [deliveryEvidence, setDeliveryEvidence] = useState([]);
-  const [returnEvidence, setReturnEvidence] = useState([]);
+  const [deliveryEvidence, setDeliveryEvidence] = useState<string[]>([]);
+  const [returnEvidence, setReturnEvidence] = useState<string[]>([]);
   const [deliveryExtraDescription, setDeliveryExtraDescription] = useState('');
   const [returnExtraDescription, setReturnExtraDescription] = useState('');
 
   // Rentals belonging to the current owner
   const ownerRentals = useMemo(
-    () => rentals.filter((r) => r.ownerId === user?.id),
+    () => rentals.filter((r: TenantRental) => r.ownerId === user?.id),
     [rentals, user?.id]
   );
 
   // Categorise rentals for each tab
   const pendingDelivery = useMemo(
-    () => ownerRentals.filter((r) => {
+    () => ownerRentals.filter((r: TenantRental) => {
       const ownerDelivery = handoverReports.find(
         (h) => h.rentalOpId === r.id && h.phase === 'delivery' && h.submittedByRole === 'owner'
       );
@@ -58,7 +61,7 @@ const Delivery = () => {
     [ownerRentals, handoverReports]
   );
   const inUse = useMemo(
-    () => ownerRentals.filter((r) => {
+    () => ownerRentals.filter((r: TenantRental) => {
       const returnRequest = handoverReports.find(
         (h) => h.rentalOpId === r.id && h.phase === 'return' && h.submittedByRole === 'tenant'
       );
@@ -67,7 +70,7 @@ const Delivery = () => {
     [ownerRentals, handoverReports]
   );
   const pendingTenantReceive = useMemo(
-    () => ownerRentals.filter((r) => {
+    () => ownerRentals.filter((r: TenantRental) => {
       const ownerDelivery = handoverReports.find(
         (h) => h.rentalOpId === r.id && h.phase === 'delivery' && h.submittedByRole === 'owner'
       );
@@ -79,7 +82,7 @@ const Delivery = () => {
     [ownerRentals, handoverReports]
   );
   const pendingReturn = useMemo(
-    () => ownerRentals.filter((r) => {
+    () => ownerRentals.filter((r: TenantRental) => {
       const returnReport = handoverReports.find(
         (h) => h.rentalOpId === r.id && h.phase === 'return' && h.submittedByRole === 'tenant'
       );
@@ -88,8 +91,8 @@ const Delivery = () => {
     [ownerRentals, handoverReports]
   );
   const openDisputes = useMemo(
-    () => disputes.filter((d) => {
-      const rental = ownerRentals.find((r) => r.id === d.rentalOpId);
+    () => disputes.filter((d: Dispute) => {
+      const rental = ownerRentals.find((r: TenantRental) => r.id === d.rentalOpId);
       return rental && d.status !== 'resolved';
     }),
     [disputes, ownerRentals]
@@ -147,7 +150,7 @@ const Delivery = () => {
   };
 
   const handleConfirmReturn = () => {
-    if (!selectedRental || !returnReport || returnEvidence.length === 0) return;
+    if (!selectedRental || !returnReport || returnEvidence.length === 0 || !user?.id) return;
     const extra = returnExtraDescription.trim();
     createHandoverReport({
       rentalOpId: selectedRental.id,
@@ -160,12 +163,12 @@ const Delivery = () => {
       notes: `صور توثيق استلام المؤجر بعد الإرجاع: ${returnEvidence.length}${extra ? ` — وصف إضافي: ${extra}` : ''}`,
       evidencePhotos: returnEvidence,
     });
-    confirmHandoverReport(returnReport.id, user?.id);
+    confirmHandoverReport(returnReport.id, user.id);
     setReturnEvidence([]);
     setReturnExtraDescription('');
   };
 
-  const handleSaveDisputeNotes = (disputeId) => {
+  const handleSaveDisputeNotes = (disputeId: string) => {
     updateDisputeOwnerNotes(disputeId, disputeNotes, `اقتراح حل: خصم ${proposedDeduction} ر.ي`);
     setDisputeNotes('');
   };
@@ -186,17 +189,14 @@ const Delivery = () => {
       </div>
 
       {/* Tabs */}
-      <div className="owner-tabs mb-6">
-        {tabList.map((tab) => (
-          <div
-            key={tab.id}
-            className={`owner-tab ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => { setActiveTab(tab.id); setSelectedRentalId(null); }}
-          >
-            {tab.label}
-          </div>
-        ))}
-      </div>
+      <DeliveryTabs
+        tabs={tabList}
+        activeTab={activeTab}
+        onTabChange={(tabId) => {
+          setActiveTab(tabId);
+          setSelectedRentalId(null);
+        }}
+      />
 
       {/* DISPUTES TAB */}
       {activeTab === 'disputes' && (
@@ -208,8 +208,8 @@ const Delivery = () => {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {openDisputes.map((dispute) => {
-                const rental = ownerRentals.find((r) => r.id === dispute.rentalOpId);
+              {openDisputes.map((dispute: Dispute) => {
+                const rental = ownerRentals.find((r: TenantRental) => r.id === dispute.rentalOpId);
                 const equipment = rental ? getEquipmentSnapshot(rental.equipmentId) : null;
                 return (
                   <div key={dispute.id} className="owner-card" style={{ borderRight: '4px solid #E74C3C' }}>
@@ -252,7 +252,7 @@ const Delivery = () => {
                           <select
                             className="owner-input w-full mb-2"
                             value={ownerDecision}
-                            onChange={(e) => setOwnerDecision(e.target.value)}
+                            onChange={(e) => setOwnerDecision(e.target.value as 'full_refund' | 'partial_refund' | 'no_refund')}
                             style={{ width: '100%' }}
                           >
                             <option value="full_refund">استرداد كامل للتأمين</option>
@@ -299,16 +299,16 @@ const Delivery = () => {
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {currentList.map((rental) => {
+                {currentList.map((rental: TenantRental) => {
                   const eq = getEquipmentSnapshot(rental.equipmentId);
                   const status = STATUS_CONFIG[rental.status];
                   const waitingTenantReceive = handoverReports.find(
-                    (h) => h.rentalOpId === rental.id && h.phase === 'delivery' && h.submittedByRole === 'owner'
+                    (h: HandoverReport) => h.rentalOpId === rental.id && h.phase === 'delivery' && h.submittedByRole === 'owner'
                   ) && !handoverReports.find(
-                    (h) => h.rentalOpId === rental.id && h.phase === 'delivery' && h.submittedByRole === 'tenant'
+                    (h: HandoverReport) => h.rentalOpId === rental.id && h.phase === 'delivery' && h.submittedByRole === 'tenant'
                   );
                   const waitingOwnerReturnConfirm = handoverReports.find(
-                    (h) => h.rentalOpId === rental.id && h.phase === 'return' && h.submittedByRole === 'tenant' && !h.confirmedAt
+                    (h: HandoverReport) => h.rentalOpId === rental.id && h.phase === 'return' && h.submittedByRole === 'tenant' && !h.confirmedAt
                   );
                   const isSelected = selectedRentalId === rental.id;
 
@@ -330,7 +330,7 @@ const Delivery = () => {
                         </span>
                       </div>
                       <p className="text-muted mb-2" style={{ fontSize: 13 }}>
-                        {TENANT_NAMES[rental.tenantId] ?? 'مستأجر'} — {formatRentalDateRange(rental.startDate, rental.endDate)}
+                        {getTenantProfile(rental.tenantId).name} — {formatRentalDateRange(rental.startDate, rental.endDate)}
                       </p>
                       {waitingTenantReceive && (
                         <span className="badge badge-pending" style={{ fontSize: 11 }}>
@@ -369,7 +369,7 @@ const Delivery = () => {
                     <div>
                       <h4 style={{ margin: '0 0 4px' }}>{selectedEquipment?.name}</h4>
                       <p className="text-muted mb-1" style={{ fontSize: 13 }}>
-                        #{selectedRental.orderNum} — {TENANT_NAMES[selectedRental.tenantId]}
+                        #{selectedRental.orderNum} — {getTenantProfile(selectedRental.tenantId).name}
                       </p>
                       <p className="text-muted mb-0" style={{ fontSize: 13 }}>
                         📅 {formatRentalDateRange(selectedRental.startDate, selectedRental.endDate)}
@@ -451,7 +451,7 @@ const Delivery = () => {
                         <div>
                           <span className="text-muted" style={{ fontSize: 12 }}>حالة المعدة عند الاستلام</span>
                           <p style={{ fontWeight: 600, margin: '2px 0' }}>
-                            {CONDITION_LABELS[tenantDeliveryReport.conditionStatus] ?? tenantDeliveryReport.conditionStatus ?? '—'}
+                            {tenantDeliveryReport.conditionStatus ? (CONDITION_LABELS[tenantDeliveryReport.conditionStatus as keyof typeof CONDITION_LABELS] ?? tenantDeliveryReport.conditionStatus) : '—'}
                           </p>
                         </div>
                         <div>
@@ -520,7 +520,7 @@ const Delivery = () => {
                         <select
                           className="owner-input"
                           value={ownerDecision}
-                          onChange={(e) => setOwnerDecision(e.target.value)}
+                          onChange={(e) => setOwnerDecision(e.target.value as 'full_refund' | 'partial_refund' | 'no_refund')}
                         >
                           <option value="full_refund">استرداد كامل للتأمين</option>
                           <option value="partial_refund">استرداد جزئي</option>

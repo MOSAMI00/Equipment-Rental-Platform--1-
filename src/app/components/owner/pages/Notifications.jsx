@@ -1,7 +1,10 @@
-import React from 'react';
-import { Trash2, CheckCircle } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { CheckCircle } from 'lucide-react';
 import { useRentalPlatform } from '../../../data/mock-api';
-import { useNavigate } from 'react-router';
+import { visit } from '../../../inertia/navigation';
+import { useOwnerPageProps } from '../../../inertia/owner-page-props';
+import EmptyState from '../shared/EmptyState';
+import { ChartSkeleton } from '../shared/OwnerSkeletons';
 
 const TYPE_ICONS = {
   payment: '💰',
@@ -23,11 +26,16 @@ const TYPE_COLORS = {
 
 const Notifications = () => {
   const {
-    ownerNotifications,
     markOwnerNotificationRead,
     markAllOwnerNotificationsRead,
   } = useRentalPlatform();
-  const navigate = useNavigate();
+  const { ownerNotifications } = useOwnerPageProps();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setIsLoading(false), 350);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const unreadCount = ownerNotifications.filter((n) => !n.read).length;
 
@@ -65,11 +73,10 @@ const Notifications = () => {
         </div>
       </div>
 
-      {ownerNotifications.length === 0 ? (
-        <div className="owner-card" style={{ textAlign: 'center', padding: '48px' }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>🔔</div>
-          <h3 style={{ color: 'var(--color-text-muted)' }}>لا توجد إشعارات</h3>
-        </div>
+      {isLoading ? (
+        <ChartSkeleton height={200} />
+      ) : ownerNotifications.length === 0 ? (
+        <EmptyState icon="🔔" title="لا توجد إشعارات" description="ستظهر الإشعارات الجديدة هنا." />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {ownerNotifications.map((n) => {
@@ -90,7 +97,7 @@ const Notifications = () => {
                 }}
                 onClick={() => {
                   markOwnerNotificationRead(n.id);
-                  if (n.action?.href) navigate(n.action.href);
+                  if (n.action?.href) visit(n.action.href);
                 }}
               >
                 <div

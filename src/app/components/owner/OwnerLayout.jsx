@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
-import { Outlet, NavLink, useLocation } from 'react-router';
+import { Outlet } from 'react-router';
 import {
   Home, Wrench, ClipboardList, FileText, Package, DollarSign,
-  Shield, Bell, Star, User, LogOut, Menu, ChevronDown, X
+  Shield, Bell, Star, User, LogOut, Menu, ChevronDown
 } from 'lucide-react';
 import { useAuth } from '../../auth/AuthContext';
-import { useRentalPlatform } from '../../data/mock-api';
+import { visit } from '../../inertia/navigation';
+import { useOwnerPageProps } from '../../inertia/owner-page-props';
 
 const OwnerLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const location = useLocation();
   const { user, logout } = useAuth();
-  const { rentals, ownerNotifications } = useRentalPlatform();
+  const { rentals, ownerNotifications } = useOwnerPageProps();
+  const pathname = window.location.pathname;
   const pendingRequests = rentals.filter((rental) => rental.ownerId === user?.id && rental.status === 'pending').length;
   const unreadOwnerNotifs = ownerNotifications.filter((n) => !n.read).length;
 
@@ -38,7 +39,7 @@ const OwnerLayout = () => {
   ];
 
   const getPageTitle = () => {
-    const item = navItems.find((i) => location.pathname.startsWith(i.path));
+    const item = navItems.find((i) => pathname.startsWith(i.path));
     return item ? item.name : 'الرئيسية';
   };
 
@@ -70,11 +71,15 @@ const OwnerLayout = () => {
 
         <div className="owner-nav">
           {navItems.map((item) => (
-            <NavLink
+            <button
               key={item.path}
-              to={item.path}
-              className={({ isActive }) => `owner-nav-item ${isActive ? 'active' : ''}`}
-              onClick={() => setIsSidebarOpen(false)}
+              className={`owner-nav-item ${pathname.startsWith(item.path) ? 'active' : ''}`}
+              style={{ width: '100%', border: 'none', background: 'transparent', textAlign: 'right', cursor: 'pointer' }}
+              type="button"
+              onClick={() => {
+                setIsSidebarOpen(false);
+                visit(item.path);
+              }}
             >
               {item.icon}
               <span>{item.name}</span>
@@ -83,7 +88,7 @@ const OwnerLayout = () => {
                   {item.badge}
                 </span>
               )}
-            </NavLink>
+            </button>
           ))}
         </div>
 
@@ -111,10 +116,14 @@ const OwnerLayout = () => {
           </div>
 
           <div className="owner-topbar-left">
-            <NavLink to="/owner/notifications" style={{ position: 'relative', color: 'var(--color-text-muted)' }}>
+            <button
+              type="button"
+              onClick={() => visit('/owner/notifications')}
+              style={{ position: 'relative', color: 'var(--color-text-muted)', border: 'none', background: 'transparent', cursor: 'pointer' }}
+            >
               <Bell size={22} />
-              {ownerNotifications > 0 && <span className="topbar-notification-badge">{ownerNotifications}</span>}
-            </NavLink>
+              {unreadOwnerNotifs > 0 && <span className="topbar-notification-badge">{unreadOwnerNotifs}</span>}
+            </button>
             <div
               className="topbar-profile"
               onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -124,9 +133,17 @@ const OwnerLayout = () => {
               <ChevronDown size={16} />
               {isProfileOpen && (
                 <div className="topbar-dropdown">
-                  <NavLink to="/owner/profile" className="topbar-dropdown-item" onClick={() => setIsProfileOpen(false)}>
+                  <button
+                    type="button"
+                    className="topbar-dropdown-item"
+                    style={{ width: '100%', border: 'none', background: 'transparent', textAlign: 'right', cursor: 'pointer' }}
+                    onClick={() => {
+                      setIsProfileOpen(false);
+                      visit('/owner/profile');
+                    }}
+                  >
                     <User size={16} /> ملفي الشخصي
-                  </NavLink>
+                  </button>
                   <div onClick={logout} className="topbar-dropdown-item" style={{ color: 'var(--color-disputed)' }}>
                     <LogOut size={16} /> تسجيل الخروج
                   </div>
@@ -145,14 +162,16 @@ const OwnerLayout = () => {
       {/* Mobile Bottom Navigation */}
       <div className="mobile-bottom-nav">
         {bottomNavItems.map((item) => (
-          <NavLink
+          <button
             key={item.path}
-            to={item.path}
-            className={({ isActive }) => `bottom-nav-item ${isActive ? 'active' : ''}`}
+            type="button"
+            className={`bottom-nav-item ${pathname.startsWith(item.path) ? 'active' : ''}`}
+            style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}
+            onClick={() => visit(item.path)}
           >
             {item.icon}
             <span>{item.name}</span>
-          </NavLink>
+          </button>
         ))}
       </div>
     </div>

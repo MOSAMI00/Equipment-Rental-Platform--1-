@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router';
 import { ArrowRight, ArrowLeft, Plus, X, Image as ImageIcon, Check } from 'lucide-react';
+import { visit } from '../../../inertia/navigation';
 
 const steps = ['المعلومات الأساسية', 'الصور', 'التسعير', 'المراجعة والنشر'];
 
 const AddEquipment = () => {
   const [step, setStep] = useState(0);
-  const navigate = useNavigate();
   const [specs, setSpecs] = useState([{ key: '', value: '' }]);
   const [images, setImages] = useState([]);
 
@@ -17,7 +16,7 @@ const AddEquipment = () => {
     <div>
       <div className="flex-between mb-8">
         <h2 style={{ margin: 0 }}>إضافة معدة جديدة</h2>
-        <button className="owner-btn owner-btn-outline" onClick={() => navigate('/owner/equipment')}>
+        <button className="owner-btn owner-btn-outline" onClick={() => visit('/owner/equipment')}>
           <X size={16} /> إلغاء
         </button>
       </div>
@@ -262,7 +261,7 @@ const AddEquipment = () => {
         <div className="flex-between mt-8" style={{ borderTop: '1px solid var(--color-border)', paddingTop: 24 }}>
           <button
             className="owner-btn owner-btn-outline"
-            onClick={() => step === 0 ? navigate('/owner/equipment') : setStep(step - 1)}
+            onClick={() => step === 0 ? visit('/owner/equipment') : setStep(step - 1)}
           >
             <ArrowRight size={16} /> {step === 0 ? 'إلغاء' : 'السابق'}
           </button>
@@ -272,7 +271,7 @@ const AddEquipment = () => {
               التالي <ArrowLeft size={16} />
             </button>
           ) : (
-            <button className="owner-btn owner-btn-primary" onClick={() => navigate('/owner/equipment')}>
+            <button className="owner-btn owner-btn-primary" onClick={() => visit('/owner/equipment')}>
               <Check size={16} /> نشر المعدة
             </button>
           )}

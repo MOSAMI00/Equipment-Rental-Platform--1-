@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Search, Eye, Check, X as XIcon, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '../../../auth/AuthContext';
@@ -6,9 +6,13 @@ import {
   formatCurrency,
   formatRentalDateRange,
   getEquipmentSnapshot,
+  getTenantProfile,
   useRentalPlatform,
 } from '../../../data/mock-api';
 import { STATUS_CONFIG } from '../../tenant/Dashboard/shared/OrderTypes';
+import { useOwnerPageProps } from '../../../inertia/owner-page-props';
+import EmptyState from '../shared/EmptyState';
+import { EquipmentCardSkeleton } from '../shared/OwnerSkeletons';
 
 const tabs = [
   { id: 'all', label: 'الكل', icon: '' },
@@ -19,25 +23,23 @@ const tabs = [
   { id: 'cancelled', label: 'ملغية', icon: '❌' },
 ];
 
-const tenantNames = {
-  'tenant-1': 'أحمد محمد',
-};
-
-const tenantPhones = {
-  'tenant-1': '+967 77 123 4567',
-};
-
 const Requests = () => {
   const { user } = useAuth();
   const {
-    rentals,
     approveRentalRequest,
     rejectRentalRequest,
   } = useRentalPlatform();
+  const { rentals } = useOwnerPageProps();
   const [activeTab, setActiveTab] = useState('all');
+  const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedRentalId, setSelectedRentalId] = useState(null);
   const [modal, setModal] = useState(null);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setIsLoading(false), 350);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const ownerRentals = useMemo(() => (
     rentals
@@ -45,10 +47,11 @@ const Requests = () => {
       .filter((rental) => activeTab === 'all' || rental.status === activeTab)
       .filter((rental) => {
         const equipment = getEquipmentSnapshot(rental.equipmentId);
+        const tenant = getTenantProfile(rental.tenantId);
         return (
           equipment.name.includes(search) ||
           rental.orderNum.includes(search) ||
-          (tenantNames[rental.tenantId] ?? 'مستأجر').includes(search)
+          tenant.name.includes(search)
         );
       })
   ), [activeTab, rentals, search, user?.id]);
@@ -113,30 +116,33 @@ const Requests = () => {
         })}
       </div>
 
-      {ownerRentals.length === 0 ? (
-        <div className="owner-card text-center">
-          <h3 style={{ marginTop: 0 }}>لا توجد طلبات مطابقة</h3>
-          <p className="text-muted" style={{ marginBottom: 0 }}>
-            ستظهر هنا طلبات الحجز الجديدة عند إرسالها من المستأجرين.
-          </p>
+      {isLoading ? (
+        <div className="owner-grid-2">
+          <EquipmentCardSkeleton />
+          <EquipmentCardSkeleton />
         </div>
+      ) : ownerRentals.length === 0 ? (
+        <EmptyState
+          icon="📭"
+          title="لا توجد طلبات مطابقة"
+          description="ستظهر هنا طلبات الحجز الجديدة عند إرسالها من المستأجرين."
+        />
       ) : (
         <div className="owner-grid-2">
           {ownerRentals.map((rental) => {
             const equipment = getEquipmentSnapshot(rental.equipmentId);
             const status = STATUS_CONFIG[rental.status];
-            const tenantName = tenantNames[rental.tenantId] ?? 'مستأجر';
-            const tenantPhone = tenantPhones[rental.tenantId] ?? '+967 77 000 0000';
+            const tenant = getTenantProfile(rental.tenantId);
 
             return (
               <div key={rental.id} className="owner-card" style={{ borderTop: `3px solid ${status.color}` }}>
                 <div className="flex-between mb-4">
                   <div className="flex-center gap-4" style={{ justifyContent: 'flex-start' }}>
-                    <img src="https://i.pravatar.cc/150?img=12" alt={tenantName} style={{ width: 48, height: 48, borderRadius: '50%' }} />
+                    <img src="https://i.pravatar.cc/150?img=12" alt={tenant.name} style={{ width: 48, height: 48, borderRadius: '50%' }} />
                     <div>
-                      <h4 style={{ margin: '0 0 2px' }}>{tenantName}</h4>
+                      <h4 style={{ margin: '0 0 2px' }}>{tenant.name}</h4>
                       <span className="text-muted" style={{ fontSize: 13, direction: 'ltr', display: 'inline-block' }}>
-                        📞 {tenantPhone}
+                        📞 {tenant.phone}
                       </span>
                       <div className="flex-center gap-2 mt-2" style={{ justifyContent: 'flex-start' }}>
                         <span className="text-muted" style={{ fontSize: 12 }}>⭐ 4.6</span>
@@ -242,8 +248,8 @@ const Requests = () => {
             </div>
             <div className="owner-modal-body">
               <div className="owner-grid-2 mb-6">
-                <div><span className="text-muted">المستأجر:</span><br /><strong>{tenantNames[selectedRental.tenantId] ?? 'مستأجر'}</strong></div>
-                <div><span className="text-muted">الهاتف:</span><br /><strong style={{ direction: 'ltr', display: 'inline-block' }}>{tenantPhones[selectedRental.tenantId] ?? '+967 77 000 0000'}</strong></div>
+                <div><span className="text-muted">المستأجر:</span><br /><strong>{getTenantProfile(selectedRental.tenantId).name}</strong></div>
+                <div><span className="text-muted">الهاتف:</span><br /><strong style={{ direction: 'ltr', display: 'inline-block' }}>{getTenantProfile(selectedRental.tenantId).phone}</strong></div>
                 <div><span className="text-muted">الحالة:</span><br /><strong>{STATUS_CONFIG[selectedRental.status].label}</strong></div>
                 <div><span className="text-muted">الدفع:</span><br /><strong>{selectedRental.paymentStatus === 'paid' ? 'مدفوع' : 'غير مدفوع'}</strong></div>
               </div>

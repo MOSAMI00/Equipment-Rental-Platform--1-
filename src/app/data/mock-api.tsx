@@ -161,6 +161,12 @@ export interface OwnerNotification {
   action?: { label: string; href: string };
 }
 
+export interface TenantProfile {
+  id: string;
+  name: string;
+  phone: string;
+}
+
 export interface CreateRentalInput {
   deliveryInfo: DeliveryInfo;
   timeSlot: TimeSlot;
@@ -689,6 +695,27 @@ const INITIAL_OWNER_NOTIFICATIONS: OwnerNotification[] = [
     read: true,
   },
 ];
+
+const TENANT_PROFILES: Record<string, TenantProfile> = {
+  'tenant-1': {
+    id: 'tenant-1',
+    name: 'أحمد محمد',
+    phone: '+967 77 123 4567',
+  },
+};
+
+export function getTenantProfile(tenantId?: string): TenantProfile {
+  if (!tenantId) {
+    return { id: '', name: 'مستأجر', phone: '+967 77 000 0000' };
+  }
+  return TENANT_PROFILES[tenantId] ?? { id: tenantId, name: 'مستأجر', phone: '+967 77 000 0000' };
+}
+
+export function getOwnerEquipmentSnapshots(ownerId?: string) {
+  const snapshots = products.map((product) => getEquipmentSnapshot(Number(product.id)));
+  if (!ownerId) return snapshots;
+  return snapshots.filter((item) => item.ownerId === ownerId);
+}
 
 export function getTenantRentals() {
   return readStorage<TenantRental[]>(STORAGE_KEYS.rentals, INITIAL_RENTALS);

@@ -1,13 +1,16 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Eye, User, Calendar } from 'lucide-react';
 import { useAuth } from '../../../auth/AuthContext';
 import {
   useRentalPlatform,
   getEquipmentSnapshot,
+  getTenantProfile,
   formatCurrency,
   formatRentalDateRange,
 } from '../../../data/mock-api';
 import { STATUS_CONFIG } from '../../tenant/Dashboard/shared/OrderTypes';
+import { useOwnerPageProps } from '../../../inertia/owner-page-props';
+import EmptyState from '../shared/EmptyState';
 
 const TABS = [
   { id: 'all', label: 'الكل' },
@@ -19,15 +22,19 @@ const TABS = [
   { id: 'disputed', label: 'نزاعات' },
 ];
 
-const TENANT_NAMES = { 'tenant-1': 'أحمد محمد' };
-const TENANT_PHONES = { 'tenant-1': '+967 777 123 456' };
-
 const Rentals = () => {
   const { user } = useAuth();
-  const { rentals, getHandoverReportsForRental } = useRentalPlatform();
+  const { getHandoverReportsForRental } = useRentalPlatform();
+  const { rentals } = useOwnerPageProps();
+  const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
   const [search, setSearch] = useState('');
   const [selectedRentalId, setSelectedRentalId] = useState(null);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setIsLoading(false), 350);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const ownerRentals = useMemo(() => (
     rentals
@@ -35,10 +42,11 @@ const Rentals = () => {
       .filter((r) => activeTab === 'all' || r.status === activeTab)
       .filter((r) => {
         const eq = getEquipmentSnapshot(r.equipmentId);
+        const tenant = getTenantProfile(r.tenantId);
         return (
           eq.name.toLowerCase().includes(search.toLowerCase()) ||
           r.orderNum.toLowerCase().includes(search.toLowerCase()) ||
-          (TENANT_NAMES[r.tenantId] ?? '').includes(search)
+          tenant.name.includes(search)
         );
       })
   ), [activeTab, rentals, search, user?.id]);
@@ -112,10 +120,20 @@ const Rentals = () => {
             </tr>
           </thead>
           <tbody>
-            {ownerRentals.length === 0 ? (
+            {isLoading ? (
               <tr>
                 <td colSpan="7" style={{ textAlign: 'center', padding: '32px', color: 'var(--color-text-muted)' }}>
-                  لا توجد عمليات تطابق البحث
+                  جاري تحميل العمليات...
+                </td>
+              </tr>
+            ) : ownerRentals.length === 0 ? (
+              <tr>
+                <td colSpan="7" style={{ textAlign: 'center', padding: '32px', color: 'var(--color-text-muted)' }}>
+                  <EmptyState
+                    icon="📄"
+                    title="لا توجد عمليات مطابقة"
+                    description="جرّب تغيير البحث أو تبويب الحالة."
+                  />
                 </td>
               </tr>
             ) : (
@@ -125,7 +143,7 @@ const Rentals = () => {
                 return (
                   <tr key={rental.id} style={{ cursor: 'pointer', backgroundColor: selectedRentalId === rental.id ? 'rgba(45,90,39,0.04)' : '' }}>
                     <td>{rental.orderNum}</td>
-                    <td>{TENANT_NAMES[rental.tenantId] ?? 'مستأجر'}</td>
+                    <td>{getTenantProfile(rental.tenantId).name}</td>
                     <td>{eq.name}</td>
                     <td style={{ fontSize: 12 }}>{formatRentalDateRange(rental.startDate, rental.endDate)}</td>
                     <td>{formatCurrency(rental.totalAmount)} ر.ي</td>
@@ -174,12 +192,12 @@ const Rentals = () => {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
                 <div>
                   <span className="text-muted" style={{ fontSize: 12 }}>المستأجر</span>
-                  <p style={{ fontWeight: 600, margin: '2px 0' }}>{TENANT_NAMES[selectedRental.tenantId] ?? 'مستأجر'}</p>
+                  <p style={{ fontWeight: 600, margin: '2px 0' }}>{getTenantProfile(selectedRental.tenantId).name}</p>
                 </div>
                 <div>
                   <span className="text-muted" style={{ fontSize: 12 }}>الهاتف</span>
                   <p style={{ fontWeight: 600, margin: '2px 0', direction: 'ltr', textAlign: 'right' }}>
-                    {TENANT_PHONES[selectedRental.tenantId] ?? '+967 77 000 0000'}
+                    {getTenantProfile(selectedRental.tenantId).phone}
                   </p>
                 </div>
                 <div>
