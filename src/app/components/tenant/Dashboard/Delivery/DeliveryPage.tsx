@@ -21,8 +21,20 @@ export function DeliveryPage() {
     resolveDispute,
     submitTenantDisputeResponse,
   } = useRentalPlatform();
-  const fallbackRental = rentals.find((rental) => rental.status === 'in_use' || rental.status === 'confirmed');
-  const rental = getRentalById(id) ?? fallbackRental;
+  const relevantRentals = useMemo(() => {
+    return rentals.filter((r) =>
+      r.status === 'confirmed' ||
+      r.status === 'in_use' ||
+      r.status === 'disputed'
+    );
+  }, [rentals]);
+
+  const [selectedRentalId, setSelectedRentalId] = useState<string | undefined>(id);
+  const rental = useMemo(() => {
+    const current = selectedRentalId ? rentals.find(r => r.id === selectedRentalId) : null;
+    return current || rentals.find(r => r.id === id) || relevantRentals[0];
+  }, [selectedRentalId, id, rentals, relevantRentals]);
+
   const reports = getHandoverReportsForRental(rental?.id);
   const disputes = getDisputesForRental(rental?.id);
   const activeDispute = disputes.find((d) => d.status !== 'resolved') ?? disputes[0];
@@ -46,10 +58,18 @@ export function DeliveryPage() {
   };
 
   useEffect(() => {
+    if (!rental) return;
+
     if (tenantReceiveDone && activeTab === 'receive') {
       setActiveTab('in_use');
+    } else if (tenantReturnDone && activeTab === 'in_use') {
+      setActiveTab('return');
+    } else if (!tenantReceiveDone && rental.status === 'confirmed') {
+      setActiveTab('receive');
+    } else if (rental.status === 'in_use' && !tenantReturnDone) {
+      setActiveTab('in_use');
     }
-  }, [tenantReceiveDone]);
+  }, [rental?.id, tenantReceiveDone, tenantReturnDone]);
 
   if (!rental) {
     return (
@@ -70,8 +90,24 @@ export function DeliveryPage() {
   return (
     <div className="p-4 md:p-6 pb-24 md:pb-6 max-w-2xl mx-auto" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
       <h2 className="text-xl font-bold text-[#222222] mb-5">التسليم والإرجاع</h2>
-      <EquipmentBanner rental={rental} />
-      
+      <div className="flex flex-col gap-3 mb-6">
+        {relevantRentals.map((r) => (
+          <div
+            key={r.id}
+            onClick={() => setSelectedRentalId(r.id)}
+            className={`transition-all duration-300 ${rental?.id === r.id
+                ? 'opacity-100'
+                : 'opacity-50 hover:opacity-80'
+              }`}
+          >
+            <EquipmentBanner
+              rental={r}
+              isActive={rental?.id === r.id}
+            />
+          </div>
+        ))}
+      </div>
+
       {activeDispute && (
         <div className="mb-5">
           <DisputeResponsePanel

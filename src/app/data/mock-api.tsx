@@ -718,7 +718,8 @@ export function getOwnerEquipmentSnapshots(ownerId?: string) {
 }
 
 export function getTenantRentals() {
-  return readStorage<TenantRental[]>(STORAGE_KEYS.rentals, INITIAL_RENTALS);
+  const rentals = readStorage<TenantRental[]>(STORAGE_KEYS.rentals, INITIAL_RENTALS);
+  return rentals.filter(r => r.orderNum !== 'OP-1043' && r.id !== '6');
 }
 
 export function getRentalById(id?: string) {
@@ -803,17 +804,23 @@ const RentalPlatformContext = createContext<RentalPlatformContextValue | null>(n
 export function RentalPlatformProvider({ children }: { children: ReactNode }) {
   const [rentals, setRentals] = useState<TenantRental[]>(() => getTenantRentals());
   const [cartItems, setCartItems] = useState<CartRentalItem[]>(() => readStorage(STORAGE_KEYS.cart, []));
-  const [handoverReports, setHandoverReports] = useState<HandoverReport[]>(() =>
-    readStorage(STORAGE_KEYS.handovers, INITIAL_HANDOVERS),
-  );
-  const [disputes, setDisputes] = useState<Dispute[]>(() => readStorage(STORAGE_KEYS.disputes, INITIAL_DISPUTES));
+  const [handoverReports, setHandoverReports] = useState<HandoverReport[]>(() => {
+    const raw = readStorage<HandoverReport[]>(STORAGE_KEYS.handovers, INITIAL_HANDOVERS);
+    return raw.filter(r => r.rentalOpId !== '6');
+  });
+  const [disputes, setDisputes] = useState<Dispute[]>(() => {
+    const raw = readStorage<Dispute[]>(STORAGE_KEYS.disputes, INITIAL_DISPUTES);
+    return raw.filter(d => d.rentalOpId !== '6');
+  });
   const [reviews, setReviews] = useState<Review[]>(() => readStorage(STORAGE_KEYS.reviews, INITIAL_REVIEWS));
-  const [notifications, setNotifications] = useState<TenantNotification[]>(() =>
-    readStorage(STORAGE_KEYS.notifications, INITIAL_NOTIFICATIONS),
-  );
-  const [ownerNotifications, setOwnerNotifications] = useState<OwnerNotification[]>(() =>
-    readStorage(STORAGE_KEYS.ownerNotifications, INITIAL_OWNER_NOTIFICATIONS),
-  );
+  const [notifications, setNotifications] = useState<TenantNotification[]>(() => {
+    const raw = readStorage<TenantNotification[]>(STORAGE_KEYS.notifications, INITIAL_NOTIFICATIONS);
+    return raw.filter(n => !n.message.includes('OP-1043'));
+  });
+  const [ownerNotifications, setOwnerNotifications] = useState<OwnerNotification[]>(() => {
+    const raw = readStorage<OwnerNotification[]>(STORAGE_KEYS.ownerNotifications, INITIAL_OWNER_NOTIFICATIONS);
+    return raw.filter(n => !n.message.includes('OP-1043'));
+  });
 
   useEffect(() => writeStorage(STORAGE_KEYS.rentals, rentals), [rentals]);
   useEffect(() => writeStorage(STORAGE_KEYS.cart, cartItems), [cartItems]);
@@ -828,14 +835,27 @@ export function RentalPlatformProvider({ children }: { children: ReactNode }) {
     const handler = (event: StorageEvent) => {
       if (!event.key) return;
 
-      if (event.key === STORAGE_KEYS.rentals) setRentals(readStorage(STORAGE_KEYS.rentals, INITIAL_RENTALS));
+      if (event.key === STORAGE_KEYS.rentals) {
+        const raw = readStorage<TenantRental[]>(STORAGE_KEYS.rentals, INITIAL_RENTALS);
+        setRentals(raw.filter(r => r.orderNum !== 'OP-1043' && r.id !== '6'));
+      }
       if (event.key === STORAGE_KEYS.cart) setCartItems(readStorage(STORAGE_KEYS.cart, []));
-      if (event.key === STORAGE_KEYS.handovers) setHandoverReports(readStorage(STORAGE_KEYS.handovers, INITIAL_HANDOVERS));
-      if (event.key === STORAGE_KEYS.disputes) setDisputes(readStorage(STORAGE_KEYS.disputes, INITIAL_DISPUTES));
+      if (event.key === STORAGE_KEYS.handovers) {
+        const raw = readStorage<HandoverReport[]>(STORAGE_KEYS.handovers, INITIAL_HANDOVERS);
+        setHandoverReports(raw.filter(r => r.rentalOpId !== '6'));
+      }
+      if (event.key === STORAGE_KEYS.disputes) {
+        const raw = readStorage<Dispute[]>(STORAGE_KEYS.disputes, INITIAL_DISPUTES);
+        setDisputes(raw.filter(d => d.rentalOpId !== '6'));
+      }
       if (event.key === STORAGE_KEYS.reviews) setReviews(readStorage(STORAGE_KEYS.reviews, INITIAL_REVIEWS));
-      if (event.key === STORAGE_KEYS.notifications) setNotifications(readStorage(STORAGE_KEYS.notifications, INITIAL_NOTIFICATIONS));
+      if (event.key === STORAGE_KEYS.notifications) {
+        const raw = readStorage<TenantNotification[]>(STORAGE_KEYS.notifications, INITIAL_NOTIFICATIONS);
+        setNotifications(raw.filter(n => !n.message.includes('OP-1043')));
+      }
       if (event.key === STORAGE_KEYS.ownerNotifications) {
-        setOwnerNotifications(readStorage(STORAGE_KEYS.ownerNotifications, INITIAL_OWNER_NOTIFICATIONS));
+        const raw = readStorage<OwnerNotification[]>(STORAGE_KEYS.ownerNotifications, INITIAL_OWNER_NOTIFICATIONS);
+        setOwnerNotifications(raw.filter(n => !n.message.includes('OP-1043')));
       }
     };
 
@@ -1091,10 +1111,10 @@ export function RentalPlatformProvider({ children }: { children: ReactNode }) {
         );
         const report = handoverReports.find((r) => r.id === handoverId);
         if (!report) return;
-        
+
         const rental = getRentalByIdFromState(report.rentalOpId);
         if (!rental) return;
-        
+
         // UPDATE RENTAL STATUS BASED ON PHASE
         setRentals((existing) =>
           existing.map((item) => {
