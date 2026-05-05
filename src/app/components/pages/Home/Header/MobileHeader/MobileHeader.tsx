@@ -5,9 +5,17 @@ interface MobileHeaderProps {
   mobileMenuOpen: boolean;
   setMobileMenuOpen: (open: boolean) => void;
   notificationCount: number;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
 }
 
-export function MobileHeader({ mobileMenuOpen, setMobileMenuOpen, notificationCount }: MobileHeaderProps) {
+export function MobileHeader({ 
+  mobileMenuOpen, 
+  setMobileMenuOpen, 
+  notificationCount,
+  searchQuery,
+  onSearchChange
+}: MobileHeaderProps) {
   return (
     <div className="md:hidden">
       <MainBar 
@@ -15,7 +23,7 @@ export function MobileHeader({ mobileMenuOpen, setMobileMenuOpen, notificationCo
         setMobileMenuOpen={setMobileMenuOpen} 
         notificationCount={notificationCount} 
       />
-      <MobileSearchBar />
+      <MobileSearchBar value={searchQuery} onChange={onSearchChange} />
     </div>
   );
 }

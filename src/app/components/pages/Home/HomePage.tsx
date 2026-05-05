@@ -11,16 +11,27 @@ import { ProductDetailsModal } from './ProductDetailsModal/ProductDetailsModal';
 
 export function HomePage() {
   const [selectedProductForModal, setSelectedProductForModal] = useState<any>(null);
+  const [activeCategory, setActiveCategory] = useState('الكل');
+  const [searchQuery, setSearchQuery] = useState('');
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <Header />
+      <Header 
+        activeCategory={activeCategory} 
+        onCategoryChange={setActiveCategory}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
 
       <main className="flex-1">
         <HeroSection />
         <TrustStrip />
         
-        <EquipmentSection onDetailsClick={setSelectedProductForModal} />
+        <EquipmentSection 
+          onDetailsClick={setSelectedProductForModal} 
+          activeCategory={activeCategory}
+          searchQuery={searchQuery}
+        />
         
         <HowItWorks />
         

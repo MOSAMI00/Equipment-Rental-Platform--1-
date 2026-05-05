@@ -1,6 +1,7 @@
 import { ClipboardList, Package, FileText, Bell, Star, Settings } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
+import { useAuth } from '../../../../../../auth/AuthContext';
 
 const accountMenuItems = [
   { icon: ClipboardList, label: 'طلباتي', href: '/dashboard', emoji: '📋' },
@@ -12,6 +13,7 @@ const accountMenuItems = [
 ];
 
 export function UserProfileMenu() {
+  const { user, logout } = useAuth();
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -26,6 +28,10 @@ export function UserProfileMenu() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  if (!user) return null;
+
+  const firstLetter = user.fullName.charAt(0);
+
   return (
     <div className="relative" ref={accountMenuRef}>
       <button
@@ -34,7 +40,7 @@ export function UserProfileMenu() {
         className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm hover:bg-primary/90 transition-all ring-2 ring-transparent hover:ring-primary/30 focus:outline-none"
         aria-label="فتح قائمة الحساب"
       >
-        أ
+        {firstLetter}
       </button>
 
       {/* Account Dropdown Menu */}
@@ -47,10 +53,10 @@ export function UserProfileMenu() {
           {/* User Info Header */}
           <div className="px-4 py-3 bg-[#F4F6F9] border-b border-border">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold">أ</div>
+              <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold">{firstLetter}</div>
               <div>
-                <p className="font-semibold text-[#222222] text-sm">أحمد محمد</p>
-                <p className="text-xs text-[#888888]">ahmed@example.com</p>
+                <p className="font-semibold text-[#222222] text-sm">{user.fullName}</p>
+                <p className="text-xs text-[#888888]">{user.phone || 'بدون رقم'}</p>
               </div>
             </div>
           </div>
@@ -74,7 +80,11 @@ export function UserProfileMenu() {
           <div className="border-t border-border py-1">
             <button
               id="logout-btn"
-              onClick={() => { setAccountMenuOpen(false); navigate('/login'); }}
+              onClick={() => { 
+                setAccountMenuOpen(false); 
+                logout();
+                navigate('/login'); 
+              }}
               className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[#E74C3C] hover:bg-red-50 transition-colors"
             >
               <span className="text-base">🔴</span>

@@ -1,4 +1,9 @@
-export function CategoryStrip() {
+interface CategoryStripProps {
+  activeCategory: string;
+  onCategoryChange: (category: string) => void;
+}
+
+export function CategoryStrip({ activeCategory, onCategoryChange }: CategoryStripProps) {
   const categories = [
     'الكل',
     'مولدات كهرباء',
@@ -15,11 +20,12 @@ export function CategoryStrip() {
     <div className="sticky top-[72px] md:top-[72px] z-40 bg-white border-b border-border">
       <div className="container mx-auto px-4">
         <div className="flex gap-2 overflow-x-auto py-3 scrollbar-hide">
-          {categories.map((category, index) => (
+          {categories.map((category) => (
             <button
               key={category}
+              onClick={() => onCategoryChange(category)}
               className={`px-4 h-10 rounded-full whitespace-nowrap transition-colors ${
-                index === 0
+                category === activeCategory
                   ? 'bg-primary text-white'
                   : 'bg-white text-muted-foreground border border-border hover:border-primary'
               }`}

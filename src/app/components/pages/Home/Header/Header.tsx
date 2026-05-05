@@ -5,7 +5,14 @@ import { MobileHeader } from './MobileHeader/MobileHeader';
 import { MobileDrawer } from './MobileDrawer/MobileDrawer';
 import { CategoryStrip } from './CategoryStrip/CategoryStrip';
 
-export function Header() {
+interface HeaderProps {
+  activeCategory: string;
+  onCategoryChange: (category: string) => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+}
+
+export function Header({ activeCategory, onCategoryChange, searchQuery, onSearchChange }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const notificationCount = 3;
 
@@ -13,18 +20,23 @@ export function Header() {
     <>
       <TopBar />
       <header className="sticky top-0 z-50 bg-white border-b border-border shadow-sm">
-        <DesktopHeader />
+        <DesktopHeader searchQuery={searchQuery} onSearchChange={onSearchChange} />
         <MobileHeader
           mobileMenuOpen={mobileMenuOpen}
           setMobileMenuOpen={setMobileMenuOpen}
           notificationCount={notificationCount}
+          searchQuery={searchQuery}
+          onSearchChange={onSearchChange}
         />
         <MobileDrawer
           mobileMenuOpen={mobileMenuOpen}
           setMobileMenuOpen={setMobileMenuOpen}
         />
       </header>
-      <CategoryStrip />
+      <CategoryStrip 
+        activeCategory={activeCategory} 
+        onCategoryChange={onCategoryChange} 
+      />
     </>
   );
 }
