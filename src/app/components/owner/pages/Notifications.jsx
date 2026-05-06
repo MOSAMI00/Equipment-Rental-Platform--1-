@@ -29,13 +29,8 @@ const Notifications = () => {
     markOwnerNotificationRead,
     markAllOwnerNotificationsRead,
   } = useRentalPlatform();
-  const { ownerNotifications } = useOwnerPageProps();
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setIsLoading(false), 350);
-    return () => window.clearTimeout(timer);
-  }, []);
+  const { ownerNotifications, isLoading: propIsLoading } = useOwnerPageProps();
+  const isLoading = propIsLoading ?? false;
 
   const unreadCount = ownerNotifications.filter((n) => !n.read).length;
 

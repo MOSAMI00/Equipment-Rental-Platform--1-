@@ -62,6 +62,7 @@ export function useOwnerPageProps(): OwnerPageProps {
       ownerNotifications: (props.ownerNotifications as OwnerNotification[]) ?? context.ownerNotifications,
       stats: props.stats ?? null,
       paymentMethods: props.paymentMethods ?? [],
+      isLoading: false,
     };
   }, [context.disputes, context.handoverReports, context.ownerNotifications, context.rentals, context.reviews, page?.props]);
 }

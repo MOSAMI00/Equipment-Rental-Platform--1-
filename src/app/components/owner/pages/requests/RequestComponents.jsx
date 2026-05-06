@@ -1,6 +1,6 @@
 import React from 'react';
 import { Eye, Filter, Search } from 'lucide-react';
-import { formatCurrency, formatRentalDateRange } from '../../../../data/mock-api';
+import { formatCurrency, formatRentalDateRange } from '../../../../utils/formatters';
 import { STATUS_CONFIG } from '../../../tenant/Dashboard/shared/OrderTypes';
 import DetailsModal from '../../shared/DetailsModal';
 

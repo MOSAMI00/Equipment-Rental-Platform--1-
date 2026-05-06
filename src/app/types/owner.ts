@@ -43,6 +43,7 @@ export type DisputeSummary = Dispute & {
 };
 
 export interface OwnerPageProps {
+  isLoading: boolean;
   rentals: RentalListItem[];
   reviews: ReviewSummary[];
   disputes: DisputeSummary[];

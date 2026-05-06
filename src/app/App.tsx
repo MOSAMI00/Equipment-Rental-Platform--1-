@@ -1,3 +1,6 @@
+// DEV MODE: Uses BrowserRouter + mock context.
+// PRODUCTION: Replace this file's entry with InertiaApp.tsx when Laravel is connected.
+// Data flow will shift from RentalPlatformProvider → Inertia page props.
 import { BrowserRouter, Navigate, Routes, Route } from 'react-router';
 import { Toaster } from 'sonner';
 import { HomePage } from './components/pages/Home/HomePage';

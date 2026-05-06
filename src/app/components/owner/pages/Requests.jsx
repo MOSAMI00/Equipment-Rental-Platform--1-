@@ -32,17 +32,13 @@ const Requests = () => {
     approveRentalRequest,
     rejectRentalRequest,
   } = useRentalPlatform();
-  const { rentals } = useOwnerPageProps();
+  const { rentals, isLoading: propIsLoading } = useOwnerPageProps();
   const [activeTab, setActiveTab] = useState('all');
-  const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedRentalId, setSelectedRentalId] = useState(null);
   const [modal, setModal] = useState(null);
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => setIsLoading(false), 350);
-    return () => window.clearTimeout(timer);
-  }, []);
+  const isLoading = propIsLoading ?? false;
 
   const ownerRentals = useMemo(() => (
     rentals

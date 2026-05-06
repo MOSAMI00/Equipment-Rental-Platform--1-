@@ -10,16 +10,12 @@ import { useOwnerPageProps } from '../../../inertia/owner-page-props';
 
 const MyEquipment = () => {
   const { user } = useAuth();
-  const { rentals } = useOwnerPageProps();
-  const [isLoading, setIsLoading] = useState(true);
+  const { rentals, isLoading: propIsLoading } = useOwnerPageProps();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
   const [status, setStatus] = useState('all');
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => setIsLoading(false), 350);
-    return () => window.clearTimeout(timer);
-  }, []);
+  const isLoading = propIsLoading ?? false;
 
   const ownerEquipment = useMemo(
     () => getOwnerEquipmentSnapshots(user?.id),

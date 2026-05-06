@@ -1,6 +1,7 @@
 import React from 'react';
 import { AlertTriangle, CheckCircle, Package } from 'lucide-react';
-import { formatCurrency, formatRentalDateRange, type Dispute, type HandoverReport } from '../../../../data/mock-api';
+import { type Dispute, type HandoverReport } from '../../../../data/mock-api';
+import { formatCurrency, formatRentalDateRange } from '../../../../utils/formatters';
 import type { RentalListItem } from '../../../../types/owner';
 import { STATUS_CONFIG } from '../../../tenant/Dashboard/shared/OrderTypes';
 import EmptyState from '../../shared/EmptyState';
