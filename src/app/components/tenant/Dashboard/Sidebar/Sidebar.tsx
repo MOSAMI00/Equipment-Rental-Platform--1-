@@ -13,9 +13,20 @@ interface NavItem {
 interface SidebarContentProps {
   navItems: NavItem[];
   onClose: () => void;
+  userName?: string;
+  userSubtitle?: string;
+  userInitial?: string;
+  onLogout?: () => void;
 }
 
-export function SidebarContent({ navItems, onClose }: SidebarContentProps) {
+export function SidebarContent({
+  navItems,
+  onClose,
+  userName = 'أحمد محمد',
+  userSubtitle = 'ahmed@example.com',
+  userInitial = 'أ',
+  onLogout,
+}: SidebarContentProps) {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -38,11 +49,11 @@ export function SidebarContent({ navItems, onClose }: SidebarContentProps) {
       <div className="px-5 py-4 border-b border-[#E0E0E0]">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-full bg-gradient-to-br from-[#2D5A27] to-[#3D7A35] text-white flex items-center justify-center font-bold text-lg flex-shrink-0 shadow-md">
-            أ
+            {userInitial}
           </div>
           <div className="min-w-0">
-            <p className="font-semibold text-[#222222] text-sm truncate">أحمد محمد</p>
-            <p className="text-xs text-[#888888] truncate">ahmed@example.com</p>
+            <p className="font-semibold text-[#222222] text-sm truncate">{userName}</p>
+            <p className="text-xs text-[#888888] truncate">{userSubtitle}</p>
           </div>
         </div>
       </div>
@@ -82,8 +93,13 @@ export function SidebarContent({ navItems, onClose }: SidebarContentProps) {
       {/* Logout */}
       <div className="px-3 py-4 border-t border-[#E0E0E0]">
         <button
-          onClick={() => { onClose(); navigate('/login'); }}
+          onClick={() => {
+            onClose();
+            if (onLogout) onLogout();
+            else navigate('/login');
+          }}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#E74C3C] hover:bg-red-50 transition-colors"
+          type="button"
         >
           <span className="text-lg">🔴</span>
           <span className="text-sm font-medium">تسجيل الخروج</span>

@@ -3,11 +3,17 @@ import { Menu, Home, Bell } from 'lucide-react';
 
 interface DashboardTopbarProps {
   title: string;
+  subtitle?: string;
   onOpenSidebar: () => void;
   unreadNotifications?: number;
 }
 
-export function DashboardTopbar({ title, onOpenSidebar, unreadNotifications = 0 }: DashboardTopbarProps) {
+export function DashboardTopbar({
+  title,
+  subtitle = 'لوحة تحكم المستأجر',
+  onOpenSidebar,
+  unreadNotifications = 0,
+}: DashboardTopbarProps) {
   return (
     <header className="h-16 bg-white border-b border-[#E0E0E0] flex items-center justify-between px-4 md:px-6 flex-shrink-0">
       <div className="flex items-center gap-3">
@@ -20,7 +26,7 @@ export function DashboardTopbar({ title, onOpenSidebar, unreadNotifications = 0 
         </button>
         <div>
           <h1 className="font-bold text-[#222222] text-lg leading-tight">{title}</h1>
-          <p className="text-xs text-[#888888] hidden sm:block">لوحة تحكم المستأجر</p>
+          <p className="text-xs text-[#888888] hidden sm:block">{subtitle}</p>
         </div>
       </div>
 

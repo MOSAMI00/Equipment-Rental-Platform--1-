@@ -1,3 +1,4 @@
+import { Link } from 'react-router';
 import { TYPE_COLORS } from '../../NotificationTypes';
 import type { TenantNotification } from '../../../../../../data/mock-api';
 
@@ -35,13 +36,23 @@ export function NotificationItem({ notif, onMarkRead }: NotificationItemProps) {
           <div className="flex items-center justify-between mt-3">
             <span className="text-xs text-[#888888]">{notif.time}</span>
             {notif.action && (
-              <a
-                href={notif.action.href}
-                onClick={e => e.stopPropagation()}
-                className="text-xs font-bold text-[#2D5A27] hover:underline"
-              >
-                {notif.action.label} ←
-              </a>
+              notif.action.href.startsWith('/') ? (
+                <Link
+                  to={notif.action.href}
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-xs font-bold text-[#2D5A27] hover:underline"
+                >
+                  {notif.action.label} ←
+                </Link>
+              ) : (
+                <a
+                  href={notif.action.href}
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-xs font-bold text-[#2D5A27] hover:underline"
+                >
+                  {notif.action.label} ←
+                </a>
+              )
             )}
           </div>
         </div>

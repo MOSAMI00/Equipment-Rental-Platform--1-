@@ -1,12 +1,24 @@
-import { ClipboardList, Package, FileText, Bell, Star, Settings } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { ClipboardList, Package, FileText, Bell, Star, Settings, Shield, Home, Wrench } from 'lucide-react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useAuth } from '../../../../../../auth/AuthContext';
 
-const accountMenuItems = [
+const tenantMenuItems = [
   { icon: ClipboardList, label: 'طلباتي', href: '/dashboard', emoji: '📋' },
   { icon: Package, label: 'التسليم والإرجاع', href: '/dashboard/delivery', emoji: '📦' },
   { icon: FileText, label: 'عقودي', href: '/dashboard/contracts', emoji: '📄' },
+  { icon: Shield, label: 'التأمينات', href: '/dashboard/insurance', emoji: '🛡️' },
+  { icon: Bell, label: 'الإشعارات', href: '/dashboard/notifications', emoji: '🔔' },
+  { icon: Star, label: 'تقييماتي', href: '/dashboard/ratings', emoji: '⭐' },
+  { icon: Settings, label: 'الإعدادات', href: '/dashboard/settings', emoji: '⚙️' },
+];
+
+const ownerMenuItems = [
+  { icon: Home, label: 'الرئيسية', href: '/dashboard/overview', emoji: '🏠' },
+  { icon: Wrench, label: 'معداتي', href: '/dashboard/equipment', emoji: '🔧' },
+  { icon: Package, label: 'التسليم والإرجاع', href: '/dashboard/delivery', emoji: '📦' },
+  { icon: FileText, label: 'عقودي', href: '/dashboard/contracts', emoji: '📄' },
+  { icon: Shield, label: 'التأمينات', href: '/dashboard/insurance', emoji: '🛡️' },
   { icon: Bell, label: 'الإشعارات', href: '/dashboard/notifications', emoji: '🔔' },
   { icon: Star, label: 'تقييماتي', href: '/dashboard/ratings', emoji: '⭐' },
   { icon: Settings, label: 'الإعدادات', href: '/dashboard/settings', emoji: '⚙️' },
@@ -17,6 +29,11 @@ export function UserProfileMenu() {
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  const accountMenuItems = useMemo(() => {
+    if (!user) return tenantMenuItems;
+    return user.type === 'owner' ? ownerMenuItems : tenantMenuItems;
+  }, [user]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {

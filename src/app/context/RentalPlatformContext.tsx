@@ -647,7 +647,7 @@ const INITIAL_OWNER_NOTIFICATIONS: OwnerNotification[] = [
     read: false,
     referenceType: 'rental_operation',
     referenceId: '1',
-    action: { label: 'مراجعة الطلب', href: '/owner/requests' },
+    action: { label: 'مراجعة الطلب', href: '/dashboard/requests' },
   },
   {
     id: 'own-notif-2',
@@ -659,7 +659,7 @@ const INITIAL_OWNER_NOTIFICATIONS: OwnerNotification[] = [
     read: false,
     referenceType: 'rental_operation',
     referenceId: '2',
-    action: { label: 'إدارة التسليم', href: '/owner/delivery' },
+    action: { label: 'إدارة التسليم', href: '/dashboard/delivery' },
   },
   {
     id: 'own-notif-3',
@@ -671,7 +671,7 @@ const INITIAL_OWNER_NOTIFICATIONS: OwnerNotification[] = [
     read: false,
     referenceType: 'handover',
     referenceId: 'handover-1',
-    action: { label: 'مراجعة التقرير', href: '/owner/delivery' },
+    action: { label: 'مراجعة التقرير', href: '/dashboard/delivery' },
   },
   {
     id: 'own-notif-4',
@@ -683,7 +683,7 @@ const INITIAL_OWNER_NOTIFICATIONS: OwnerNotification[] = [
     read: false,
     referenceType: 'dispute',
     referenceId: 'dispute-1',
-    action: { label: 'عرض النزاع', href: '/owner/requests' },
+    action: { label: 'عرض النزاع', href: '/dashboard/requests' },
   },
   {
     id: 'own-notif-5',
@@ -941,7 +941,7 @@ export function RentalPlatformProvider({ children }: { children: ReactNode }) {
             message: `مستأجر طلب تأجير ${equipment.name} #${rental.orderNum}. بانتظار موافقتك.`,
             referenceType: 'rental_operation',
             referenceId: rental.id,
-            action: { label: 'مراجعة الطلب', href: '/owner/requests' },
+            action: { label: 'مراجعة الطلب', href: '/dashboard/requests' },
           });
         });
 
@@ -1016,7 +1016,7 @@ export function RentalPlatformProvider({ children }: { children: ReactNode }) {
           message: `تم حجز مبلغ إيجار ${equipment.name} #${rental.orderNum} في الضمان. المعدة جاهزة للتسليم.`,
           referenceType: 'rental_operation',
           referenceId: rental.id,
-          action: { label: 'إدارة التسليم', href: '/owner/delivery' },
+          action: { label: 'إدارة التسليم', href: '/dashboard/delivery' },
         });
       },
       createHandoverReport: (input) => {
@@ -1082,7 +1082,7 @@ export function RentalPlatformProvider({ children }: { children: ReactNode }) {
               : `المستأجر أرسل طلب إرجاع ${equipment.name} #${rental.orderNum}. ارفع صورة وفعّل تأكيد الإرجاع.`,
             referenceType: 'handover',
             referenceId: report.id,
-            action: { label: 'مراجعة التقرير', href: '/owner/delivery' },
+            action: { label: 'مراجعة التقرير', href: '/dashboard/delivery' },
           });
         } else {
           // Owner submitted → notify tenant
@@ -1200,7 +1200,7 @@ export function RentalPlatformProvider({ children }: { children: ReactNode }) {
             message: `تم تسجيل نزاعك على الطلب #${rental.orderNum}.`,
             referenceType: 'dispute',
             referenceId: dispute.id,
-            action: { label: 'متابعة', href: '/owner/delivery' },
+            action: { label: 'متابعة', href: '/dashboard/delivery' },
           });
         } else {
           addNotification({
@@ -1219,7 +1219,7 @@ export function RentalPlatformProvider({ children }: { children: ReactNode }) {
             message: `تم فتح نزاع على الطلب #${rental.orderNum} من قِبل المستأجر. يرجى الرد على المطالبة.`,
             referenceType: 'dispute',
             referenceId: dispute.id,
-            action: { label: 'عرض النزاع', href: '/owner/requests' },
+            action: { label: 'عرض النزاع', href: '/dashboard/requests' },
           });
         }
 
@@ -1243,7 +1243,7 @@ export function RentalPlatformProvider({ children }: { children: ReactNode }) {
           message: `قدّم المستأجر رداً على النزاع للطلب #${rental.orderNum}.`,
           referenceType: 'dispute',
           referenceId: disputeId,
-          action: { label: 'مراجعة', href: '/owner/delivery' },
+          action: { label: 'مراجعة', href: '/dashboard/delivery' },
         });
       },
       resolveDispute: (disputeId) => {

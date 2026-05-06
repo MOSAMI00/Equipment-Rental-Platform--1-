@@ -1,10 +1,11 @@
 import { Link } from 'react-router';
-import { ClipboardList, Package, FileText, Bell, Star, Settings } from 'lucide-react';
+import { ClipboardList, Package, FileText, Bell, Star, Settings, Shield } from 'lucide-react';
 
 const accountMenuItems = [
   { icon: ClipboardList, label: 'طلباتي', href: '/dashboard', emoji: '📋' },
   { icon: Package, label: 'التسليم والإرجاع', href: '/dashboard/delivery', emoji: '📦' },
   { icon: FileText, label: 'عقودي', href: '/dashboard/contracts', emoji: '📄' },
+  { icon: Shield, label: 'التأمينات', href: '/dashboard/insurance', emoji: '🛡️' },
   { icon: Bell, label: 'الإشعارات', href: '/dashboard/notifications', emoji: '🔔' },
   { icon: Star, label: 'تقييماتي', href: '/dashboard/ratings', emoji: '⭐' },
   { icon: Settings, label: 'الإعدادات', href: '/dashboard/settings', emoji: '⚙️' },

@@ -27,7 +27,7 @@ const MyEquipment = () => {
     status,
   });
 
-  const handleAddEquipment = () => visit('/owner/equipment/add');
+  const handleAddEquipment = () => visit('/dashboard/equipment/add');
 
   return (
     <div>

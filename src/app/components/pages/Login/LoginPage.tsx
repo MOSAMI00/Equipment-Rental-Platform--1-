@@ -25,7 +25,7 @@ export function LoginPage() {
 
     auth.login(user);
     toast.success(`مرحباً ${user.fullName}`);
-    navigate(user.type === 'tenant' ? '/dashboard' : '/owner');
+    navigate(user.type === 'tenant' ? '/dashboard' : '/dashboard/overview');
   };
 
   return (
