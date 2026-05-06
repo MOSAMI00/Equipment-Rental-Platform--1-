@@ -5,24 +5,31 @@ import { LoginPage } from './components/pages/Login/LoginPage';
 import { RegisterPage } from './components/pages/Register/RegisterPage';
 import { ProductDetailPage } from './components/pages/ProductDetails/ProductDetailPage';
 import { CartPage } from './components/pages/Cart/CartPage';
+import { TenantLayout } from './components/tenant/Dashboard/TenantLayout';
+import { MyOrdersPage } from './components/tenant/Dashboard/MyOrders/MyOrdersPage';
 import { OrderDetailPage } from './components/tenant/Dashboard/OrderDetails/OrderDetailPage';
+// import { DeliveryPage } from './components/tenant/Dashboard/Delivery/DeliveryPage';
+import { DeliveryPage } from './features/delivery';
+import { NotificationsPage } from './features/notifications';
+// import { RatingsPage } from './components/tenant/Dashboard/Ratings/RatingsPage';
+// import { SettingsPage } from './components/tenant/Dashboard/Settings/SettingsPage';
+import { SettingsPage } from './features/settings';
+import { ReviewsPage } from './features/reviews';
+import OwnerLayout from './components/owner/OwnerLayout';
 import OwnerOverview from './components/owner/pages/overview/Overview';
 import OwnerMyEquipment from './components/owner/pages/equipment/MyEquipment';
 import OwnerAddEquipment from './components/owner/pages/add-equipment/AddEquipment';
 import OwnerRequests from './components/owner/pages/requests/Requests';
 import OwnerRentals from './components/owner/pages/rentals/Rentals';
+// import OwnerDelivery from './components/owner/pages/delivery/Delivery';
+import OwnerInsurance from './components/owner/pages/insurance/Insurance';
 import OwnerEarnings from './components/owner/pages/earnings/Earnings';
-import { DashboardShellLayout } from './components/dashboard/DashboardShellLayout';
-import { DashboardHome } from './components/dashboard/DashboardHome';
-import { OwnerLegacyRedirect } from './components/dashboard/OwnerLegacyRedirect';
-import { UnifiedDeliveryPage } from './components/dashboard/pages/UnifiedDeliveryPage';
-import { UnifiedContractsPage } from './components/dashboard/pages/UnifiedContractsPage';
-import { UnifiedNotificationsPage } from './components/dashboard/pages/UnifiedNotificationsPage';
-import { UnifiedRatingsPage } from './components/dashboard/pages/UnifiedRatingsPage';
-import { UnifiedSettingsPage } from './components/dashboard/pages/UnifiedSettingsPage';
-import { InsuranceDashboardPage } from './components/dashboard/pages/InsuranceDashboardPage';
+// import OwnerNotifications from './components/owner/pages/notifications/Notifications';
+// import OwnerReviews from './components/owner/pages/reviews/Reviews';
+// import OwnerProfile from './components/owner/pages/profile/Profile';
+import ContractsPage from './features/contracts/ContractsPage';
 import { RentalPlatformProvider } from './data/mock-api';
-import { AuthProvider, RequireAuth, RequireOwnerOnly } from './auth/AuthContext';
+import { AuthProvider, RequireOwner, RequireTenant } from './auth/AuthContext';
 
 export default function App() {
   return (
@@ -37,33 +44,47 @@ export default function App() {
             <Route path="/product/:id" element={<ProductDetailPage />} />
             <Route path="/cart" element={<CartPage />} />
 
+            {/* Tenant Dashboard Routes */}
             <Route
               path="/dashboard"
               element={(
-                <RequireAuth>
-                  <DashboardShellLayout />
-                </RequireAuth>
+                <RequireTenant>
+                  <TenantLayout />
+                </RequireTenant>
               )}
             >
-              <Route index element={<DashboardHome />} />
+              <Route index element={<MyOrdersPage />} />
               <Route path="order/:id" element={<OrderDetailPage />} />
-              <Route path="order/:id/delivery" element={<UnifiedDeliveryPage />} />
-              <Route path="delivery" element={<UnifiedDeliveryPage />} />
-              <Route path="contracts" element={<UnifiedContractsPage />} />
-              <Route path="notifications" element={<UnifiedNotificationsPage />} />
-              <Route path="ratings" element={<UnifiedRatingsPage />} />
-              <Route path="settings" element={<UnifiedSettingsPage />} />
-              <Route path="insurance" element={<InsuranceDashboardPage />} />
-
-              <Route path="overview" element={<RequireOwnerOnly><OwnerOverview /></RequireOwnerOnly>} />
-              <Route path="equipment" element={<RequireOwnerOnly><OwnerMyEquipment /></RequireOwnerOnly>} />
-              <Route path="equipment/add" element={<RequireOwnerOnly><OwnerAddEquipment /></RequireOwnerOnly>} />
-              <Route path="requests" element={<RequireOwnerOnly><OwnerRequests /></RequireOwnerOnly>} />
-              <Route path="rentals" element={<RequireOwnerOnly><OwnerRentals /></RequireOwnerOnly>} />
-              <Route path="earnings" element={<RequireOwnerOnly><OwnerEarnings /></RequireOwnerOnly>} />
+              <Route path="order/:id/delivery" element={<DeliveryPage />} />
+              <Route path="delivery" element={<DeliveryPage />} />
+              <Route path="contracts" element={<ContractsPage />} />
+              <Route path="notifications" element={<NotificationsPage />} />
+              <Route path="ratings" element={<ReviewsPage />} />
+              <Route path="settings" element={<SettingsPage />} />
             </Route>
-
-            <Route path="/owner/*" element={<OwnerLegacyRedirect />} />
+            {/* Owner Dashboard Routes */}
+            <Route
+              path="/owner"
+              element={(
+                <RequireOwner>
+                  <OwnerLayout />
+                </RequireOwner>
+              )}
+            >
+              <Route index element={<Navigate to="/owner/overview" replace />} />
+              <Route path="overview" element={<OwnerOverview />} />
+              <Route path="equipment" element={<OwnerMyEquipment />} />
+              <Route path="equipment/add" element={<OwnerAddEquipment />} />
+              <Route path="requests" element={<OwnerRequests />} />
+              <Route path="rentals" element={<OwnerRentals />} />
+              <Route path="delivery" element={<DeliveryPage />} />
+              <Route path="insurance" element={<OwnerInsurance />} />
+              <Route path="earnings" element={<OwnerEarnings />} />
+              <Route path="contracts" element={<ContractsPage />} />
+              <Route path="notifications" element={<NotificationsPage />} />
+              <Route path="reviews" element={<ReviewsPage />} />
+              <Route path="profile" element={<SettingsPage />} />
+            </Route>
           </Routes>
           <Toaster position="top-center" richColors />
         </BrowserRouter>

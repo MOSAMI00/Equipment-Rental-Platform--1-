@@ -118,31 +118,12 @@ export function useAuth() {
   return context;
 }
 
-export function RequireAuth({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
-  const location = useLocation();
-
-  if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
-
-  return <>{children}</>;
-}
-
-export function RequireOwnerOnly({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
-  const location = useLocation();
-
-  if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
-  if (user.type !== 'owner') return <Navigate to="/dashboard" replace state={{ from: location.pathname }} />;
-
-  return <>{children}</>;
-}
-
 export function RequireTenant({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const location = useLocation();
 
   if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
-  if (user.type !== 'tenant') return <Navigate to="/dashboard/overview" replace />;
+  if (user.type !== 'tenant') return <Navigate to="/owner" replace />;
 
   return <>{children}</>;
 }

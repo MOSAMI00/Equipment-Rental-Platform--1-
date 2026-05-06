@@ -28,7 +28,7 @@ const OwnerTopbar = ({
     <div className="owner-topbar-left">
       <button
         type="button"
-        onClick={() => onNavigate('/dashboard/notifications')}
+        onClick={() => onNavigate('/owner/notifications')}
         style={{ position: 'relative', color: 'var(--color-text-muted)', border: 'none', background: 'transparent', cursor: 'pointer' }}
       >
         <Bell size={22} />
@@ -47,7 +47,7 @@ const OwnerTopbar = ({
               type="button"
               className="topbar-dropdown-item"
               style={{ width: '100%', border: 'none', background: 'transparent', textAlign: 'right', cursor: 'pointer' }}
-              onClick={() => onNavigate('/dashboard/settings')}
+              onClick={() => onNavigate('/owner/profile')}
             >
               <User size={16} /> ملفي الشخصي
             </button>

@@ -14,14 +14,14 @@ const tenantMenuItems = [
 ];
 
 const ownerMenuItems = [
-  { icon: Home, label: 'الرئيسية', href: '/dashboard/overview', emoji: '🏠' },
-  { icon: Wrench, label: 'معداتي', href: '/dashboard/equipment', emoji: '🔧' },
-  { icon: Package, label: 'التسليم والإرجاع', href: '/dashboard/delivery', emoji: '📦' },
-  { icon: FileText, label: 'عقودي', href: '/dashboard/contracts', emoji: '📄' },
-  { icon: Shield, label: 'التأمينات', href: '/dashboard/insurance', emoji: '🛡️' },
-  { icon: Bell, label: 'الإشعارات', href: '/dashboard/notifications', emoji: '🔔' },
-  { icon: Star, label: 'تقييماتي', href: '/dashboard/ratings', emoji: '⭐' },
-  { icon: Settings, label: 'الإعدادات', href: '/dashboard/settings', emoji: '⚙️' },
+  { icon: Home, label: 'الرئيسية', href: '/owner/overview', emoji: '🏠' },
+  { icon: Wrench, label: 'معداتي', href: '/owner/equipment', emoji: '🔧' },
+  { icon: Package, label: 'التسليم والإرجاع', href: '/owner/delivery', emoji: '📦' },
+  { icon: FileText, label: 'عقودي', href: '/owner/contracts', emoji: '📄' },
+  { icon: Shield, label: 'التأمينات', href: '/owner/insurance', emoji: '🛡️' },
+  { icon: Bell, label: 'الإشعارات', href: '/owner/notifications', emoji: '🔔' },
+  { icon: Star, label: 'تقييماتي', href: '/owner/reviews', emoji: '⭐' },
+  { icon: Settings, label: 'الإعدادات', href: '/owner/profile', emoji: '⚙️' },
 ];
 
 export function UserProfileMenu() {

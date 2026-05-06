@@ -55,7 +55,7 @@ export function RegisterPage() {
 
     auth.registerUser(newUser);
     toast.success('تم إنشاء حسابك بنجاح');
-    navigate(userType === 'tenant' ? '/dashboard' : '/dashboard/overview');
+    navigate(userType === 'tenant' ? '/dashboard' : '/owner');
   };
 
   return (

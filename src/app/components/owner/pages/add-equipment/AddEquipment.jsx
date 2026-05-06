@@ -50,7 +50,7 @@ const AddEquipment = () => {
     <div>
       <div className="flex-between mb-8">
         <h2 style={{ margin: 0 }}>إضافة معدة جديدة</h2>
-        <button className="owner-btn owner-btn-outline" onClick={() => visit('/dashboard/equipment')}>
+        <button className="owner-btn owner-btn-outline" onClick={() => visit('/owner/equipment')}>
           <X size={16} /> إلغاء
         </button>
       </div>
@@ -75,7 +75,7 @@ const AddEquipment = () => {
         <div className="flex-between mt-8" style={{ borderTop: '1px solid var(--color-border)', paddingTop: 24 }}>
           <button
             className="owner-btn owner-btn-outline"
-            onClick={() => (step === 0 ? visit('/dashboard/equipment') : goBack())}
+            onClick={() => (step === 0 ? visit('/owner/equipment') : goBack())}
           >
             <ArrowRight size={16} /> {step === 0 ? 'إلغاء' : 'السابق'}
           </button>
@@ -85,7 +85,7 @@ const AddEquipment = () => {
               التالي <ArrowLeft size={16} />
             </button>
           ) : (
-            <button className="owner-btn owner-btn-primary" onClick={() => visit('/dashboard/equipment')}>
+            <button className="owner-btn owner-btn-primary" onClick={() => visit('/owner/equipment')}>
               <Check size={16} /> نشر المعدة
             </button>
           )}
