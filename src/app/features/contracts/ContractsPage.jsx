@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react';
 import { useAuth } from '../../auth/AuthContext';
-import { AppInput, EmptyState, PageHeader } from '../../components/shared';
+import { AppInput, EmptyState, FilterTabs, PageHeader } from '../../components/shared';
 import { CONTRACTS } from '../../components/tenant/Dashboard/Contracts/ContractTypes';
-import { contractRows } from '../../components/owner/pages/contracts/contractsData';
 import { getContractConfig } from './contractsConfig';
 import { ContractsTable } from './ContractsTable';
+import { ownerContractRows } from './contractsSeed';
 
 function normalizeTenantContracts() {
   return CONTRACTS.map((item) => ({
@@ -19,7 +19,7 @@ function normalizeTenantContracts() {
 }
 
 function normalizeOwnerContracts() {
-  return contractRows.map((item) => ({
+  return ownerContractRows.map((item) => ({
     id: item.id,
     number: item.number,
     partnerName: item.tenant,
@@ -73,20 +73,18 @@ export default function ContractsPage({ contracts: contractsProp }) {
         )}
       />
 
-      <div className="mb-4 flex flex-wrap gap-2">
-        {config.tabs.map((tab) => (
-          <button
-            key={tab}
-            type="button"
-            onClick={() => setActiveTab(tab)}
-            className={`rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
-              activeTab === tab ? 'bg-[#2D5A27] text-white' : 'bg-white border border-[#E0E0E0] text-[#222222]'
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
+      <FilterTabs
+        tabs={config.tabs.map((tab) => ({
+          id: tab,
+          label: tab,
+          count: contracts.filter((contract) => {
+            const allowedStatuses = config.statusesByTab[tab] || [];
+            return allowedStatuses.length === 0 || allowedStatuses.includes(contract.status);
+          }).length,
+        }))}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
 
       {filtered.length > 0 ? (
         <ContractsTable contracts={filtered} config={config} />

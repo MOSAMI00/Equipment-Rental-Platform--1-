@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router';
 import {
   ClipboardList, Package, FileText, Bell, Star, Settings,
-  LogOut, X
+  LogOut, Shield, X
 } from 'lucide-react';
 import { SidebarContent } from './Sidebar/Sidebar';
 import { DashboardTopbar } from './Topbar/Topbar';
@@ -15,6 +15,7 @@ const navItems = [
   { icon: FileText, label: 'عقودي', href: '/dashboard/contracts', emoji: '📄' },
   { icon: Bell, label: 'الإشعارات', href: '/dashboard/notifications', emoji: '🔔', badge: 3 },
   { icon: Star, label: 'تقييماتي', href: '/dashboard/ratings', emoji: '⭐' },
+  { icon: Shield, label: 'التأمينات', href: '/dashboard/insurance', emoji: '🛡️' },
   { icon: Settings, label: 'الإعدادات', href: '/dashboard/settings', emoji: '⚙️' },
 ];
 
@@ -24,6 +25,7 @@ const pageTitles: Record<string, string> = {
   '/dashboard/contracts': 'عقودي',
   '/dashboard/notifications': 'الإشعارات',
   '/dashboard/ratings': 'تقييماتي',
+  '/dashboard/insurance': 'التأمينات',
   '/dashboard/settings': 'الإعدادات',
 };
 

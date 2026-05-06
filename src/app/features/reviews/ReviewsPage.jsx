@@ -5,7 +5,7 @@ import { useRentalPlatform, getEquipmentSnapshot, formatRentalDate } from '../..
 import { getReviewsConfig } from './reviewsConfig';
 import { ReviewSummary } from './ReviewSummary';
 import { ReviewCard } from './ReviewCard';
-import { PageHeader, EmptyState } from '../../components/shared';
+import { PageHeader, EmptyState, FilterTabs } from '../../components/shared';
 
 const RECEIVED_MOCK = [
   { id: 'received-1', equipment: 'مولد كهرباء', person: 'محمد سالم (مؤجر)', stars: 5, comment: 'مستأجر ممتاز، يحترم المواعيد ويعامل المعدة بعناية.', date: '04 مايو 2026', image: '👤' },
@@ -111,32 +111,17 @@ export default function ReviewsPage() {
 
       <ReviewSummary reviews={role === 'owner' ? receivedReviews : [...receivedReviews, ...sentReviews]} />
 
-      <div className="mb-6 flex flex-wrap gap-2 border-b border-[#E0E0E0] pb-2">
-        {config.tabs.map((tab) => {
+      <FilterTabs
+        tabs={config.tabs.map((tab) => {
           let count = 0;
           if (tab === 'مستلمة' || tab === 'التقييمات المستلمة') count = receivedReviews.length;
           if (tab === 'مرسلة') count = sentReviews.length;
           if (tab === 'بانتظار التقييم') count = pendingReviews.length;
-
-          return (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 text-sm font-semibold transition-colors border-b-2 flex items-center gap-2 ${
-                activeTab === tab
-                  ? 'border-[#2D5A27] text-[#2D5A27]'
-                  : 'border-transparent text-[#888888] hover:text-[#222222]'
-              }`}
-            >
-              <span>{tab}</span>
-              <span className={`px-2 py-0.5 rounded-full text-xs ${activeTab === tab ? 'bg-[#2D5A27]/10 text-[#2D5A27]' : 'bg-[#F4F6F9] text-[#888888]'}`}>
-                {count}
-              </span>
-            </button>
-          );
+          return { id: tab, label: tab, count };
         })}
-      </div>
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
 
       {activeTab === 'بانتظار التقييم' ? (
         <div className="flex flex-col gap-4">

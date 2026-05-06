@@ -4,7 +4,7 @@ import { useAuth } from '../../auth/AuthContext';
 import { useRentalPlatform } from '../../data/mock-api';
 import { getNotificationsConfig } from './notificationsConfig';
 import { NotificationCard } from './NotificationCard';
-import { PageHeader, EmptyState } from '../../components/shared';
+import { PageHeader, EmptyState, FilterTabs } from '../../components/shared';
 
 export default function NotificationsPage() {
   const { user } = useAuth();
@@ -67,22 +67,15 @@ export default function NotificationsPage() {
         }
       />
 
-      <div className="mb-6 flex flex-wrap gap-2 border-b border-[#E0E0E0] pb-2">
-        {config.tabs.map((tab) => (
-          <button
-            key={tab}
-            type="button"
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 text-sm font-semibold transition-colors border-b-2 ${
-              activeTab === tab
-                ? 'border-[#2D5A27] text-[#2D5A27]'
-                : 'border-transparent text-[#888888] hover:text-[#222222]'
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
+      <FilterTabs
+        tabs={config.tabs.map((tab) => ({
+          id: tab,
+          label: tab,
+          count: tab === config.tabs[1] ? unreadCount : allNotifications.length,
+        }))}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
 
       {displayed.length > 0 ? (
         <div className="flex flex-col gap-3">
