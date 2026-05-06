@@ -10,7 +10,7 @@ const { chromium } = require('playwright');
     console.log('Navigated to register');
     
     // Check initial userType
-    const isTenantActive = await page.evaluate(() => document.querySelector('button:has-text("أنا مستأجر")').className.includes('bg-['));
+    const isTenantActive = await page.locator('button:has-text("أنا مستأجر")').evaluate(node => node.className.includes('bg-['));
     console.log('Is tenant active initially:', isTenantActive);
 
     await page.click('button:has-text("أنا مؤجر")');
@@ -36,12 +36,14 @@ const { chromium } = require('playwright');
     // Index 5 is Store Name
     await allInputs[5].fill('Test Store');
     
+    // Add district fill
+    await allInputs[6].fill('Test District');
+
     // Selects
     const selects = await page.$$('select');
     await selects[0].selectOption({ index: 1 }); // Governorate
-    await selects[1].selectOption({ index: 1 }); // District
-    await selects[2].selectOption({ index: 1 }); // Main Governorate
-    await selects[3].selectOption({ index: 1 }); // Payment Method
+    await selects[1].selectOption({ index: 1 }); // Main Governorate
+    await selects[2].selectOption({ index: 1 }); // Payment Method
     
     // Check terms
     await page.click('input[type="checkbox"]');
