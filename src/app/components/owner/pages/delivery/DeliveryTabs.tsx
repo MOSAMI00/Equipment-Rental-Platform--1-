@@ -1,4 +1,5 @@
 import React from 'react';
+import { FilterTabs } from '../../../shared';
 
 type TabItem = {
   id: string;
@@ -13,17 +14,11 @@ type DeliveryTabsProps = {
 
 export default function DeliveryTabs({ tabs, activeTab, onTabChange }: DeliveryTabsProps) {
   return (
-    <div className="owner-tabs mb-6">
-      {tabs.map((tab) => (
-        <div
-          key={tab.id}
-          className={`owner-tab ${activeTab === tab.id ? 'active' : ''}`}
-          onClick={() => onTabChange(tab.id)}
-        >
-          {tab.label}
-        </div>
-      ))}
-    </div>
+    <FilterTabs
+      tabs={tabs}
+      activeTab={activeTab}
+      onTabChange={onTabChange}
+    />
   );
 }
 

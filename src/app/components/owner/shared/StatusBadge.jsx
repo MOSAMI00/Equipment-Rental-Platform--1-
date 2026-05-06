@@ -1,19 +1,18 @@
 import React from 'react';
-import { Badge } from '../../ui/badge';
+import { StatusBadge as SharedStatusBadge } from '../../shared/StatusBadge';
 
-const STATUS_META = {
-  available: { label: '● متاح', className: 'badge-available' },
-  confirmed: { label: '● محجوز', className: 'badge-confirmed' },
-  in_use: { label: '● قيد الاستخدام', className: 'badge-in-use' },
-  pending: { label: '● بانتظار', className: 'badge-pending' },
-  cancelled: { label: '● مخفي', className: 'badge-cancelled' },
-  hidden: { label: '● مخفي', className: 'badge-cancelled' },
-  completed: { label: '● مكتمل', className: 'badge-completed' },
+const OWNER_LABELS = {
+  available: '● متاح',
+  confirmed: '● محجوز',
+  in_use: '● قيد الاستخدام',
+  pending: '● بانتظار',
+  cancelled: '● مخفي',
+  hidden: '● مخفي',
+  completed: '● مكتمل',
 };
 
-const StatusBadge = ({ status }) => {
-  const meta = STATUS_META[status] ?? STATUS_META.pending;
-  return <Badge className={`badge ${meta.className}`}>{meta.label}</Badge>;
-};
+const StatusBadge = ({ status }) => (
+  <SharedStatusBadge status={status} label={OWNER_LABELS[status]} />
+);
 
 export default StatusBadge;
