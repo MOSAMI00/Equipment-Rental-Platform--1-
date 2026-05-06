@@ -14,6 +14,7 @@ import ProfileInfoTab from '../../components/owner/pages/profile/ProfileInfoTab'
 import SecurityTab from '../../components/owner/pages/profile/SecurityTab';
 import PayoutMethodsTab from '../../components/owner/pages/profile/PayoutMethodsTab';
 import NotificationPreferencesTab from '../../components/owner/pages/profile/NotificationPreferencesTab';
+import TenantInsuranceTab from './TenantInsuranceTab';
 
 const ICONS = {
   User: <User size={18} />,
@@ -44,6 +45,7 @@ export default function SettingsPage() {
         case 'profile': return <ProfileForm />;
         case 'security': return <SecurityForm />;
         case 'kyc': return <KYCUploaders />;
+        case 'insurance': return <TenantInsuranceTab />;
         default: return null;
       }
     }
@@ -53,18 +55,17 @@ export default function SettingsPage() {
     <div className="p-4 md:p-6 pb-24 md:pb-6" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
       <PageHeader title={config.pageTitle} />
 
-      <div className="flex flex-col md:flex-row gap-6 items-start">
-        {/* Sidebar Tabs */}
-        <div className="w-full md:w-64 flex-shrink-0">
-          <div className="bg-white rounded-2xl border border-[#E0E0E0] p-2 flex flex-row md:flex-col gap-1 overflow-x-auto">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
+        <div className="w-full overflow-x-auto rounded-2xl border border-[#E8ECEF] bg-white p-1.5 shadow-sm">
+          <div className="flex min-w-max gap-1">
             {config.tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold transition-all whitespace-nowrap md:whitespace-normal text-right flex-1 md:flex-none ${
+                className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all whitespace-nowrap ${
                   activeTab === tab.id
-                    ? 'bg-[#2D5A27] text-white'
-                    : 'text-[#888888] hover:bg-[#F4F6F9] hover:text-[#222222]'
+                    ? 'bg-[#2D5A27] text-white shadow-sm'
+                    : 'text-[#666666] hover:bg-[#F4F6F9] hover:text-[#222222]'
                 }`}
               >
                 {ICONS[tab.iconName]}
@@ -74,8 +75,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Content Area */}
-        <div className="flex-1 w-full bg-white rounded-2xl border border-[#E0E0E0] p-4 md:p-6">
+        <div className="min-w-0 w-full bg-white rounded-2xl border border-[#E0E0E0] p-5 md:p-8 shadow-sm">
           {renderContent()}
         </div>
       </div>

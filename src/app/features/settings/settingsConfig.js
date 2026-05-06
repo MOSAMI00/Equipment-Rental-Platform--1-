@@ -5,6 +5,7 @@ export const SETTINGS_CONFIG = {
       { id: 'profile', name: 'الملف الشخصي', iconName: 'User' },
       { id: 'security', name: 'الأمان', iconName: 'Shield' },
       { id: 'kyc', name: 'التحقق من الهوية KYC', iconName: 'CreditCard' },
+      { id: 'insurance', name: 'التأمينات', iconName: 'CreditCard' },
     ]
   },
   owner: {

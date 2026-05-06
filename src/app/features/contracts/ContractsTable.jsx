@@ -1,6 +1,7 @@
 import { AppButton, DataTable, StatusBadge } from '../../components/shared';
 
-export function ContractsTable({ contracts, config }) {
+export function ContractsTable({ contracts, config, onViewContract }) {
+  // Contract actions are limited to read-only viewing; delivery/dispute actions live in their workflow pages.
   const columns = [
     { key: 'number', header: 'رقم العقد', cell: (contract) => contract.number },
     { key: 'partner', header: config.partnerColumnHeader, cell: (contract) => contract.partnerName },
@@ -12,26 +13,12 @@ export function ContractsTable({ contracts, config }) {
       cell: (contract) => <StatusBadge status={contract.status} label={contract.statusLabel} />,
     },
     {
-      key: 'actions',
-      header: 'الإجراءات',
-      cell: () => (
-        <div className="flex flex-wrap items-center gap-2">
-          {config.actions.canConfirmReceipt ? (
-            <AppButton variant="outline" size="sm">
-              {config.actionLabels.confirmReceipt}
-            </AppButton>
-          ) : null}
-          {config.actions.canConfirmDelivery ? (
-            <AppButton variant="outline" size="sm">
-              {config.actionLabels.confirmDelivery}
-            </AppButton>
-          ) : null}
-          {config.actions.canDispute ? (
-            <AppButton variant="outline" size="sm" className="text-[#E67E22] border-[#E6B77D]">
-              {config.actionLabels.dispute}
-            </AppButton>
-          ) : null}
-        </div>
+      key: 'view',
+      header: 'العقد',
+      cell: (contract) => (
+        <AppButton variant="outline" size="sm" onClick={() => onViewContract(contract)}>
+          عرض العقد
+        </AppButton>
       ),
     },
   ];

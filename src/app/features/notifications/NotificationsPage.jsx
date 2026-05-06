@@ -45,7 +45,8 @@ export default function NotificationsPage() {
       markNotificationRead(notification.id);
     }
     
-    if (notification.action?.href) {
+    // Navigation is config-driven so tenant notifications can remain read-only for now.
+    if (config.actions?.hasExternalLinks && notification.action?.href) {
       navigate(notification.action.href);
     }
   };

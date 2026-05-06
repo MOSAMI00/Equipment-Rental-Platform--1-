@@ -1,7 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { useAuth } from '../../auth/AuthContext';
-import { useRentalPlatform, getEquipmentSnapshot, formatRentalDate } from '../../data/mock-api';
+import {
+  useRentalPlatform,
+  getEquipmentSnapshot,
+  getTenantProfile,
+  formatRentalDate,
+} from '../../data/mock-api';
 import { getReviewsConfig } from './reviewsConfig';
 import { ReviewSummary } from './ReviewSummary';
 import { ReviewCard } from './ReviewCard';
@@ -12,6 +17,25 @@ const RECEIVED_MOCK = [
   { id: 'received-2', equipment: 'رافعة شوكية', person: 'علي حسن (مؤجر)', stars: 4, comment: 'مستأجر جيد، أعاد المعدة بحالة ممتازة.', date: '25 أبريل 2026', image: '👤' },
 ];
 
+function mapReviewCard({ review, rentals, role, direction }) {
+  const rental = rentals.find((item) => item.id === review.rentalOpId);
+  const equipment = rental ? getEquipmentSnapshot(rental.equipmentId) : undefined;
+  const tenant = rental ? getTenantProfile(rental.tenantId) : undefined;
+  const isOwner = role === 'owner';
+
+  return {
+    id: review.id,
+    equipment: equipment?.name ?? 'طلب إيجار',
+    person: direction === 'received'
+      ? (isOwner ? tenant?.name || review.reviewerId || 'مستأجر' : equipment?.ownerName || review.reviewerId || 'مؤجر')
+      : (isOwner ? tenant?.name || review.targetId || 'مستأجر' : equipment?.ownerName || review.targetId || 'مؤجر'),
+    stars: review.rating,
+    comment: review.reviewText,
+    date: formatRentalDate(review.createdAt),
+    image: equipment?.image ?? '⭐',
+  };
+}
+
 export default function ReviewsPage() {
   const { user } = useAuth();
   const role = user?.type || 'tenant';
@@ -21,68 +45,50 @@ export default function ReviewsPage() {
   const [activeTab, setActiveTab] = useState(config.tabs[0]);
 
   const { rentals, reviews, submitReview } = useRentalPlatform();
+  const userId = user?.id || (role === 'owner' ? 'owner-1' : 'tenant-1');
 
   const sentReviews = useMemo(() => {
-    if (role === 'owner') return [];
-    return reviews.map((review) => {
-      const rental = rentals.find((item) => item.id === review.rentalOpId);
-      const equipment = rental ? getEquipmentSnapshot(rental.equipmentId) : undefined;
-      return {
-        id: review.id,
-        equipment: equipment?.name ?? 'طلب إيجار',
-        person: equipment ? `${equipment.ownerName} (مؤجر)` : 'مؤجر',
-        stars: review.rating,
-        comment: review.reviewText,
-        date: formatRentalDate(review.createdAt),
-        image: equipment?.image ?? '⭐',
-      };
-    });
-  }, [reviews, rentals, role]);
+    return reviews
+      .filter((review) => review.reviewerId === userId)
+      .map((review) => mapReviewCard({ review, rentals, role, direction: 'sent' }));
+  }, [reviews, rentals, role, userId]);
 
   const receivedReviews = useMemo(() => {
-    if (role === 'owner') {
-      const ownerId = user?.id || 'owner-1';
-      return reviews
-        .filter((review) => review.targetId === ownerId)
-        .map((review) => {
-          const rental = rentals.find((item) => item.id === review.rentalOpId);
-          const equipment = rental ? getEquipmentSnapshot(rental.equipmentId) : undefined;
-          return {
-            id: review.id,
-            equipment: equipment?.name ?? 'معدة غير معروفة',
-            person: review.reviewerId || 'مستأجر',
-            stars: review.rating,
-            comment: review.reviewText,
-            date: formatRentalDate(review.createdAt),
-            image: '👤',
-          };
-        });
-    } else {
-      return RECEIVED_MOCK;
-    }
-  }, [reviews, rentals, role, user?.id]);
+    const received = reviews
+      .filter((review) => review.targetId === userId)
+      .map((review) => mapReviewCard({ review, rentals, role, direction: 'received' }));
+
+    return role === 'tenant' && received.length === 0 ? RECEIVED_MOCK : received;
+  }, [reviews, rentals, role, userId]);
 
   const pendingReviews = useMemo(() => {
-    if (role === 'owner') return [];
-    const reviewedRentalIds = new Set(reviews.map((review) => review.rentalOpId));
+    const reviewedRentalIds = new Set(
+      reviews
+        .filter((review) => review.reviewerId === userId)
+        .map((review) => review.rentalOpId)
+    );
     const pending = rentals
-      .filter((rental) => rental.status === 'completed' && !reviewedRentalIds.has(rental.id))
+      .filter((rental) => {
+        if (rental.status !== 'completed' || reviewedRentalIds.has(rental.id)) return false;
+        return role === 'owner' ? rental.ownerId === userId : rental.tenantId === userId;
+      })
       .map((rental) => {
         const equipment = getEquipmentSnapshot(rental.equipmentId);
+        const tenant = getTenantProfile(rental.tenantId);
         return {
           id: rental.id,
           orderNum: rental.orderNum,
           equipment: equipment.name,
-          lessor: equipment.ownerName,
-          ownerId: equipment.ownerId,
-          image: equipment.image,
+          partnerName: role === 'owner' ? tenant.name : equipment.ownerName,
+          targetId: role === 'owner' ? rental.tenantId : equipment.ownerId,
+          image: role === 'owner' ? '👤' : equipment.image,
           date: formatRentalDate(rental.endDate),
         };
       });
 
     if (!selectedOrderId) return pending;
     return pending.sort((a, b) => (a.id === selectedOrderId ? -1 : b.id === selectedOrderId ? 1 : 0));
-  }, [rentals, reviews, selectedOrderId, role]);
+  }, [rentals, reviews, selectedOrderId, role, userId]);
 
   const [ratingValues, setRatingValues] = useState({});
   const [comments, setComments] = useState({});
@@ -91,33 +97,31 @@ export default function ReviewsPage() {
     submitReview({
       rentalOpId: item.id,
       targetType: 'user',
-      targetId: item.ownerId,
+      targetId: item.targetId,
       rating: ratingValues[item.id],
       reviewText: comments[item.id] || '',
     });
   };
 
-  const getDisplayedList = () => {
-    if (activeTab === 'مستلمة' || activeTab === 'التقييمات المستلمة') return receivedReviews;
-    if (activeTab === 'مرسلة') return sentReviews;
-    return [];
+  const tabRegistry = {
+    // Tabs come from reviewsConfig, while each list is resolved by user role and review direction.
+    مستلمة: receivedReviews,
+    مرسلة: sentReviews,
+    'بانتظار التقييم': pendingReviews,
+    'التقييمات المستلمة': receivedReviews,
   };
-
-  const displayedList = getDisplayedList();
+  const displayedList = tabRegistry[activeTab] || [];
 
   return (
     <div className="p-4 md:p-6 pb-24 md:pb-6" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
       <PageHeader title={config.pageTitle} />
 
-      <ReviewSummary reviews={role === 'owner' ? receivedReviews : [...receivedReviews, ...sentReviews]} />
+      <ReviewSummary reviews={[...receivedReviews, ...sentReviews]} />
 
       <FilterTabs
         tabs={config.tabs.map((tab) => {
-          let count = 0;
-          if (tab === 'مستلمة' || tab === 'التقييمات المستلمة') count = receivedReviews.length;
-          if (tab === 'مرسلة') count = sentReviews.length;
-          if (tab === 'بانتظار التقييم') count = pendingReviews.length;
-          return { id: tab, label: tab, count };
+          const list = tabRegistry[tab] || [];
+          return { id: tab, label: tab, count: list.length };
         })}
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -130,11 +134,15 @@ export default function ReviewsPage() {
               <div key={item.id} className="bg-white rounded-2xl border border-[#E0E0E0] p-5">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-12 h-12 rounded-xl bg-[#F4F6F9] overflow-hidden flex-shrink-0">
-                    <img src={item.image} alt={item.equipment} className="w-full h-full object-cover" />
+                    {item.image?.startsWith('http') ? (
+                      <img src={item.image} alt={item.equipment} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-2xl">{item.image || '⭐'}</div>
+                    )}
                   </div>
                   <div>
                     <p className="font-bold text-[#222222] text-sm">{item.equipment}</p>
-                    <p className="text-xs text-[#888888]">الطلب: {item.orderNum} • {item.date}</p>
+                    <p className="text-xs text-[#888888]">الطلب: {item.orderNum} • {item.partnerName} • {item.date}</p>
                   </div>
                 </div>
 

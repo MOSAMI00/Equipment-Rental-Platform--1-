@@ -12,16 +12,6 @@ const CONTRACT_CONFIGS = {
       مكتمل: ['completed'],
       منتهي: ['expired'],
     },
-    actions: {
-      canDispute: true,
-      canConfirmReceipt: true,
-      canConfirmDelivery: false,
-    },
-    actionLabels: {
-      confirmReceipt: 'تأكيد الاستلام',
-      confirmDelivery: 'تأكيد التسليم',
-      dispute: 'فتح نزاع',
-    },
   },
   owner: {
     pageTitle: 'عقود التأجير',
@@ -35,16 +25,6 @@ const CONTRACT_CONFIGS = {
       'بانتظار الموافقة': ['pending'],
       نشط: ['active'],
       مكتمل: ['completed'],
-    },
-    actions: {
-      canDispute: true,
-      canConfirmReceipt: false,
-      canConfirmDelivery: true,
-    },
-    actionLabels: {
-      confirmReceipt: 'تأكيد الاستلام',
-      confirmDelivery: 'تأكيد التسليم',
-      dispute: 'فتح نزاع',
     },
   },
 };

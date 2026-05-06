@@ -9,11 +9,11 @@ const REVIEWS_CONFIG = {
   },
   owner: {
     pageTitle: 'تقييماتي',
-    tabs: ['مستلمة'],
+    tabs: ['مستلمة', 'مرسلة', 'بانتظار التقييم'],
     emptyStateIcon: '⭐',
     emptyStateTitle: 'لا توجد تقييمات',
     emptyStateDesc: 'لم تستلم أي تقييمات حتى الآن.',
-    canSubmit: false,
+    canSubmit: true,
   }
 };
 
