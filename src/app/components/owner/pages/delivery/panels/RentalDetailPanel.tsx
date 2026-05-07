@@ -1,6 +1,6 @@
 import React from 'react';
 import { Package } from 'lucide-react';
-import { formatCurrency, formatRentalDateRange, type HandoverReport } from '../../../../../data/mock-api';
+import { formatCurrency, formatRentalDateRange, type CompensationRequest, type HandoverReport } from '../../../../../data/mock-api';
 import type { RentalListItem } from '../../../../../types/owner';
 import EmptyState from '../../../shared/EmptyState';
 import { DeliveryLifecycleCard } from './DeliveryLifecycleCard';
@@ -13,6 +13,7 @@ export function RentalDetailPanel(props: {
   ownerDeliveryReport?: HandoverReport;
   tenantDeliveryReport?: HandoverReport;
   returnReport?: HandoverReport;
+  compensationRequest?: CompensationRequest | null;
   deliveryEvidence: string[];
   returnEvidence: string[];
   deliveryExtraDescription: string;
@@ -28,6 +29,7 @@ export function RentalDetailPanel(props: {
   onConfirmDelivery: () => void;
   onConfirmReturn: () => void;
   onOpenDispute: () => void;
+  onRequestCompensation: (amount: number, notes: string, photos: string[]) => void;
 }) {
   const { selectedRental } = props;
 
@@ -86,6 +88,7 @@ export function RentalDetailPanel(props: {
       <ReturnReportCard
         returnReport={props.returnReport}
         selectedRental={selectedRental}
+        compensationRequest={props.compensationRequest}
         evidence={props.returnEvidence}
         description={props.returnExtraDescription}
         ownerDecision={props.ownerDecision}
@@ -96,6 +99,7 @@ export function RentalDetailPanel(props: {
         setProposedDeduction={props.setProposedDeduction}
         onConfirmReturn={props.onConfirmReturn}
         onOpenDispute={props.onOpenDispute}
+        onRequestCompensation={props.onRequestCompensation}
       />
       {!props.ownerDeliveryReport && !props.returnReport ? <EmptyState compact icon="📦" title="بانتظار بدء عملية التسليم" /> : null}
     </div>

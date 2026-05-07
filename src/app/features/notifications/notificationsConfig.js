@@ -9,7 +9,7 @@ const NOTIFICATIONS_CONFIG = {
     emptyStateTitleUnread: 'لا توجد إشعارات غير مقروءة',
     emptyStateDesc: 'ستظهر هنا الإشعارات الجديدة عند وصولها',
     actions: {
-      hasExternalLinks: false,
+      hasExternalLinks: true,
     }
   },
   owner: {

@@ -56,6 +56,7 @@ const Delivery = () => {
             ownerDeliveryReport={workflow.ownerDeliveryReport}
             tenantDeliveryReport={workflow.tenantDeliveryReport}
             returnReport={workflow.returnReport}
+            compensationRequest={workflow.compensation}
             deliveryEvidence={workflow.deliveryEvidence}
             returnEvidence={workflow.returnEvidence}
             deliveryExtraDescription={workflow.deliveryExtraDescription}
@@ -71,6 +72,7 @@ const Delivery = () => {
             onConfirmDelivery={workflow.handleConfirmDelivery}
             onConfirmReturn={workflow.handleConfirmReturn}
             onOpenDispute={workflow.handleOpenReturnDispute}
+            onRequestCompensation={workflow.handleRequestCompensation}
           />
         </div>
       )}

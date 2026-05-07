@@ -461,6 +461,17 @@ body {
   transform: translateY(-1px);
 }
 
+.owner-btn-warning {
+  background-color: var(--color-pending);
+  color: white;
+  box-shadow: 0 2px 8px rgba(243, 156, 18, 0.25);
+}
+.owner-btn-warning:hover {
+  background-color: #d68910;
+  box-shadow: 0 4px 12px rgba(243, 156, 18, 0.35);
+  transform: translateY(-1px);
+}
+
 .owner-btn-danger {
   background-color: var(--color-disputed);
   color: white;
