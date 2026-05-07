@@ -11,8 +11,8 @@ import { KYCUploaders } from "../../components/tenant/Dashboard/Settings/Main/Se
 
 // Owner Forms
 import ProfileInfoTab from "../../components/owner/pages/profile/ProfileInfoTab";
-import SecurityTab from "../../components/owner/pages/profile/SecurityTab";
-import PayoutMethodsTab from "../../components/owner/pages/profile/PayoutMethodsTab";
+// import SecurityTab from "../../components/owner/pages/profile/SecurityTab";
+// import PayoutMethodsTab from "../../components/owner/pages/profile/PayoutMethodsTab";
 
 const ICONS = {
   User: <User size={18} />,
@@ -35,7 +35,7 @@ export default function SettingsPage() {
         case "profile":
           return <ProfileInfoTab user={user} ownerInitial={ownerInitial} />;
         case "security":
-          return <SecurityTab />;
+          return <SecurityForm />;
         case "kyc":
           return <KYCUploaders />;
         default:
