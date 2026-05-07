@@ -1,16 +1,21 @@
-import { useMemo, useState } from 'react';
-import { useAuth } from '../../auth/AuthContext';
-import { AppInput, EmptyState, FilterTabs, PageHeader } from '../../components/shared';
-import { CONTRACTS } from '../../components/tenant/Dashboard/Contracts/ContractTypes';
-import { getContractConfig } from './contractsConfig';
-import { ContractsTable } from './ContractsTable';
-import { ownerContractRows } from './contractsSeed';
+import { useMemo, useState } from "react";
+import { useAuth } from "../../auth/AuthContext";
+import {
+  AppInput,
+  EmptyState,
+  FilterTabs,
+  PageHeader,
+} from "../../components/shared";
+import { CONTRACTS } from "../../components/tenant/Dashboard/Contracts/ContractTypes";
+import { getContractConfig } from "./contractsConfig";
+import { ContractsTable } from "./ContractsTable";
+import { ownerContractRows } from "./contractsSeed";
 
 function normalizeTenantContracts() {
   return CONTRACTS.map((item) => ({
     id: item.id,
     number: item.contractNum,
-    partnerName: item.lessor,
+    partnerName: item.owner,
     equipment: item.equipment,
     amount: `${item.amount} ر.ي`,
     status: item.status,
@@ -26,22 +31,24 @@ function normalizeOwnerContracts() {
     equipment: item.equipment,
     amount: item.total,
     // owner sample data has no status yet, so we keep it active.
-    status: 'active',
-    statusLabel: 'نشط',
+    status: "active",
+    statusLabel: "نشط",
   }));
 }
 
 export default function ContractsPage({ contracts: contractsProp }) {
   const { user } = useAuth();
-  const role = user?.type || 'tenant';
+  const role = user?.type || "tenant";
   const config = getContractConfig(role);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState(config.tabs[0]);
   const [selectedContract, setSelectedContract] = useState(null);
 
   const contracts = useMemo(() => {
     if (Array.isArray(contractsProp)) return contractsProp;
-    return role === 'owner' ? normalizeOwnerContracts() : normalizeTenantContracts();
+    return role === "owner"
+      ? normalizeOwnerContracts()
+      : normalizeTenantContracts();
   }, [contractsProp, role]);
 
   const filtered = useMemo(() => {
@@ -49,7 +56,9 @@ export default function ContractsPage({ contracts: contractsProp }) {
     const lowered = search.trim();
 
     return contracts.filter((contract) => {
-      const matchesTab = allowedStatuses.length === 0 || allowedStatuses.includes(contract.status);
+      const matchesTab =
+        allowedStatuses.length === 0 ||
+        allowedStatuses.includes(contract.status);
       const matchesSearch =
         lowered.length === 0 ||
         contract.number.includes(lowered) ||
@@ -60,18 +69,22 @@ export default function ContractsPage({ contracts: contractsProp }) {
   }, [activeTab, config.statusesByTab, contracts, search]);
 
   return (
-    <div className="p-4 md:p-6 pb-24 md:pb-6" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
+    <div
+      className="p-4 md:p-6 pb-24 md:pb-6"
+      dir="rtl"
+      style={{ fontFamily: "'Cairo', sans-serif" }}
+    >
       <PageHeader
         title={config.pageTitle}
         description={`${contracts.length} عقد`}
-        actions={(
+        actions={
           <AppInput
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder={config.searchPlaceholder}
             className="w-full md:w-80"
           />
-        )}
+        }
       />
 
       <FilterTabs
@@ -80,7 +93,10 @@ export default function ContractsPage({ contracts: contractsProp }) {
           label: tab,
           count: contracts.filter((contract) => {
             const allowedStatuses = config.statusesByTab[tab] || [];
-            return allowedStatuses.length === 0 || allowedStatuses.includes(contract.status);
+            return (
+              allowedStatuses.length === 0 ||
+              allowedStatuses.includes(contract.status)
+            );
           }).length,
         }))}
         activeTab={activeTab}
@@ -88,7 +104,11 @@ export default function ContractsPage({ contracts: contractsProp }) {
       />
 
       {filtered.length > 0 ? (
-        <ContractsTable contracts={filtered} config={config} onViewContract={setSelectedContract} />
+        <ContractsTable
+          contracts={filtered}
+          config={config}
+          onViewContract={setSelectedContract}
+        />
       ) : (
         <EmptyState
           compact
@@ -103,8 +123,12 @@ export default function ContractsPage({ contracts: contractsProp }) {
           <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-xl">
             <div className="mb-5 flex items-start justify-between gap-4">
               <div>
-                <h2 className="m-0 text-xl font-bold text-[#222222]">عقد التأجير</h2>
-                <p className="m-0 mt-1 text-sm text-[#888888]">{selectedContract.number}</p>
+                <h2 className="m-0 text-xl font-bold text-[#222222]">
+                  عقد التأجير
+                </h2>
+                <p className="m-0 mt-1 text-sm text-[#888888]">
+                  {selectedContract.number}
+                </p>
               </div>
               <button
                 type="button"
@@ -117,25 +141,40 @@ export default function ContractsPage({ contracts: contractsProp }) {
 
             <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
               <div className="rounded-xl bg-[#F8FAFC] p-4">
-                <p className="m-0 text-[#888888]">{config.partnerColumnHeader}</p>
-                <p className="m-0 mt-1 font-bold text-[#222222]">{selectedContract.partnerName}</p>
+                <p className="m-0 text-[#888888]">
+                  {config.partnerColumnHeader}
+                </p>
+                <p className="m-0 mt-1 font-bold text-[#222222]">
+                  {selectedContract.partnerName}
+                </p>
               </div>
               <div className="rounded-xl bg-[#F8FAFC] p-4">
                 <p className="m-0 text-[#888888]">المعدة</p>
-                <p className="m-0 mt-1 font-bold text-[#222222]">{selectedContract.equipment}</p>
+                <p className="m-0 mt-1 font-bold text-[#222222]">
+                  {selectedContract.equipment}
+                </p>
               </div>
               <div className="rounded-xl bg-[#F8FAFC] p-4">
-                <p className="m-0 text-[#888888]">{config.amountColumnHeader}</p>
-                <p className="m-0 mt-1 font-bold text-[#222222]">{selectedContract.amount}</p>
+                <p className="m-0 text-[#888888]">
+                  {config.amountColumnHeader}
+                </p>
+                <p className="m-0 mt-1 font-bold text-[#222222]">
+                  {selectedContract.amount}
+                </p>
               </div>
               <div className="rounded-xl bg-[#F8FAFC] p-4">
-                <p className="m-0 text-[#888888]">{config.statusColumnHeader}</p>
-                <p className="m-0 mt-1 font-bold text-[#222222]">{selectedContract.statusLabel || selectedContract.status}</p>
+                <p className="m-0 text-[#888888]">
+                  {config.statusColumnHeader}
+                </p>
+                <p className="m-0 mt-1 font-bold text-[#222222]">
+                  {selectedContract.statusLabel || selectedContract.status}
+                </p>
               </div>
             </div>
 
             <div className="mt-5 rounded-xl border border-[#E0E0E0] bg-white p-4 text-sm leading-7 text-[#555555]">
-              هذه معاينة قراءة فقط لبيانات العقد الحالية. إجراءات التسليم والإرجاع والنزاعات تبقى داخل صفحات workflow الخاصة بها.
+              هذه معاينة قراءة فقط لبيانات العقد الحالية. إجراءات التسليم
+              والإرجاع والنزاعات تبقى داخل صفحات workflow الخاصة بها.
             </div>
           </div>
         </div>
