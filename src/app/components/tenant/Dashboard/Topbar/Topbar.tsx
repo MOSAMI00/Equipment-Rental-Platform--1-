@@ -1,3 +1,6 @@
+
+// TODO: explore who components uses this file and if it can be deleted or separated or merged with another file [I think it is only used by components/dashboard folder which is also deleted but need to confirm before deleting this file]
+
 import { NavLink } from 'react-router';
 import { Menu, Home, Bell } from 'lucide-react';
 

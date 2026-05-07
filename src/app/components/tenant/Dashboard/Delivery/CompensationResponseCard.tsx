@@ -1,3 +1,6 @@
+
+// TODO: export this component to a shared location if needed in other places
+
 import { useState } from 'react';
 import { formatCurrency, type CompensationRequest } from '../../../../data/mock-api';
 

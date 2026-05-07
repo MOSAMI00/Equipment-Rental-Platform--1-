@@ -1,3 +1,6 @@
+
+// TODO: explore what this file functionality is and if it can be deleted or merged 
+
 import { FilterTabs as SharedFilterTabs, type FilterTabItem } from '../../../../shared';
 import { Status, TABS } from '../../shared/OrderTypes';
 import type { TenantRental } from '../../../../../data/mock-api';

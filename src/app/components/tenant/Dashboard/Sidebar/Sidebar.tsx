@@ -1,3 +1,7 @@
+
+// TODO: explore who components uses this file and if it can be deleted or separated or merged with another file [I think it is duplicated and only used by components/dashboard folder which is also deleted but need to confirm before deleting this file]
+
+
 import { NavLink, useLocation, useNavigate } from 'react-router';
 import { LogOut } from 'lucide-react';
 

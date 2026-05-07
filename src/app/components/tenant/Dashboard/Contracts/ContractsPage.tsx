@@ -1,3 +1,6 @@
+
+
+// TODO: Delete this file after migrating to the new design in src/app/features/contracts/ContractsPage.jsx
 import { useState } from 'react';
 import { CONTRACTS } from './ContractTypes';
 import { ContractTable } from './Main/ContractTable';
@@ -9,7 +12,7 @@ export function ContractsPage() {
 
   const filtered = CONTRACTS.filter(c =>
     c.contractNum.includes(search) ||
-    c.lessor.includes(search) ||
+    c.owner.includes(search) ||
     c.equipment.includes(search)
   );
 

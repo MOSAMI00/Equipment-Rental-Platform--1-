@@ -1,3 +1,6 @@
+
+
+// TODO: EXPORT THIS TO A SHARED LOCATION IF NEEDED IN OTHER PLACES
 export interface Contract {
   id: string;
   contractNum: string;

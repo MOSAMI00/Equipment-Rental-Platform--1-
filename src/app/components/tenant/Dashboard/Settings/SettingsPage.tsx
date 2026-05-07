@@ -1,3 +1,5 @@
+
+// TODO: Delete this file 
 import { SettingsLayout } from './Main/SettingsLayout/SettingsLayout';
 
 export function SettingsPage() {

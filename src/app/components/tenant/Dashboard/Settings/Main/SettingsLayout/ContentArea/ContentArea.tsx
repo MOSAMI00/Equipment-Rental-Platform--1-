@@ -1,3 +1,6 @@
+
+
+// TODO: export content area components folder to a shared location if needed in other places
 import { SettingsTab } from '../SettingsLayout';
 import { ProfileForm } from './ProfileForm';
 import { SecurityForm } from './SecurityForm';

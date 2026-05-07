@@ -1,3 +1,7 @@
+// TODO: explore who components uses this file and if it can be deleted or separated or merged with another file
+
+
+
 export type RentalStatus =
   | 'pending'
   | 'confirmed'

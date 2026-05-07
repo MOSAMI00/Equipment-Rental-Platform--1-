@@ -1,3 +1,7 @@
+
+// TODO: Delete this file after migrating to the new design in src/app/features
+
+
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { toast } from 'sonner';

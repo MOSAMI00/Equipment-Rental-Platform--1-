@@ -1,3 +1,6 @@
+
+// // TODO: explore who components uses this file and if it can be deleted or separated or merged with another file
+
 import React from 'react';
 import { ChevronLeft } from 'lucide-react';
 import type { HandoverReport } from '../../../../data/mock-api';
