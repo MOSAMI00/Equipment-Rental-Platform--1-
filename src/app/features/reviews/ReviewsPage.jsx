@@ -108,7 +108,6 @@ export default function ReviewsPage() {
     مستلمة: receivedReviews,
     مرسلة: sentReviews,
     'بانتظار التقييم': pendingReviews,
-    'التقييمات المستلمة': receivedReviews,
   };
   const displayedList = tabRegistry[activeTab] || [];
 
