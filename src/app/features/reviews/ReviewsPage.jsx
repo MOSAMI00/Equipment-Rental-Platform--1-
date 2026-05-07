@@ -8,8 +8,8 @@ import {
   formatRentalDate,
 } from '../../data/mock-api';
 import { getReviewsConfig } from './reviewsConfig';
-import { ReviewSummary } from './ReviewSummary';
-import { ReviewCard } from './ReviewCard';
+import { ReviewSummary } from './components/ReviewSummary';
+import { ReviewCard } from './components/ReviewCard';
 import { PageHeader, EmptyState, FilterTabs } from '../../components/shared';
 
 const RECEIVED_MOCK = [

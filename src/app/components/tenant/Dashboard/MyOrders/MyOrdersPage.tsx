@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Status } from '../shared/OrderTypes';
+import { Status } from '../../../../types/orderTypes';
 import { getEquipmentSnapshot, useTenantRentals } from '../../../../data/mock-api';
-import { OrderHeader } from './Main/OrderHeader/OrderHeader';
-import { OrderActionBanner } from './Main/ActionBanner';
-import { OrderTabs } from './Main/FilterTabs';
-import { OrdersGrid } from './Main/OrdersGrid/OrdersGrid';
+import { OrderHeader } from './OrderHeader/OrderHeader';
+import { OrderActionBanner } from './ActionBanner';
+import { OrderTabs } from './FilterTabs';
+import { OrdersGrid } from './OrdersGrid/OrdersGrid';
 
 export function MyOrdersPage() {
   const [activeTab, setActiveTab] = useState<Status | 'all'>('all');

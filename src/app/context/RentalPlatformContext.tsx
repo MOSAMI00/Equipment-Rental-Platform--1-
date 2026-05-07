@@ -1,8 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { products } from '../data/products';
-import type { ProductCardProps } from '../components/pages/Home/Main/EquipmentSection/ProductCard';
-import type { RentalOperation, RentalStatus } from '../components/tenant/Dashboard/shared/OrderTypes';
+import type { ProductCardProps } from '../features/home/Main/EquipmentSection/ProductCard';
+import type { RentalOperation, RentalStatus } from '../types/orderTypes';
 import { useAuth } from '../auth/AuthContext';
 
 const SERVICE_FEE_RATE = 0.05;

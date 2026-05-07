@@ -4,9 +4,9 @@ import {
   ClipboardList, Package, FileText, Bell, Star, Settings,
   LogOut, Shield, X
 } from 'lucide-react';
-import { SidebarContent } from './Sidebar/Sidebar';
-import { DashboardTopbar } from './Topbar/Topbar';
-import { MobileBottomNav } from './MobileBottomNav/MobileBottomNav';
+import { SidebarContent } from './Sidebar';
+import { DashboardTopbar } from './Topbar';
+import { MobileBottomNav } from './MobileBottomNav';
 import { useRentalPlatform } from '../../../data/mock-api';
 
 const navItems = [

@@ -9,21 +9,20 @@ import {
   useRentalPlatform,
 } from '../../data/mock-api';
 import {
-  AppButton,
   EmptyState,
   FilterTabs,
   PageHeader,
   StatusBadge,
 } from '../../components/shared';
-import { CompensationResponseCard } from '../../components/tenant/Dashboard/Delivery/CompensationResponseCard';
 import { getDeliveryConfig } from './deliveryConfig';
+import { DeliveryRentalList } from './components/DeliveryRentalList';
+import { DeliveryStageForm } from './components/DeliveryStageForm';
+import { OwnerCompensationCard } from './components/OwnerCompensationCard';
+import { CompensationResponseCard } from './components/CompensationResponseCard';
+import { DeliveryReportModal } from './components/DeliveryReportModal';
+import { PostRentalRating } from './components/PostRentalRating';
 
-const STATUS_META = {
-  confirmed: { label: 'بانتظار التسليم', color: '#2D5A27', bg: '#EAF3E9' },
-  in_use: { label: 'قيد الاستخدام', color: '#E67E22', bg: 'rgba(230,126,34,0.12)' },
-  disputed: { label: 'نزاع مفتوح', color: '#E74C3C', bg: 'rgba(231,76,60,0.12)' },
-  completed: { label: 'مكتمل', color: '#27AE60', bg: 'rgba(39,174,96,0.12)' },
-};
+// ─── Constants ───────────────────────────────────────────────────────────────
 
 const STAGE_META = {
   delivery: { label: 'بانتظار التسليم', status: 'confirmed' },
@@ -34,6 +33,13 @@ const STAGE_META = {
   completed: { label: 'مكتمل', status: 'completed' },
 };
 
+const STATUS_META = {
+  confirmed: { label: 'بانتظار التسليم', color: '#2D5A27', bg: '#EAF3E9' },
+  in_use: { label: 'قيد الاستخدام', color: '#E67E22', bg: 'rgba(230,126,34,0.12)' },
+  disputed: { label: 'نزاع مفتوح', color: '#E74C3C', bg: 'rgba(231,76,60,0.12)' },
+  completed: { label: 'مكتمل', color: '#27AE60', bg: 'rgba(39,174,96,0.12)' },
+};
+
 const DEFAULT_FORM = {
   conditionStatus: 'good',
   hasDamage: 'false',
@@ -41,13 +47,7 @@ const DEFAULT_FORM = {
   evidencePhotos: [],
 };
 
-const COMPENSATION_STATUS_LABELS = {
-  requested: 'بانتظار رد المستأجر',
-  accepted: 'مقبول',
-  rejected: 'مرفوض',
-  disputed: 'تحول إلى نزاع',
-  none: 'لا يوجد',
-};
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function getStageFeedback({ role, stage }) {
   const isOwner = role === 'owner';
@@ -125,144 +125,149 @@ function getFormSpec({ role, stage }) {
   return null;
 }
 
-function DeliveryStageForm({ form, onChange, onSubmit, spec }) {
-  const isReturn = spec.phase === 'return';
+// ─── Detail Panel ────────────────────────────────────────────────────────────
 
-  return (
-    <div className="mt-5 rounded-2xl border border-[#E0E0E0] bg-[#FBFCFD] p-4">
-      <h3 className="m-0 text-base font-bold text-[#222222]">{spec.title}</h3>
-      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <label className="text-sm font-semibold text-[#222222]">
-          {isReturn ? 'هل توجد تلفيات؟' : 'حالة المعدة'}
-          <select
-            value={isReturn ? form.hasDamage : form.conditionStatus}
-            onChange={(event) => onChange(isReturn ? 'hasDamage' : 'conditionStatus', event.target.value)}
-            className="mt-2 h-11 w-full rounded-xl border border-[#E0E0E0] bg-white px-3 text-sm focus:border-[#2D5A27] focus:outline-none"
-          >
-            {isReturn ? (
-              <>
-                <option value="false">لا توجد تلفيات</option>
-                <option value="true">توجد تلفيات</option>
-              </>
-            ) : (
-              <>
-                <option value="excellent">ممتازة</option>
-                <option value="good">جيدة</option>
-                <option value="fair">متوسطة</option>
-                <option value="damaged">تحتاج مراجعة</option>
-              </>
-            )}
-          </select>
-        </label>
-
-        <label className="text-sm font-semibold text-[#222222]">
-          صور التوثيق
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={(event) => onChange('evidencePhotos', Array.from(event.target.files || []).map((file) => file.name))}
-            className="mt-2 block w-full rounded-xl border border-dashed border-[#C8D6C5] bg-white px-3 py-2 text-sm"
-          />
-          <span className="mt-1 block text-xs font-normal text-[#888888]">
-            {form.evidencePhotos.length > 0 ? `${form.evidencePhotos.length} صورة مختارة` : 'الصور مطلوبة لتوثيق المرحلة'}
-          </span>
-        </label>
-      </div>
-
-      <label className="mt-4 block text-sm font-semibold text-[#222222]">
-        ملاحظات
-        <textarea
-          value={form.notes}
-          onChange={(event) => onChange('notes', event.target.value)}
-          rows={3}
-          placeholder="أضف ملاحظات عن حالة المعدة أو التسليم..."
-          className="mt-2 w-full resize-none rounded-xl border border-[#E0E0E0] bg-white p-3 text-sm focus:border-[#2D5A27] focus:outline-none"
-        />
-      </label>
-
-      <AppButton
-        className="mt-4"
-        disabled={form.evidencePhotos.length === 0}
-        onClick={onSubmit}
-      >
-        {spec.submitLabel}
-      </AppButton>
-    </div>
-  );
-}
-
-function OwnerCompensationCard({
+function DeliveryDetailPanel({
+  rental,
+  stage,
+  reports,
+  disputes,
   compensation,
-  form,
-  onChange,
-  onSubmit,
+  role,
+  formSpec,
+  activeForm,
+  activeCompensationForm,
+  stageFeedback,
+  onUpdateForm,
+  onSubmitStage,
+  onUpdateCompensationForm,
+  onRequestCompensation,
+  onRespondCompensation,
+  onOpenCompensationDispute,
+  onSelectReport,
+  onSubmitRating,
 }) {
-  if (compensation) {
-    return (
-      <div className="mt-4 rounded-2xl border border-[#F3C77B] bg-[#FFF9ED] p-4 text-sm text-[#222222]">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h3 className="m-0 text-base font-bold text-[#222222]">طلب التعويض</h3>
-            <p className="m-0 mt-2 text-[#555555]">
-              المبلغ المطالب به: <strong>{formatCurrency(compensation.requestedAmount)} ر.ي</strong>
-            </p>
-            <p className="m-0 mt-1 text-[#555555]">
-              الحالة: <strong>{COMPENSATION_STATUS_LABELS[compensation.status] || compensation.status}</strong>
-            </p>
-          </div>
-          <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-[#B9770E]">
-            {COMPENSATION_STATUS_LABELS[compensation.status] || compensation.status}
-          </span>
-        </div>
-        {compensation.notes ? (
-          <p className="m-0 mt-3 leading-7 text-[#555555]">{compensation.notes}</p>
-        ) : null}
-      </div>
-    );
-  }
+  const ownerReturnReport = reports.find((report) => report.phase === 'return' && report.submittedByRole === 'owner');
 
   return (
-    <div className="mt-4 rounded-2xl border border-[#F3C77B] bg-[#FFF9ED] p-4">
-      <h3 className="m-0 text-base font-bold text-[#222222]">طلب تعويض</h3>
-      <p className="m-0 mt-2 text-sm text-[#666666]">
-        بعد تأكيد الإرجاع يمكنك إرسال مطالبة منفصلة للمستأجر مع المبلغ والملاحظات والصور.
-      </p>
-
-      <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-        <input
-          type="number"
-          value={form.amount}
-          onChange={(event) => onChange('amount', event.target.value)}
-          placeholder="المبلغ المطالب به (ر.ي)"
-          className="h-11 rounded-xl border border-[#E0E0E0] bg-white px-3 text-sm focus:border-[#2D5A27] focus:outline-none"
-        />
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={(event) => onChange('photos', Array.from(event.target.files || []).map((file) => file.name))}
-          className="block w-full rounded-xl border border-dashed border-[#F3C77B] bg-white px-3 py-2 text-sm"
-        />
+    <div className="rounded-2xl border border-[#E0E0E0] bg-white p-5 shadow-sm">
+      {/* Header */}
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="m-0 text-xl font-bold text-[#222222]">{rental.equipment.name}</h2>
+          <p className="m-0 mt-1 text-sm text-[#888888]">
+            {rental.orderNum} • {rental.partnerLabel}: {rental.partnerName}
+          </p>
+        </div>
+        <StatusBadge status={STAGE_META[stage]?.status} meta={{
+          ...STATUS_META[STAGE_META[stage]?.status],
+          label: STAGE_META[stage]?.label,
+        }} />
       </div>
-      <textarea
-        value={form.notes}
-        onChange={(event) => onChange('notes', event.target.value)}
-        rows={3}
-        placeholder="ملاحظات وتفاصيل التعويض..."
-        className="mt-3 w-full resize-none rounded-xl border border-[#E0E0E0] bg-white p-3 text-sm focus:border-[#2D5A27] focus:outline-none"
-      />
 
-      <AppButton
-        className="mt-3"
-        disabled={!Number(form.amount) || !form.notes.trim()}
-        onClick={onSubmit}
-      >
-        إرسال طلب التعويض
-      </AppButton>
+      {/* Info Cards */}
+      <div className="grid grid-cols-1 gap-3 text-sm md:grid-cols-3">
+        <div className="rounded-xl bg-[#F8FAFC] p-4">
+          <p className="m-0 text-[#888888]">تاريخ البداية</p>
+          <p className="m-0 mt-1 font-bold text-[#222222]">{formatRentalDate(rental.startDate)}</p>
+        </div>
+        <div className="rounded-xl bg-[#F8FAFC] p-4">
+          <p className="m-0 text-[#888888]">تاريخ النهاية</p>
+          <p className="m-0 mt-1 font-bold text-[#222222]">{formatRentalDate(rental.endDate)}</p>
+        </div>
+        <div className="rounded-xl bg-[#F8FAFC] p-4">
+          <p className="m-0 text-[#888888]">موقع التسليم</p>
+          <p className="m-0 mt-1 font-bold text-[#222222]">{rental.deliveryInfo?.address || rental.equipment.location}</p>
+        </div>
+      </div>
+
+      {/* Reports Log */}
+      <div className="mt-5 rounded-2xl border border-[#E8ECEF] p-4">
+        <h3 className="m-0 mb-3 text-base font-bold text-[#222222]">سجل التسليم والإرجاع</h3>
+        {reports.length > 0 ? (
+          <div className="flex flex-col gap-2">
+            {reports.map((report) => (
+              <button
+                key={report.id}
+                type="button"
+                onClick={() => onSelectReport(report)}
+                className="flex items-center justify-between gap-3 rounded-xl bg-[#F8FAFC] p-3 text-right text-sm transition-colors hover:bg-[#EEF3F0]"
+              >
+                <span className="font-semibold text-[#222222]">
+                  {report.phase === 'delivery' ? 'تقرير التسليم' : 'تقرير الإرجاع'}
+                </span>
+                <span className="text-[#888888]">{formatRentalDate(report.createdAt)}</span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p className="m-0 text-sm text-[#888888]">لا توجد تقارير موثقة بعد.</p>
+        )}
+      </div>
+
+      {/* Stage Feedback */}
+      <div className="mt-4 rounded-2xl border border-[#DDE8DA] bg-[#F5FAF4] p-4 text-sm leading-7 text-[#2D5A27]">
+        {stageFeedback}
+      </div>
+
+      {/* Owner Compensation */}
+      {role === 'owner' && ownerReturnReport ? (
+        <OwnerCompensationCard
+          compensation={compensation}
+          form={activeCompensationForm}
+          onChange={onUpdateCompensationForm}
+          onSubmit={onRequestCompensation}
+        />
+      ) : null}
+
+      {/* Tenant Compensation Response */}
+      {role === 'tenant' && compensation ? (
+        <div className="mt-4">
+          <CompensationResponseCard
+            compensation={compensation}
+            onAccept={() => onRespondCompensation(compensation.id, 'accepted')}
+            onReject={() => onRespondCompensation(compensation.id, 'rejected')}
+            onOpenDispute={(claim, amount) => onOpenCompensationDispute(compensation.id, claim, amount)}
+          />
+        </div>
+      ) : null}
+
+      {/* Disputes Notice */}
+      {disputes.length > 0 ? (
+        <div className="mt-4 rounded-2xl border border-[#F5B7B1] bg-[#FDEDEC] p-4 text-sm text-[#C0392B]">
+          يوجد نزاع مفتوح على هذه العملية. تابع تفاصيله من نفس السجل عند ربط backend النزاعات.
+        </div>
+      ) : null}
+
+      {/* Stage Form or Idle */}
+      {formSpec ? (
+        <DeliveryStageForm
+          form={activeForm}
+          spec={formSpec}
+          onChange={onUpdateForm}
+          onSubmit={onSubmitStage}
+        />
+      ) : (
+        stage !== 'completed' && (
+          <div className="mt-5 rounded-2xl bg-[#F8FAFC] p-4 text-sm text-[#888888]">
+            لا يوجد إجراء مطلوب منك في هذه المرحلة.
+          </div>
+        )
+      )}
+
+      {/* Post-Rental Rating (shown after completion) */}
+      {stage === 'completed' ? (
+        <PostRentalRating
+          rental={rental}
+          onSubmit={({ rating, comment }) => onSubmitRating({ rental, rating, comment })}
+          onSkip={() => {}}
+        />
+      ) : null}
     </div>
   );
 }
+
+// ─── Main Page ───────────────────────────────────────────────────────────────
 
 export default function DeliveryPage() {
   const { user } = useAuth();
@@ -279,6 +284,7 @@ export default function DeliveryPage() {
     requestCompensation,
     respondToCompensation,
     openCompensationDispute,
+    submitReview,
   } = useRentalPlatform();
   const [activeTab, setActiveTab] = useState(config.tabs[0].id);
   const [selectedRentalId, setSelectedRentalId] = useState(routeRentalId || null);
@@ -315,10 +321,7 @@ export default function DeliveryPage() {
   const tenantReturnReport = reports.find((report) => report.phase === 'return' && report.submittedByRole === 'tenant');
   const ownerReturnReport = reports.find((report) => report.phase === 'return' && report.submittedByRole === 'owner');
   const selectedStage = selectedRental?.workflowStage || 'delivery';
-  const formSpec = getFormSpec({
-    role,
-    stage: selectedStage,
-  });
+  const formSpec = getFormSpec({ role, stage: selectedStage });
   const activeForm = selectedRental ? { ...DEFAULT_FORM, ...(forms[selectedRental.id] || {}) } : DEFAULT_FORM;
   const activeCompensationForm = selectedRental
     ? { amount: '', notes: '', photos: [], ...(compensationForms[selectedRental.id] || {}) }
@@ -392,6 +395,18 @@ export default function DeliveryPage() {
     }));
   };
 
+  const handleSubmitRating = ({ rental, rating, comment }) => {
+    if (!rental || !submitReview) return;
+    const equipment = rental.equipment;
+    submitReview({
+      rentalOpId: rental.id,
+      targetType: 'user',
+      targetId: role === 'owner' ? rental.tenantId : equipment?.ownerId,
+      rating,
+      reviewText: comment || '',
+    });
+  };
+
   return (
     <div className={config.containerClassName} dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
       <PageHeader
@@ -409,191 +424,41 @@ export default function DeliveryPage() {
         />
       ) : (
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(320px,420px)_1fr]">
-          <div className="flex flex-col gap-3">
-            {filteredRows.map((rental) => (
-              <button
-                key={rental.id}
-                type="button"
-                onClick={() => setSelectedRentalId(rental.id)}
-                className={`w-full rounded-2xl border bg-white p-4 text-right transition-all ${
-                  selectedRental?.id === rental.id
-                    ? 'border-[#2D5A27] shadow-md'
-                    : 'border-[#E0E0E0] hover:border-[#B8CDB4]'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <img
-                    src={rental.equipment.image}
-                    alt={rental.equipment.name}
-                    className="h-16 w-16 rounded-xl object-cover"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="m-0 truncate text-sm font-bold text-[#222222]">{rental.equipment.name}</p>
-                    <p className="m-0 mt-1 text-xs text-[#888888]">{rental.orderNum} • {rental.partnerName}</p>
-                  </div>
-                  <StatusBadge status={STAGE_META[rental.workflowStage]?.status} meta={{
-                    ...STATUS_META[STAGE_META[rental.workflowStage]?.status],
-                    label: STAGE_META[rental.workflowStage]?.label,
-                  }} />
-                </div>
-              </button>
-            ))}
-          </div>
+          <DeliveryRentalList
+            rentals={filteredRows}
+            selectedRental={selectedRental}
+            onSelect={setSelectedRentalId}
+          />
 
           {selectedRental ? (
-            <div className="rounded-2xl border border-[#E0E0E0] bg-white p-5 shadow-sm">
-              <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h2 className="m-0 text-xl font-bold text-[#222222]">{selectedRental.equipment.name}</h2>
-                  <p className="m-0 mt-1 text-sm text-[#888888]">
-                    {selectedRental.orderNum} • {selectedRental.partnerLabel}: {selectedRental.partnerName}
-                  </p>
-                </div>
-                <StatusBadge status={STAGE_META[selectedStage]?.status} meta={{
-                  ...STATUS_META[STAGE_META[selectedStage]?.status],
-                  label: STAGE_META[selectedStage]?.label,
-                }} />
-              </div>
-
-              <div className="grid grid-cols-1 gap-3 text-sm md:grid-cols-3">
-                <div className="rounded-xl bg-[#F8FAFC] p-4">
-                  <p className="m-0 text-[#888888]">تاريخ البداية</p>
-                  <p className="m-0 mt-1 font-bold text-[#222222]">{formatRentalDate(selectedRental.startDate)}</p>
-                </div>
-                <div className="rounded-xl bg-[#F8FAFC] p-4">
-                  <p className="m-0 text-[#888888]">تاريخ النهاية</p>
-                  <p className="m-0 mt-1 font-bold text-[#222222]">{formatRentalDate(selectedRental.endDate)}</p>
-                </div>
-                <div className="rounded-xl bg-[#F8FAFC] p-4">
-                  <p className="m-0 text-[#888888]">موقع التسليم</p>
-                  <p className="m-0 mt-1 font-bold text-[#222222]">{selectedRental.deliveryInfo?.address || selectedRental.equipment.location}</p>
-                </div>
-              </div>
-
-              <div className="mt-5 rounded-2xl border border-[#E8ECEF] p-4">
-                <h3 className="m-0 mb-3 text-base font-bold text-[#222222]">سجل التسليم والإرجاع</h3>
-                {reports.length > 0 ? (
-                  <div className="flex flex-col gap-2">
-                    {reports.map((report) => (
-                      <button
-                        key={report.id}
-                        type="button"
-                        onClick={() => setSelectedReport(report)}
-                        className="flex items-center justify-between gap-3 rounded-xl bg-[#F8FAFC] p-3 text-right text-sm transition-colors hover:bg-[#EEF3F0]"
-                      >
-                        <span className="font-semibold text-[#222222]">
-                          {report.phase === 'delivery' ? 'تقرير التسليم' : 'تقرير الإرجاع'}
-                        </span>
-                        <span className="text-[#888888]">{formatRentalDate(report.createdAt)}</span>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="m-0 text-sm text-[#888888]">لا توجد تقارير موثقة بعد.</p>
-                )}
-              </div>
-
-              <div className="mt-4 rounded-2xl border border-[#DDE8DA] bg-[#F5FAF4] p-4 text-sm leading-7 text-[#2D5A27]">
-                {stageFeedback}
-              </div>
-
-              {role === 'owner' && ownerReturnReport ? (
-                <OwnerCompensationCard
-                  compensation={compensation}
-                  form={activeCompensationForm}
-                  onChange={updateCompensationForm}
-                  onSubmit={handleRequestCompensation}
-                />
-              ) : null}
-
-              {role === 'tenant' && compensation ? (
-                <div className="mt-4">
-                  <CompensationResponseCard
-                    compensation={compensation}
-                    onAccept={() => respondToCompensation(compensation.id, 'accepted')}
-                    onReject={() => respondToCompensation(compensation.id, 'rejected')}
-                    onOpenDispute={(claim, amount) => openCompensationDispute(compensation.id, claim, amount)}
-                  />
-                </div>
-              ) : null}
-
-              {disputes.length > 0 ? (
-                <div className="mt-4 rounded-2xl border border-[#F5B7B1] bg-[#FDEDEC] p-4 text-sm text-[#C0392B]">
-                  يوجد نزاع مفتوح على هذه العملية. تابع تفاصيله من نفس السجل عند ربط backend النزاعات.
-                </div>
-              ) : null}
-
-              {formSpec ? (
-                <DeliveryStageForm
-                  form={activeForm}
-                  spec={formSpec}
-                  onChange={updateForm}
-                  onSubmit={handleSubmitStage}
-                />
-              ) : (
-                <div className="mt-5 rounded-2xl bg-[#F8FAFC] p-4 text-sm text-[#888888]">
-                  لا يوجد إجراء مطلوب منك في هذه المرحلة.
-                </div>
-              )}
-            </div>
+            <DeliveryDetailPanel
+              rental={selectedRental}
+              stage={selectedStage}
+              reports={reports}
+              disputes={disputes}
+              compensation={compensation}
+              role={role}
+              formSpec={formSpec}
+              activeForm={activeForm}
+              activeCompensationForm={activeCompensationForm}
+              stageFeedback={stageFeedback}
+              onUpdateForm={updateForm}
+              onSubmitStage={handleSubmitStage}
+              onUpdateCompensationForm={updateCompensationForm}
+              onRequestCompensation={handleRequestCompensation}
+              onRespondCompensation={respondToCompensation}
+              onOpenCompensationDispute={openCompensationDispute}
+              onSelectReport={setSelectedReport}
+              onSubmitRating={handleSubmitRating}
+            />
           ) : null}
         </div>
       )}
 
-      {selectedReport ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-xl">
-            <div className="mb-5 flex items-start justify-between gap-4">
-              <div>
-                <h2 className="m-0 text-xl font-bold text-[#222222]">
-                  {selectedReport.phase === 'delivery' ? 'تقرير التسليم' : 'تقرير الإرجاع'}
-                </h2>
-                <p className="m-0 mt-1 text-sm text-[#888888]">{formatRentalDate(selectedReport.createdAt)}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedReport(null)}
-                className="rounded-full border border-[#E0E0E0] px-3 py-1 text-sm font-bold text-[#555555] hover:bg-[#F4F6F9]"
-              >
-                إغلاق
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-              <div className="rounded-xl bg-[#F8FAFC] p-4">
-                <p className="m-0 text-[#888888]">تم بواسطة</p>
-                <p className="m-0 mt-1 font-bold text-[#222222]">
-                  {selectedReport.submittedByRole === 'owner' ? 'المؤجر' : 'المستأجر'}
-                </p>
-              </div>
-              <div className="rounded-xl bg-[#F8FAFC] p-4">
-                <p className="m-0 text-[#888888]">حالة المعدة</p>
-                <p className="m-0 mt-1 font-bold text-[#222222]">
-                  {selectedReport.conditionStatus || (selectedReport.hasDamage ? 'توجد تلفيات' : 'لا توجد تلفيات')}
-                </p>
-              </div>
-              <div className="rounded-xl bg-[#F8FAFC] p-4 sm:col-span-2">
-                <p className="m-0 text-[#888888]">الملاحظات</p>
-                <p className="m-0 mt-1 font-bold text-[#222222]">{selectedReport.notes || 'لا توجد ملاحظات'}</p>
-              </div>
-              <div className="rounded-xl bg-[#F8FAFC] p-4 sm:col-span-2">
-                <p className="m-0 text-[#888888]">الصور</p>
-                {selectedReport.evidencePhotos?.length > 0 ? (
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {selectedReport.evidencePhotos.map((photo) => (
-                      <span key={photo} className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#555555]">
-                        {photo}
-                      </span>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="m-0 mt-1 font-bold text-[#222222]">لا توجد صور مرفقة</p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <DeliveryReportModal
+        report={selectedReport}
+        onClose={() => setSelectedReport(null)}
+      />
     </div>
   );
 }

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { toast } from 'sonner';
-import { PaymentMethods } from '../../../pages/Cart/StepContent/PaymentMethods';
-import { STATUS_CONFIG, type RentalStatus } from '../shared/OrderTypes';
+import { PaymentMethods } from '../../../../features/cart/StepContent/PaymentMethods';
+import { STATUS_CONFIG, type RentalStatus } from '../../../../types/orderTypes';
 import {
   formatCurrency,
   formatRentalDate,
@@ -11,13 +11,13 @@ import {
   type HandoverReport,
   type PaymentMethod,
 } from '../../../../data/mock-api';
-import { Breadcrumb } from './Main/Breadcrumb';
-import { OrderInfoCard } from './Main/OrderInfoCard';
-import { RentalInfoCard } from './Main/RentalInfoCard';
-import { OrderTimeline } from './Main/OrderTimeline';
-import { ActionButtons } from './Main/ActionButtons';
-import { OrderSummary } from './Main/OrderSummary';
-import { EscrowStatus } from './Main/EscrowStatus';
+import { Breadcrumb } from './Breadcrumb';
+import { OrderInfoCard } from './OrderInfoCard';
+import { RentalInfoCard } from './RentalInfoCard';
+import { OrderTimeline } from './OrderTimeline';
+import { ActionButtons } from './ActionButtons';
+import { OrderSummary } from './OrderSummary';
+import { EscrowStatus } from './EscrowStatus';
 
 function buildTimeline(status: RentalStatus) {
   const steps = [

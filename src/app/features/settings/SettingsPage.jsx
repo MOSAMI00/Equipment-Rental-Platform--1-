@@ -5,14 +5,12 @@ import { PageHeader } from "../../components/shared";
 import { getSettingsConfig } from "./settingsConfig";
 
 // Tenant Forms
-import { ProfileForm } from "../../components/tenant/Dashboard/Settings/Main/SettingsLayout/ContentArea/ProfileForm";
-import { SecurityForm } from "../../components/tenant/Dashboard/Settings/Main/SettingsLayout/ContentArea/SecurityForm";
-import { KYCUploaders } from "../../components/tenant/Dashboard/Settings/Main/SettingsLayout/ContentArea/KYCUploaders";
+import { ProfileForm } from "./tabs/ProfileForm";
+import { SecurityForm } from "./tabs/SecurityForm";
+import { KYCUploaders } from "./tabs/KYCUploaders";
 
 // Owner Forms
 import ProfileInfoTab from "../../components/owner/pages/profile/ProfileInfoTab";
-// import SecurityTab from "../../components/owner/pages/profile/SecurityTab";
-// import PayoutMethodsTab from "../../components/owner/pages/profile/PayoutMethodsTab";
 
 const ICONS = {
   User: <User size={18} />,

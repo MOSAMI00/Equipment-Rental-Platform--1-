@@ -1,10 +1,10 @@
 import { BrowserRouter, Navigate, Routes, Route } from 'react-router';
 import { Toaster } from 'sonner';
-import { HomePage } from './components/pages/Home/HomePage';
-import { LoginPage } from './components/pages/Login/LoginPage';
-import { RegisterPage } from './components/pages/Register/RegisterPage';
-import { ProductDetailPage } from './components/pages/ProductDetails/ProductDetailPage';
-import { CartPage } from './components/pages/Cart/CartPage';
+import { HomePage } from './features/home/HomePage';
+import { LoginPage } from './features/auth/login/LoginPage';
+import { RegisterPage } from './features/auth/register/RegisterPage';
+import { ProductDetailPage } from './features/product-details/ProductDetailPage';
+import { CartPage } from './features/cart/CartPage';
 import { TenantLayout } from './components/tenant/Dashboard/TenantLayout';
 import { MyOrdersPage } from './components/tenant/Dashboard/MyOrders/MyOrdersPage';
 import { OrderDetailPage } from './components/tenant/Dashboard/OrderDetails/OrderDetailPage';
