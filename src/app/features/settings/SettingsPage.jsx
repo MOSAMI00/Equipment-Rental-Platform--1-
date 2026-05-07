@@ -1,56 +1,66 @@
-import React, { useState } from 'react';
-import { User, Shield, CreditCard, Bell } from 'lucide-react';
-import { useAuth } from '../../auth/AuthContext';
-import { PageHeader } from '../../components/shared';
-import { getSettingsConfig } from './settingsConfig';
+import React, { useState } from "react";
+import { User, Shield, CreditCard, Bell } from "lucide-react";
+import { useAuth } from "../../auth/AuthContext";
+import { PageHeader } from "../../components/shared";
+import { getSettingsConfig } from "./settingsConfig";
 
 // Tenant Forms
-import { ProfileForm } from '../../components/tenant/Dashboard/Settings/Main/SettingsLayout/ContentArea/ProfileForm';
-import { SecurityForm } from '../../components/tenant/Dashboard/Settings/Main/SettingsLayout/ContentArea/SecurityForm';
-import { KYCUploaders } from '../../components/tenant/Dashboard/Settings/Main/SettingsLayout/ContentArea/KYCUploaders';
+import { ProfileForm } from "../../components/tenant/Dashboard/Settings/Main/SettingsLayout/ContentArea/ProfileForm";
+import { SecurityForm } from "../../components/tenant/Dashboard/Settings/Main/SettingsLayout/ContentArea/SecurityForm";
+import { KYCUploaders } from "../../components/tenant/Dashboard/Settings/Main/SettingsLayout/ContentArea/KYCUploaders";
 
 // Owner Forms
-import ProfileInfoTab from '../../components/owner/pages/profile/ProfileInfoTab';
-import SecurityTab from '../../components/owner/pages/profile/SecurityTab';
-import PayoutMethodsTab from '../../components/owner/pages/profile/PayoutMethodsTab';
-import NotificationPreferencesTab from '../../components/owner/pages/profile/NotificationPreferencesTab';
+import ProfileInfoTab from "../../components/owner/pages/profile/ProfileInfoTab";
+import SecurityTab from "../../components/owner/pages/profile/SecurityTab";
+import PayoutMethodsTab from "../../components/owner/pages/profile/PayoutMethodsTab";
 
 const ICONS = {
   User: <User size={18} />,
   Shield: <Shield size={18} />,
   CreditCard: <CreditCard size={18} />,
-  Bell: <Bell size={18} />
+  Bell: <Bell size={18} />,
 };
 
 export default function SettingsPage() {
   const { user } = useAuth();
-  const role = user?.type || 'tenant';
+  const role = user?.type || "tenant";
   const config = getSettingsConfig(role);
   const [activeTab, setActiveTab] = useState(config.tabs[0].id);
 
-  const ownerInitial = (user?.fullName ?? '؟').charAt(0);
+  const ownerInitial = (user?.fullName ?? "؟").charAt(0);
 
   const renderContent = () => {
-    if (role === 'owner') {
+    if (role === "owner") {
       switch (activeTab) {
-        case 'profile': return <ProfileInfoTab user={user} ownerInitial={ownerInitial} />;
-        case 'security': return <SecurityTab />;
-        case 'payment': return <PayoutMethodsTab />;
-        case 'notifications': return <NotificationPreferencesTab />;
-        default: return null;
+        case "profile":
+          return <ProfileInfoTab user={user} ownerInitial={ownerInitial} />;
+        case "security":
+          return <SecurityTab />;
+        case "kyc":
+          return <KYCUploaders />;
+        default:
+          return null;
       }
     } else {
       switch (activeTab) {
-        case 'profile': return <ProfileForm />;
-        case 'security': return <SecurityForm />;
-        case 'kyc': return <KYCUploaders />;
-        default: return null;
+        case "profile":
+          return <ProfileForm />;
+        case "security":
+          return <SecurityForm />;
+        case "kyc":
+          return <KYCUploaders />;
+        default:
+          return null;
       }
     }
   };
 
   return (
-    <div className="p-4 md:p-6 pb-24 md:pb-6" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
+    <div
+      className="p-4 md:p-6 pb-24 md:pb-6"
+      dir="rtl"
+      style={{ fontFamily: "'Cairo', sans-serif" }}
+    >
       <PageHeader title={config.pageTitle} />
 
       <div className="mx-auto grid w-full max-w-6xl gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">
@@ -62,8 +72,8 @@ export default function SettingsPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex min-w-12 items-center justify-center gap-2 rounded-xl px-3 py-3 text-sm font-semibold transition-all whitespace-nowrap lg:w-full lg:justify-start ${
                   activeTab === tab.id
-                    ? 'bg-[#2D5A27] text-white shadow-sm'
-                    : 'text-[#666666] hover:bg-[#F4F6F9] hover:text-[#222222]'
+                    ? "bg-[#2D5A27] text-white shadow-sm"
+                    : "text-[#666666] hover:bg-[#F4F6F9] hover:text-[#222222]"
                 }`}
               >
                 {ICONS[tab.iconName]}
