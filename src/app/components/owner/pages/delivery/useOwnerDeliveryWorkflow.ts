@@ -23,6 +23,8 @@ export const useOwnerDeliveryWorkflow = () => {
     confirmHandoverReport,
     updateDisputeOwnerNotes,
     createDispute,
+    requestCompensation,
+    compensationRequests,
   } = useRentalPlatform();
   const { rentals, handoverReports, disputes } = useOwnerPageProps();
 
@@ -72,6 +74,11 @@ export const useOwnerDeliveryWorkflow = () => {
     tenantDeliveryReport,
     returnReport,
   } = getRentalHandoverReports(rentalHandovers as HandoverReport[]);
+
+  const compensation = useMemo(
+    () => compensationRequests.find((item) => item.rentalOpId === selectedRentalId),
+    [compensationRequests, selectedRentalId],
+  );
 
   const currentList = useMemo(
     () => getCurrentDeliveryList(activeTab, deliveryBuckets),
@@ -131,6 +138,17 @@ export const useOwnerDeliveryWorkflow = () => {
     setActiveTab('disputes');
   };
 
+  const handleRequestCompensation = (amount: number, notes: string, photos: string[]) => {
+    if (!selectedRental || !returnReport) return;
+    requestCompensation({
+      rentalOpId: selectedRental.id,
+      handoverId: returnReport.id,
+      requestedAmount: amount,
+      notes,
+      evidencePhotos: photos,
+    });
+  };
+
   const handleSaveDisputeNotes = (disputeId: string) => {
     updateDisputeOwnerNotes(disputeId, disputeNotes, `اقتراح حل: خصم ${proposedDeduction || 0} ر.ي`);
     setDisputeNotes('');
@@ -153,6 +171,7 @@ export const useOwnerDeliveryWorkflow = () => {
     returnEvidence,
     returnExtraDescription,
     returnReport,
+    compensation,
     selectedRental,
     selectedRentalId,
     tabList,
@@ -160,6 +179,7 @@ export const useOwnerDeliveryWorkflow = () => {
     handleConfirmDelivery,
     handleConfirmReturn,
     handleOpenReturnDispute,
+    handleRequestCompensation,
     handleSaveDisputeNotes,
     handleTabChange,
     setDeliveryEvidence,

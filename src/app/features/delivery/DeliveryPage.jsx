@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useParams } from 'react-router';
 import { useAuth } from '../../auth/AuthContext';
 import {
+  formatCurrency,
   formatRentalDate,
   getEquipmentSnapshot,
   getTenantProfile,
@@ -13,6 +15,7 @@ import {
   PageHeader,
   StatusBadge,
 } from '../../components/shared';
+import { CompensationResponseCard } from '../../components/tenant/Dashboard/Delivery/CompensationResponseCard';
 import { getDeliveryConfig } from './deliveryConfig';
 
 const STATUS_META = {
@@ -36,6 +39,14 @@ const DEFAULT_FORM = {
   hasDamage: 'false',
   notes: '',
   evidencePhotos: [],
+};
+
+const COMPENSATION_STATUS_LABELS = {
+  requested: 'بانتظار رد المستأجر',
+  accepted: 'مقبول',
+  rejected: 'مرفوض',
+  disputed: 'تحول إلى نزاع',
+  none: 'لا يوجد',
 };
 
 function getStageFeedback({ role, stage }) {
@@ -181,8 +192,81 @@ function DeliveryStageForm({ form, onChange, onSubmit, spec }) {
   );
 }
 
+function OwnerCompensationCard({
+  compensation,
+  form,
+  onChange,
+  onSubmit,
+}) {
+  if (compensation) {
+    return (
+      <div className="mt-4 rounded-2xl border border-[#F3C77B] bg-[#FFF9ED] p-4 text-sm text-[#222222]">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 className="m-0 text-base font-bold text-[#222222]">طلب التعويض</h3>
+            <p className="m-0 mt-2 text-[#555555]">
+              المبلغ المطالب به: <strong>{formatCurrency(compensation.requestedAmount)} ر.ي</strong>
+            </p>
+            <p className="m-0 mt-1 text-[#555555]">
+              الحالة: <strong>{COMPENSATION_STATUS_LABELS[compensation.status] || compensation.status}</strong>
+            </p>
+          </div>
+          <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-[#B9770E]">
+            {COMPENSATION_STATUS_LABELS[compensation.status] || compensation.status}
+          </span>
+        </div>
+        {compensation.notes ? (
+          <p className="m-0 mt-3 leading-7 text-[#555555]">{compensation.notes}</p>
+        ) : null}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4 rounded-2xl border border-[#F3C77B] bg-[#FFF9ED] p-4">
+      <h3 className="m-0 text-base font-bold text-[#222222]">طلب تعويض</h3>
+      <p className="m-0 mt-2 text-sm text-[#666666]">
+        بعد تأكيد الإرجاع يمكنك إرسال مطالبة منفصلة للمستأجر مع المبلغ والملاحظات والصور.
+      </p>
+
+      <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+        <input
+          type="number"
+          value={form.amount}
+          onChange={(event) => onChange('amount', event.target.value)}
+          placeholder="المبلغ المطالب به (ر.ي)"
+          className="h-11 rounded-xl border border-[#E0E0E0] bg-white px-3 text-sm focus:border-[#2D5A27] focus:outline-none"
+        />
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={(event) => onChange('photos', Array.from(event.target.files || []).map((file) => file.name))}
+          className="block w-full rounded-xl border border-dashed border-[#F3C77B] bg-white px-3 py-2 text-sm"
+        />
+      </div>
+      <textarea
+        value={form.notes}
+        onChange={(event) => onChange('notes', event.target.value)}
+        rows={3}
+        placeholder="ملاحظات وتفاصيل التعويض..."
+        className="mt-3 w-full resize-none rounded-xl border border-[#E0E0E0] bg-white p-3 text-sm focus:border-[#2D5A27] focus:outline-none"
+      />
+
+      <AppButton
+        className="mt-3"
+        disabled={!Number(form.amount) || !form.notes.trim()}
+        onClick={onSubmit}
+      >
+        إرسال طلب التعويض
+      </AppButton>
+    </div>
+  );
+}
+
 export default function DeliveryPage() {
   const { user } = useAuth();
+  const { id: routeRentalId } = useParams();
   const role = user?.type || 'tenant';
   const config = getDeliveryConfig(role);
   const userId = user?.id || (role === 'owner' ? 'owner-1' : 'tenant-1');
@@ -191,11 +275,20 @@ export default function DeliveryPage() {
     createHandoverReport,
     getHandoverReportsForRental,
     getDisputesForRental,
+    getCompensationForRental,
+    requestCompensation,
+    respondToCompensation,
+    openCompensationDispute,
   } = useRentalPlatform();
   const [activeTab, setActiveTab] = useState(config.tabs[0].id);
-  const [selectedRentalId, setSelectedRentalId] = useState(null);
+  const [selectedRentalId, setSelectedRentalId] = useState(routeRentalId || null);
   const [selectedReport, setSelectedReport] = useState(null);
   const [forms, setForms] = useState({});
+  const [compensationForms, setCompensationForms] = useState({});
+
+  useEffect(() => {
+    if (routeRentalId) setSelectedRentalId(routeRentalId);
+  }, [routeRentalId]);
 
   const rows = useMemo(() => normalizeDeliveryRows({
     rentals,
@@ -218,12 +311,18 @@ export default function DeliveryPage() {
 
   const reports = selectedRental ? getHandoverReportsForRental(selectedRental.id) : [];
   const disputes = selectedRental ? getDisputesForRental(selectedRental.id) : [];
+  const compensation = selectedRental ? getCompensationForRental(selectedRental.id) : undefined;
+  const tenantReturnReport = reports.find((report) => report.phase === 'return' && report.submittedByRole === 'tenant');
+  const ownerReturnReport = reports.find((report) => report.phase === 'return' && report.submittedByRole === 'owner');
   const selectedStage = selectedRental?.workflowStage || 'delivery';
   const formSpec = getFormSpec({
     role,
     stage: selectedStage,
   });
   const activeForm = selectedRental ? { ...DEFAULT_FORM, ...(forms[selectedRental.id] || {}) } : DEFAULT_FORM;
+  const activeCompensationForm = selectedRental
+    ? { amount: '', notes: '', photos: [], ...(compensationForms[selectedRental.id] || {}) }
+    : { amount: '', notes: '', photos: [] };
   const stageFeedback = getStageFeedback({ role, stage: selectedStage });
 
   const tabs = config.tabs.map((tab) => ({
@@ -258,6 +357,39 @@ export default function DeliveryPage() {
     });
 
     setForms((current) => ({ ...current, [selectedRental.id]: DEFAULT_FORM }));
+  };
+
+  const updateCompensationForm = (key, value) => {
+    if (!selectedRental) return;
+    setCompensationForms((current) => ({
+      ...current,
+      [selectedRental.id]: {
+        amount: '',
+        notes: '',
+        photos: [],
+        ...(current[selectedRental.id] || {}),
+        [key]: value,
+      },
+    }));
+  };
+
+  const handleRequestCompensation = () => {
+    if (!selectedRental || !ownerReturnReport) return;
+    const amount = Number(activeCompensationForm.amount || 0);
+    if (!amount || !activeCompensationForm.notes.trim()) return;
+
+    requestCompensation({
+      rentalOpId: selectedRental.id,
+      handoverId: ownerReturnReport.id || tenantReturnReport?.id,
+      requestedAmount: amount,
+      notes: activeCompensationForm.notes.trim(),
+      evidencePhotos: activeCompensationForm.photos,
+    });
+
+    setCompensationForms((current) => ({
+      ...current,
+      [selectedRental.id]: { amount: '', notes: '', photos: [] },
+    }));
   };
 
   return (
@@ -364,6 +496,26 @@ export default function DeliveryPage() {
               <div className="mt-4 rounded-2xl border border-[#DDE8DA] bg-[#F5FAF4] p-4 text-sm leading-7 text-[#2D5A27]">
                 {stageFeedback}
               </div>
+
+              {role === 'owner' && ownerReturnReport ? (
+                <OwnerCompensationCard
+                  compensation={compensation}
+                  form={activeCompensationForm}
+                  onChange={updateCompensationForm}
+                  onSubmit={handleRequestCompensation}
+                />
+              ) : null}
+
+              {role === 'tenant' && compensation ? (
+                <div className="mt-4">
+                  <CompensationResponseCard
+                    compensation={compensation}
+                    onAccept={() => respondToCompensation(compensation.id, 'accepted')}
+                    onReject={() => respondToCompensation(compensation.id, 'rejected')}
+                    onOpenDispute={(claim, amount) => openCompensationDispute(compensation.id, claim, amount)}
+                  />
+                </div>
+              ) : null}
 
               {disputes.length > 0 ? (
                 <div className="mt-4 rounded-2xl border border-[#F5B7B1] bg-[#FDEDEC] p-4 text-sm text-[#C0392B]">

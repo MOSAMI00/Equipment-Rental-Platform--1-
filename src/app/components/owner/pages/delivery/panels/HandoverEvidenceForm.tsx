@@ -8,6 +8,7 @@ export function HandoverEvidenceForm({
   setDescription,
   onSubmit,
   submitLabel,
+  showDescription = true,
   children,
 }: {
   evidence: string[];
@@ -16,6 +17,7 @@ export function HandoverEvidenceForm({
   setDescription: (value: string) => void;
   onSubmit: () => void;
   submitLabel: string;
+  showDescription?: boolean;
   children?: React.ReactNode;
 }) {
   return (
@@ -27,14 +29,18 @@ export function HandoverEvidenceForm({
         className="owner-input"
         onChange={(event) => setEvidence(Array.from(event.target.files || []).map((file) => file.name))}
       />
-      <label className="text-muted" style={{ fontSize: 12 }}>وصف إضافي (اختياري)</label>
-      <textarea
-        className="owner-input"
-        rows={3}
-        placeholder="مثال: ملاحظات على حالة المعدة، الموقع، أو الصور."
-        value={description}
-        onChange={(event) => setDescription(event.target.value)}
-      />
+      {showDescription ? (
+        <>
+          <label className="text-muted" style={{ fontSize: 12 }}>وصف إضافي (اختياري)</label>
+          <textarea
+            className="owner-input"
+            rows={3}
+            placeholder="مثال: ملاحظات على حالة المعدة، الموقع، أو الصور."
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+          />
+        </>
+      ) : null}
       {children}
       <button className="owner-btn owner-btn-success w-full" style={{ width: '100%' }} onClick={onSubmit} disabled={evidence.length === 0}>
         <CheckCircle size={16} /> {submitLabel}

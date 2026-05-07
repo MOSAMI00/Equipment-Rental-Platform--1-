@@ -14,7 +14,6 @@ import ProfileInfoTab from '../../components/owner/pages/profile/ProfileInfoTab'
 import SecurityTab from '../../components/owner/pages/profile/SecurityTab';
 import PayoutMethodsTab from '../../components/owner/pages/profile/PayoutMethodsTab';
 import NotificationPreferencesTab from '../../components/owner/pages/profile/NotificationPreferencesTab';
-import TenantInsuranceTab from './TenantInsuranceTab';
 
 const ICONS = {
   User: <User size={18} />,
@@ -45,7 +44,6 @@ export default function SettingsPage() {
         case 'profile': return <ProfileForm />;
         case 'security': return <SecurityForm />;
         case 'kyc': return <KYCUploaders />;
-        case 'insurance': return <TenantInsuranceTab />;
         default: return null;
       }
     }
@@ -55,25 +53,25 @@ export default function SettingsPage() {
     <div className="p-4 md:p-6 pb-24 md:pb-6" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
       <PageHeader title={config.pageTitle} />
 
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
-        <div className="w-full overflow-x-auto rounded-2xl border border-[#E8ECEF] bg-white p-1.5 shadow-sm">
-          <div className="flex min-w-max gap-1">
+      <div className="mx-auto grid w-full max-w-6xl gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">
+        <aside className="min-w-0">
+          <div className="flex gap-2 overflow-x-auto rounded-2xl border border-[#E8ECEF] bg-white p-2 shadow-sm lg:sticky lg:top-6 lg:flex-col lg:overflow-visible">
             {config.tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all whitespace-nowrap ${
+                className={`flex min-w-12 items-center justify-center gap-2 rounded-xl px-3 py-3 text-sm font-semibold transition-all whitespace-nowrap lg:w-full lg:justify-start ${
                   activeTab === tab.id
                     ? 'bg-[#2D5A27] text-white shadow-sm'
                     : 'text-[#666666] hover:bg-[#F4F6F9] hover:text-[#222222]'
                 }`}
               >
                 {ICONS[tab.iconName]}
-                <span>{tab.name}</span>
+                <span className="hidden sm:inline">{tab.name}</span>
               </button>
             ))}
           </div>
-        </div>
+        </aside>
 
         <div className="min-w-0 w-full bg-white rounded-2xl border border-[#E0E0E0] p-5 md:p-8 shadow-sm">
           {renderContent()}
