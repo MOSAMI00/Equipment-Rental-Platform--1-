@@ -1,4 +1,4 @@
 export { default as ReviewsPage } from './ReviewsPage';
-export { ReviewCard } from './components/ReviewCard';
-export { ReviewSummary } from './components/ReviewSummary';
-export { getReviewsConfig } from './reviewsConfig';
+export { ReviewCard } from './ui/ReviewCard';
+export { ReviewSummary } from './ui/ReviewSummary';
+export { getReviewsConfig } from './lib/reviewsConfig';

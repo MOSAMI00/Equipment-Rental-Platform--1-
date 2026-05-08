@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router';
-import { STATUS_CONFIG, Status } from '../../../../../types/orderTypes';
+import { STATUS_CONFIG } from '../../../../../entities/rental';
+import type { Status } from '../../../../../types/orderTypes';
 import {
   formatCurrency,
   formatRentalDateRange,

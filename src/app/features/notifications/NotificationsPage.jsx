@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../../auth/AuthContext';
 import { useRentalPlatform } from '../../data/mock-api';
-import { getNotificationsConfig } from './notificationsConfig';
-import { NotificationCard } from './components/NotificationCard';
+import { getNotificationsConfig } from './lib/notificationsConfig';
+import { NotificationCard } from './ui/NotificationCard';
 import { PageHeader, EmptyState, FilterTabs } from '../../components/shared';
 
 export default function NotificationsPage({ role: roleProp }) {

@@ -1,2 +1,2 @@
 export { default as SettingsPage } from './SettingsPage';
-export { getSettingsConfig } from './settingsConfig';
+export { getSettingsConfig } from './lib/settingsConfig';

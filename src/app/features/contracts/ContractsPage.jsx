@@ -6,11 +6,11 @@ import {
   FilterTabs,
   PageHeader,
 } from "../../components/shared";
-import { CONTRACTS } from "./contractTypes";
-import { getContractConfig } from "./contractsConfig";
-import { ContractsTable } from "./components/ContractsTable";
-import { ContractDetailModal } from "./components/ContractDetailModal";
-import { ownerContractRows } from "./contractsSeed";
+import { CONTRACTS } from "./lib/contractTypes";
+import { getContractConfig } from "./lib/contractsConfig";
+import { ContractsTable } from "./ui/ContractsTable";
+import { ContractDetailModal } from "./ui/ContractDetailModal";
+import { ownerContractRows } from "./lib/contractsSeed";
 
 function normalizeTenantContracts() {
   return CONTRACTS.map((item) => ({

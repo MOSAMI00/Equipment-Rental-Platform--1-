@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { CartHeader } from './components/Header';
-import { Stepper } from './components/Stepper';
+import { CartHeader } from './ui/Header';
+import { Stepper } from './ui/Stepper';
 import { ReviewItems } from './StepContent/ReviewItems';
 import { DeliveryForm } from './StepContent/DeliveryForm';
 import { PaymentMethods } from './StepContent/PaymentMethods';

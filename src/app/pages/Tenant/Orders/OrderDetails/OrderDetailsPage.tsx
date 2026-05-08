@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { toast } from 'sonner';
 import { PaymentMethods } from '../../../../features/cart/StepContent/PaymentMethods';
-import { STATUS_CONFIG, type RentalStatus } from '../../../../types/orderTypes';
+import { STATUS_CONFIG } from '../../../../entities/rental';
+import type { RentalStatus } from '../../../../types/orderTypes';
 import {
   formatCurrency,
   formatRentalDate,

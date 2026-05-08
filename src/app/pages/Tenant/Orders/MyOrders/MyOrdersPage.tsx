@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Status } from '../../../../types/orderTypes';
+import type { Status } from '../../../../types/orderTypes';
 import { getEquipmentSnapshot, useTenantRentals } from '../../../../data/mock-api';
 import { OrderHeader } from './components/OrderHeader';
 import { OrderActionBanner } from './components/ActionBanner';

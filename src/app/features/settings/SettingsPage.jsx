@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import { User, Shield, CreditCard, Bell } from "lucide-react";
 import { useAuth } from "../../auth/AuthContext";
 import { PageHeader } from "../../components/shared";
-import { getSettingsConfig } from "./settingsConfig";
+import { getSettingsConfig } from "./lib/settingsConfig";
 
 // Tenant Forms
-import { ProfileForm } from "./tabs/ProfileForm";
-import { SecurityForm } from "./tabs/SecurityForm";
-import { KYCUploaders } from "./tabs/KYCUploaders";
+import { ProfileForm } from "./ui/ProfileForm";
+import { SecurityForm } from "./ui/SecurityForm";
+import { KYCUploaders } from "./ui/KYCUploaders";
 
 // Owner Forms
 import ProfileInfoTab from "../../pages/Owner/Settings/ProfileInfoTab";

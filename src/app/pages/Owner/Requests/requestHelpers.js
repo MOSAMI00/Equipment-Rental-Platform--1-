@@ -1,4 +1,4 @@
-import { STATUS_CONFIG } from '../../../types/orderTypes';
+import { STATUS_CONFIG } from '../../../entities/rental';
 
 export const UNKNOWN_EQUIPMENT = 'معدة غير معروفة';
 export const UNKNOWN_USER = 'مستخدم غير معروف';

@@ -14,7 +14,7 @@ import {
   PageHeader,
   StatusBadge,
 } from '../../components/shared';
-import { getInsuranceConfig, INSURANCE_STATUS_META } from './insuranceConfig';
+import { getInsuranceConfig, INSURANCE_STATUS_META } from './lib/insuranceConfig';
 
 function normalizeInsuranceRows({ rentals, role, userId }) {
   return rentals

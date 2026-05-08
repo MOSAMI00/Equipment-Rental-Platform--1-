@@ -7,9 +7,9 @@ import {
   getTenantProfile,
   formatRentalDate,
 } from '../../data/mock-api';
-import { getReviewsConfig } from './reviewsConfig';
-import { ReviewSummary } from './components/ReviewSummary';
-import { ReviewCard } from './components/ReviewCard';
+import { getReviewsConfig } from './lib/reviewsConfig';
+import { ReviewSummary } from './ui/ReviewSummary';
+import { ReviewCard } from './ui/ReviewCard';
 import { PageHeader, EmptyState, FilterTabs } from '../../components/shared';
 
 const RECEIVED_MOCK = [

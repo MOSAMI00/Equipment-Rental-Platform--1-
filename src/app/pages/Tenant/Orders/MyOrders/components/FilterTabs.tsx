@@ -1,6 +1,7 @@
 
 import { FilterTabs as SharedFilterTabs, type FilterTabItem } from '../../../../../components/shared';
-import { Status, TABS } from '../../../../../types/orderTypes';
+import { RENTAL_TABS } from '../../../../../entities/rental';
+import type { Status } from '../../../../../types/orderTypes';
 import type { TenantRental } from '../../../../../data/mock-api';
 
 interface OrderTabsProps {
@@ -10,7 +11,7 @@ interface OrderTabsProps {
 }
 
 export function OrderTabs({ activeTab, onTabChange, rentals }: OrderTabsProps) {
-  const tabs: FilterTabItem[] = TABS.map((tab) => ({
+  const tabs: FilterTabItem[] = RENTAL_TABS.map((tab) => ({
     id: tab.key,
     label: tab.label,
     count: tab.key === 'all' ? rentals.length : rentals.filter((r) => r.status === tab.key).length,

@@ -1,9 +1,15 @@
 /**
- * Shared rental order types and status configuration.
- * Used across tenant, owner, and context modules.
+ * @deprecated — Import from '@/app/entities/rental' instead.
+ * This file re-exports for backwards compatibility and will be removed.
  */
+export {
+  STATUS_CONFIG,
+  RENTAL_TABS as TABS,
+} from '../entities/rental';
 
+export { RENTAL_STATUSES } from '../entities/rental/status';
 
+// ── Type aliases kept for TS consumers until full migration ──────────────
 export type RentalStatus =
   | 'pending'
   | 'confirmed'
@@ -27,23 +33,4 @@ export interface RentalOperation {
   status: RentalStatus;
 }
 
-export const STATUS_CONFIG: Record<RentalStatus, { label: string; color: string; bg: string }> = {
-  pending: { label: 'معلق', color: '#F39C12', bg: '#FEF9E7' },
-  confirmed: { label: 'مؤكد', color: '#3498DB', bg: '#EBF5FB' },
-  in_use: { label: 'قيد الاستخدام', color: '#E67E22', bg: '#FEF5EC' },
-  completed: { label: 'مكتمل', color: '#27AE60', bg: '#EAFAF1' },
-  cancelled: { label: 'ملغي', color: '#95A5A6', bg: '#F2F3F4' },
-  disputed: { label: 'متنازع عليه', color: '#E74C3C', bg: '#FDEDEC' },
-};
-
 export type Status = RentalStatus;
-
-export const TABS: { key: RentalStatus | 'all'; label: string }[] = [
-  { key: 'all', label: 'الكل' },
-  { key: 'pending', label: 'معلقة' },
-  { key: 'confirmed', label: 'مؤكدة' },
-  { key: 'in_use', label: 'قيد الاستخدام' },
-  { key: 'completed', label: 'مكتملة' },
-  { key: 'cancelled', label: 'ملغية' },
-  { key: 'disputed', label: 'نزاعات' },
-];

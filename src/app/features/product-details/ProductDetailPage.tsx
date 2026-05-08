@@ -1,12 +1,12 @@
 import { Link, useParams } from 'react-router';
 import { products } from '../../data/products';
-import { Header } from './components/Header';
-import { Breadcrumb } from './components/Breadcrumb';
+import { Header } from './ui/Header';
+import { Breadcrumb } from './ui/Breadcrumb';
 import { Gallery } from './Gallery';
 import { Tabs } from './Tabs';
 import { BookingSidebar } from './BookingSidebar';
-import { OwnerCard } from './components/OwnerCard';
-import { MobileBottomBar } from './components/MobileBottomBar';
+import { OwnerCard } from './ui/OwnerCard';
+import { MobileBottomBar } from './ui/MobileBottomBar';
 
 export function ProductDetailPage() {
   const { id } = useParams();

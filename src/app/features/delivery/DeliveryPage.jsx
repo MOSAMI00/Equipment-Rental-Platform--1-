@@ -14,13 +14,13 @@ import {
   PageHeader,
   StatusBadge,
 } from '../../components/shared';
-import { getDeliveryConfig } from './deliveryConfig';
-import { DeliveryRentalList } from './components/DeliveryRentalList';
-import { DeliveryStageForm } from './components/DeliveryStageForm';
-import { OwnerCompensationCard } from './components/OwnerCompensationCard';
-import { CompensationResponseCard } from './components/CompensationResponseCard';
-import { DeliveryReportModal } from './components/DeliveryReportModal';
-import { PostRentalRating } from './components/PostRentalRating';
+import { getDeliveryConfig } from './lib/deliveryConfig';
+import { DeliveryRentalList } from './ui/DeliveryRentalList';
+import { DeliveryStageForm } from './ui/DeliveryStageForm';
+import { OwnerCompensationCard } from './ui/OwnerCompensationCard';
+import { CompensationResponseCard } from './ui/CompensationResponseCard';
+import { DeliveryReportModal } from './ui/DeliveryReportModal';
+import { PostRentalRating } from './ui/PostRentalRating';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
