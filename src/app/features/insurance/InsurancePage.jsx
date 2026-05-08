@@ -1,20 +1,19 @@
 import React, { useMemo, useState } from 'react';
 import { useAuth } from '../../auth/AuthContext';
 import {
-  formatCurrency,
   getEquipmentSnapshot,
   getTenantProfile,
   useRentalPlatform,
 } from '../../data/mock-api';
 import {
   AppInput,
-  DataTable,
   EmptyState,
   FilterTabs,
   PageHeader,
-  StatusBadge,
 } from '../../components/shared';
-import { getInsuranceConfig, INSURANCE_STATUS_META } from './lib/insuranceConfig';
+import { getInsuranceConfig } from './lib/insuranceConfig';
+import { TenantInsuranceTable } from './ui/TenantInsuranceTable';
+import { OwnerInsuranceTable } from './ui/OwnerInsuranceTable';
 
 function normalizeInsuranceRows({ rentals, role, userId }) {
   return rentals
@@ -69,19 +68,6 @@ export default function InsurancePage({ role: roleProp }) {
     count: tab.id === 'all' ? rows.length : rows.filter((row) => row.status === tab.id).length,
   }));
 
-  const columns = [
-    { key: 'orderNum', header: 'الطلب', cell: (row) => row.orderNum },
-    { key: 'partnerName', header: config.partnerColumnHeader, cell: (row) => row.partnerName },
-    { key: 'equipment', header: 'المعدة', cell: (row) => row.equipment },
-    { key: 'amount', header: config.amountColumnHeader, cell: (row) => `${formatCurrency(row.amount)} ر.ي` },
-    {
-      key: 'status',
-      header: 'حالة الضمان',
-      cell: (row) => <StatusBadge status={row.status} meta={INSURANCE_STATUS_META[row.status]} />,
-    },
-    { key: 'deduction', header: config.deductionColumnHeader, cell: (row) => row.deduction },
-  ];
-
   return (
     <div className="p-4 md:p-6 pb-24 md:pb-6" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
       <PageHeader
@@ -100,11 +86,11 @@ export default function InsurancePage({ role: roleProp }) {
       <FilterTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
       {filteredRows.length > 0 ? (
-        <DataTable
-          columns={columns}
-          data={filteredRows}
-          getRowKey={(row) => row.id}
-        />
+        role === 'tenant' ? (
+          <TenantInsuranceTable rows={filteredRows} />
+        ) : (
+          <OwnerInsuranceTable rows={filteredRows} />
+        )
       ) : (
         <EmptyState
           icon="🛡️"

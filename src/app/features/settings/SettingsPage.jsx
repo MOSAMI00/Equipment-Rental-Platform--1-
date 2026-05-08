@@ -10,7 +10,7 @@ import { SecurityForm } from "./ui/SecurityForm";
 import { KYCUploaders } from "./ui/KYCUploaders";
 
 // Owner Forms
-import ProfileInfoTab from "../../pages/Owner/Settings/ProfileInfoTab";
+import { OwnerProfileForm } from "./ui/OwnerProfileForm";
 
 const ICONS = {
   User: <User size={18} />,
@@ -25,13 +25,11 @@ export default function SettingsPage({ role: roleProp }) {
   const config = getSettingsConfig(role);
   const [activeTab, setActiveTab] = useState(config.tabs[0].id);
 
-  const ownerInitial = (user?.fullName ?? "؟").charAt(0);
-
   const renderContent = () => {
     if (role === "owner") {
       switch (activeTab) {
         case "profile":
-          return <ProfileInfoTab user={user} ownerInitial={ownerInitial} />;
+          return <OwnerProfileForm />;
         case "security":
           return <SecurityForm />;
         case "kyc":

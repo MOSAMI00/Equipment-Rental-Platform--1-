@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useAuth } from "../../auth/AuthContext";
 import {
   AppInput,
@@ -8,7 +8,8 @@ import {
 } from "../../components/shared";
 import { CONTRACTS } from "./lib/contractTypes";
 import { getContractConfig } from "./lib/contractsConfig";
-import { ContractsTable } from "./ui/ContractsTable";
+import { TenantContractsTable } from "./ui/TenantContractsTable";
+import { OwnerContractsTable } from "./ui/OwnerContractsTable";
 import { ContractDetailModal } from "./ui/ContractDetailModal";
 import { ownerContractRows } from "./lib/contractsSeed";
 
@@ -31,7 +32,6 @@ function normalizeOwnerContracts() {
     partnerName: item.tenant,
     equipment: item.equipment,
     amount: item.total,
-    // owner sample data has no status yet, so we keep it active.
     status: "active",
     statusLabel: "نشط",
   }));
@@ -105,11 +105,17 @@ export default function ContractsPage({ contracts: contractsProp, role: roleProp
       />
 
       {filtered.length > 0 ? (
-        <ContractsTable
-          contracts={filtered}
-          config={config}
-          onViewContract={setSelectedContract}
-        />
+        role === "tenant" ? (
+          <TenantContractsTable
+            contracts={filtered}
+            onViewContract={setSelectedContract}
+          />
+        ) : (
+          <OwnerContractsTable
+            contracts={filtered}
+            onViewContract={setSelectedContract}
+          />
+        )
       ) : (
         <EmptyState
           compact

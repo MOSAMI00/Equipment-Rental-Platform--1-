@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router';
 import { useAuth } from '../../auth/AuthContext';
 import { useRentalPlatform } from '../../data/mock-api';
 import { getNotificationsConfig } from './lib/notificationsConfig';
-import { NotificationCard } from './ui/NotificationCard';
-import { PageHeader, EmptyState, FilterTabs } from '../../components/shared';
+import { TenantNotificationsList } from './ui/TenantNotificationsList';
+import { OwnerNotificationsList } from './ui/OwnerNotificationsList';
+import { PageHeader, FilterTabs } from '../../components/shared';
 
 export default function NotificationsPage({ role: roleProp }) {
   const { user } = useAuth();
@@ -77,21 +78,19 @@ export default function NotificationsPage({ role: roleProp }) {
         onTabChange={setActiveTab}
       />
 
-      {displayed.length > 0 ? (
-        <div className="flex flex-col gap-3">
-          {displayed.map((notification) => (
-            <NotificationCard
-              key={notification.id}
-              notification={notification}
-              onOpen={handleOpenNotification}
-            />
-          ))}
-        </div>
+      {role === 'tenant' ? (
+        <TenantNotificationsList
+          displayed={displayed}
+          onOpen={handleOpenNotification}
+          config={config}
+          activeTab={activeTab}
+        />
       ) : (
-        <EmptyState
-          icon={config.emptyStateIcon}
-          title={activeTab === config.tabs[1] ? config.emptyStateTitleUnread : config.emptyStateTitleAll}
-          description={config.emptyStateDesc}
+        <OwnerNotificationsList
+          displayed={displayed}
+          onOpen={handleOpenNotification}
+          config={config}
+          activeTab={activeTab}
         />
       )}
     </div>

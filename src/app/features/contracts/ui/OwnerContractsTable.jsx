@@ -1,15 +1,15 @@
+import React from 'react';
 import { AppButton, DataTable, StatusBadge } from '../../../components/shared';
 
-export function ContractsTable({ contracts, config, onViewContract }) {
-  // Contract actions are limited to read-only viewing; delivery/dispute actions live in their workflow pages.
+export function OwnerContractsTable({ contracts, onViewContract }) {
   const columns = [
     { key: 'number', header: 'رقم العقد', cell: (contract) => contract.number },
-    { key: 'partner', header: config.partnerColumnHeader, cell: (contract) => contract.partnerName },
+    { key: 'partner', header: 'المستأجر', cell: (contract) => contract.partnerName },
     { key: 'equipment', header: 'المعدة', cell: (contract) => contract.equipment },
-    { key: 'amount', header: config.amountColumnHeader, cell: (contract) => contract.amount },
+    { key: 'amount', header: 'صافي الأرباح', cell: (contract) => contract.amount },
     {
       key: 'status',
-      header: config.statusColumnHeader,
+      header: 'حالة العقد',
       cell: (contract) => <StatusBadge status={contract.status} label={contract.statusLabel} />,
     },
     {
