@@ -79,9 +79,6 @@ C:.
 │   │           use-mobile.ts
 │   │           utils.ts
 │   │           
-│   ├───context
-│   │       RentalPlatformContext.tsx
-│   │       
 │   ├───data
 │   │   │   mock-api.tsx
 │   │   │   products.ts
@@ -89,8 +86,22 @@ C:.
 │   │   └───mock
 │   │           index.ts
 │   │           
+│   ├───entities
+│   │   ├───equipment
+│   │   │       index.js
+│   │   │       
+│   │   ├───rental
+│   │   │       constants.js
+│   │   │       index.js
+│   │   │       status.js
+│   │   │       
+│   │   └───user
+│   │           index.js
+│   │           
 │   ├───features
 │   │   ├───auth
+│   │   │   │   index.ts
+│   │   │   │   
 │   │   │   ├───login
 │   │   │   │   │   LoginPage.tsx
 │   │   │   │   │   
@@ -133,50 +144,60 @@ C:.
 │   │   │               
 │   │   ├───cart
 │   │   │   │   CartPage.tsx
+│   │   │   │   index.ts
+│   │   │   │   store.jsx
 │   │   │   │   
-│   │   │   ├───components
-│   │   │   │       Header.tsx
-│   │   │   │       Stepper.tsx
-│   │   │   │       
 │   │   │   ├───StepContent
 │   │   │   │       ContractCheckbox.tsx
 │   │   │   │       DeliveryForm.tsx
 │   │   │   │       PaymentMethods.tsx
 │   │   │   │       ReviewItems.tsx
 │   │   │   │       
-│   │   │   └───SummarySidebar
-│   │   │           ItemsList.tsx
-│   │   │           PricingBreakdown.tsx
-│   │   │           SummarySidebar.tsx
-│   │   │           Total.tsx
-│   │   │           TrustInfo.tsx
+│   │   │   ├───SummarySidebar
+│   │   │   │       ItemsList.tsx
+│   │   │   │       PricingBreakdown.tsx
+│   │   │   │       SummarySidebar.tsx
+│   │   │   │       Total.tsx
+│   │   │   │       TrustInfo.tsx
+│   │   │   │       
+│   │   │   └───ui
+│   │   │           Header.tsx
+│   │   │           Stepper.tsx
 │   │   │           
 │   │   ├───contracts
-│   │   │   │   contractsConfig.js
 │   │   │   │   ContractsPage.jsx
-│   │   │   │   contractsSeed.js
-│   │   │   │   contractTypes.js
 │   │   │   │   index.js
 │   │   │   │   
-│   │   │   └───components
+│   │   │   ├───lib
+│   │   │   │       contractsConfig.js
+│   │   │   │       contractsSeed.js
+│   │   │   │       contractTypes.js
+│   │   │   │       
+│   │   │   └───ui
 │   │   │           ContractDetailModal.jsx
-│   │   │           ContractsTable.jsx
+│   │   │           OwnerContractsTable.jsx
+│   │   │           TenantContractsTable.jsx
 │   │   │           
 │   │   ├───delivery
-│   │   │   │   deliveryConfig.js
 │   │   │   │   DeliveryPage.jsx
 │   │   │   │   index.js
 │   │   │   │   
-│   │   │   └───components
+│   │   │   ├───lib
+│   │   │   │       deliveryConfig.js
+│   │   │   │       
+│   │   │   └───ui
 │   │   │           CompensationResponseCard.jsx
 │   │   │           DeliveryRentalList.jsx
 │   │   │           DeliveryReportModal.jsx
 │   │   │           DeliveryStageForm.jsx
 │   │   │           OwnerCompensationCard.jsx
+│   │   │           OwnerDeliveryDetails.jsx
 │   │   │           PostRentalRating.jsx
+│   │   │           TenantDeliveryDetails.jsx
 │   │   │           
 │   │   ├───home
 │   │   │   │   HomePage.tsx
+│   │   │   │   index.ts
 │   │   │   │   
 │   │   │   ├───Footer
 │   │   │   │       Footer.tsx
@@ -239,19 +260,31 @@ C:.
 │   │   │           ProductDetailsModal.tsx
 │   │   │           
 │   │   ├───insurance
-│   │   │       index.js
-│   │   │       insuranceConfig.js
-│   │   │       InsurancePage.jsx
-│   │   │       
+│   │   │   │   index.js
+│   │   │   │   InsurancePage.jsx
+│   │   │   │   
+│   │   │   ├───lib
+│   │   │   │       insuranceConfig.js
+│   │   │   │       
+│   │   │   └───ui
+│   │   │           OwnerInsuranceTable.jsx
+│   │   │           TenantInsuranceTable.jsx
+│   │   │           
 │   │   ├───notifications
 │   │   │   │   index.js
-│   │   │   │   notificationsConfig.js
 │   │   │   │   NotificationsPage.jsx
+│   │   │   │   store.jsx
 │   │   │   │   
-│   │   │   └───components
+│   │   │   ├───lib
+│   │   │   │       notificationsConfig.js
+│   │   │   │       
+│   │   │   └───ui
 │   │   │           NotificationCard.jsx
+│   │   │           OwnerNotificationsList.jsx
+│   │   │           TenantNotificationsList.jsx
 │   │   │           
 │   │   ├───product-details
+│   │   │   │   index.ts
 │   │   │   │   ProductDetailPage.tsx
 │   │   │   │   
 │   │   │   ├───BookingSidebar
@@ -261,39 +294,49 @@ C:.
 │   │   │   │       PriceCard.tsx
 │   │   │   │       TrustBadges.tsx
 │   │   │   │       
-│   │   │   ├───components
-│   │   │   │       Breadcrumb.tsx
-│   │   │   │       Header.tsx
-│   │   │   │       MobileBottomBar.tsx
-│   │   │   │       OwnerCard.tsx
-│   │   │   │       
 │   │   │   ├───Gallery
 │   │   │   │       ImageDisplay.tsx
 │   │   │   │       index.tsx
 │   │   │   │       Thumbnails.tsx
 │   │   │   │       
-│   │   │   └───Tabs
-│   │   │           Description.tsx
-│   │   │           index.tsx
-│   │   │           Reviews.tsx
-│   │   │           Terms.tsx
+│   │   │   ├───Tabs
+│   │   │   │       Description.tsx
+│   │   │   │       index.tsx
+│   │   │   │       Reviews.tsx
+│   │   │   │       Terms.tsx
+│   │   │   │       
+│   │   │   └───ui
+│   │   │           Breadcrumb.tsx
+│   │   │           Header.tsx
+│   │   │           MobileBottomBar.tsx
+│   │   │           OwnerCard.tsx
 │   │   │           
+│   │   ├───rentals
+│   │   │       store.jsx
+│   │   │       
 │   │   ├───reviews
 │   │   │   │   index.js
-│   │   │   │   reviewsConfig.js
 │   │   │   │   ReviewsPage.jsx
 │   │   │   │   
-│   │   │   └───components
+│   │   │   ├───lib
+│   │   │   │       reviewsConfig.js
+│   │   │   │       
+│   │   │   └───ui
+│   │   │           OwnerReviewsList.jsx
 │   │   │           ReviewCard.jsx
 │   │   │           ReviewSummary.jsx
+│   │   │           TenantReviewsList.jsx
 │   │   │           
 │   │   └───settings
 │   │       │   index.js
-│   │       │   settingsConfig.js
 │   │       │   SettingsPage.jsx
 │   │       │   
-│   │       └───tabs
+│   │       ├───lib
+│   │       │       settingsConfig.js
+│   │       │       
+│   │       └───ui
 │   │               KYCUploaders.tsx
+│   │               OwnerProfileForm.jsx
 │   │               ProfileForm.tsx
 │   │               SecurityForm.jsx
 │   │               
@@ -401,7 +444,6 @@ C:.
 │   │   │   │       ReviewsPage.jsx
 │   │   │   │       
 │   │   │   └───Settings
-│   │   │           ProfileInfoTab.jsx
 │   │   │           SettingsPage.jsx
 │   │   │           
 │   │   └───Tenant
