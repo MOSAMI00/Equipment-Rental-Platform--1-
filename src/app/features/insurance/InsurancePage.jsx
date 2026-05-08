@@ -38,9 +38,9 @@ function normalizeInsuranceRows({ rentals, role, userId }) {
     });
 }
 
-export default function InsurancePage() {
+export default function InsurancePage({ role: roleProp }) {
   const { user } = useAuth();
-  const role = user?.type || 'tenant';
+  const role = roleProp || user?.type || 'tenant';
   const config = getInsuranceConfig(role);
   const { rentals } = useRentalPlatform();
   const [activeTab, setActiveTab] = useState('all');

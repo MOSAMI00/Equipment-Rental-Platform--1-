@@ -36,9 +36,9 @@ function mapReviewCard({ review, rentals, role, direction }) {
   };
 }
 
-export default function ReviewsPage() {
+export default function ReviewsPage({ role: roleProp }) {
   const { user } = useAuth();
-  const role = user?.type || 'tenant';
+  const role = roleProp || user?.type || 'tenant';
   const config = getReviewsConfig(role);
   const [searchParams] = useSearchParams();
   const selectedOrderId = searchParams.get('orderId');

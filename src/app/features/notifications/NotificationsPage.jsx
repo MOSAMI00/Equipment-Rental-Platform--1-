@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router';
 import { useAuth } from '../../auth/AuthContext';
 import { useRentalPlatform } from '../../data/mock-api';
 import { getNotificationsConfig } from './notificationsConfig';
-import { NotificationCard } from './NotificationCard';
+import { NotificationCard } from './components/NotificationCard';
 import { PageHeader, EmptyState, FilterTabs } from '../../components/shared';
 
-export default function NotificationsPage() {
+export default function NotificationsPage({ role: roleProp }) {
   const { user } = useAuth();
-  const role = user?.type || 'tenant';
+  const role = roleProp || user?.type || 'tenant';
   const config = getNotificationsConfig(role);
   const navigate = useNavigate();
 

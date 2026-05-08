@@ -1,26 +1,42 @@
 import { BrowserRouter, Navigate, Routes, Route } from 'react-router';
 import { Toaster } from 'sonner';
+
+// ─── Layouts ────────────────────────────────────────────────────────────────
+import { TenantLayout } from './layouts/tenant/TenantLayout';
+import OwnerLayout from './layouts/owner/OwnerLayout';
+
+// ─── Public Pages (from features) ───────────────────────────────────────────
 import { HomePage } from './features/home/HomePage';
 import { LoginPage } from './features/auth/login/LoginPage';
 import { RegisterPage } from './features/auth/register/RegisterPage';
 import { ProductDetailPage } from './features/product-details/ProductDetailPage';
 import { CartPage } from './features/cart/CartPage';
-import { TenantLayout } from './components/tenant/Dashboard/TenantLayout';
-import { MyOrdersPage } from './components/tenant/Dashboard/MyOrders/MyOrdersPage';
-import { OrderDetailPage } from './components/tenant/Dashboard/OrderDetails/OrderDetailPage';
-import { DeliveryPage } from './features/delivery';
-import { NotificationsPage } from './features/notifications';
-import { SettingsPage } from './features/settings';
-import { ReviewsPage } from './features/reviews';
-import OwnerLayout from './components/owner/OwnerLayout';
-import OwnerOverview from './components/owner/pages/overview/Overview';
-import OwnerMyEquipment from './components/owner/pages/equipment/MyEquipment';
-import OwnerAddEquipment from './components/owner/pages/add-equipment/AddEquipment';
-import OwnerRequests from './components/owner/pages/requests/Requests';
-import OwnerRentals from './components/owner/pages/rentals/Rentals';
-import OwnerEarnings from './components/owner/pages/earnings/Earnings';
-import ContractsPage from './features/contracts/ContractsPage';
-import { InsurancePage } from './features/insurance';
+
+// ─── Tenant Pages ───────────────────────────────────────────────────────────
+import { MyOrdersPage } from './pages/Tenant/Orders/MyOrders/MyOrdersPage';
+import { OrderDetailPage } from './pages/Tenant/Orders/OrderDetails/OrderDetailsPage';
+import TenantDeliveryPage from './pages/Tenant/Delivery/DeliveryPage';
+import TenantContractsPage from './pages/Tenant/Contracts/ContractsPage';
+import TenantReviewsPage from './pages/Tenant/Reviews/ReviewsPage';
+import TenantInsurancePage from './pages/Tenant/Insurance/InsurancePage';
+import TenantNotificationsPage from './pages/Tenant/Notifications/NotificationsPage';
+import TenantSettingsPage from './pages/Tenant/Settings/SettingsPage';
+
+// ─── Owner Pages ────────────────────────────────────────────────────────────
+import OwnerOverview from './pages/Owner/Overview/OverviewPage';
+import OwnerMyEquipment from './pages/Owner/Equipment/EquipmentPage';
+import OwnerAddEquipment from './pages/Owner/AddEquipment/AddEquipmentPage';
+import OwnerRequests from './pages/Owner/Requests/RequestsPage';
+import OwnerRentals from './pages/Owner/Rentals/RentalsPage';
+import OwnerEarnings from './pages/Owner/Earnings/EarningsPage';
+import OwnerDeliveryPage from './pages/Owner/Delivery/DeliveryPage';
+import OwnerContractsPage from './pages/Owner/Contracts/ContractsPage';
+import OwnerReviewsPage from './pages/Owner/Reviews/ReviewsPage';
+import OwnerInsurancePage from './pages/Owner/Insurance/InsurancePage';
+import OwnerNotificationsPage from './pages/Owner/Notifications/NotificationsPage';
+import OwnerSettingsPage from './pages/Owner/Settings/SettingsPage';
+
+// ─── Providers & Guards ─────────────────────────────────────────────────────
 import { RentalPlatformProvider } from './data/mock-api';
 import { AuthProvider, RequireOwner, RequireTenant } from './auth/AuthContext';
 
@@ -30,6 +46,7 @@ export default function App() {
       <RentalPlatformProvider>
         <BrowserRouter>
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
@@ -48,14 +65,15 @@ export default function App() {
             >
               <Route index element={<MyOrdersPage />} />
               <Route path="order/:id" element={<OrderDetailPage />} />
-              <Route path="order/:id/delivery" element={<DeliveryPage />} />
-              <Route path="delivery" element={<DeliveryPage />} />
-              <Route path="contracts" element={<ContractsPage />} />
-              <Route path="notifications" element={<NotificationsPage />} />
-              <Route path="ratings" element={<ReviewsPage />} />
-              <Route path="insurance" element={<InsurancePage />} />
-              <Route path="settings" element={<SettingsPage />} />
+              <Route path="order/:id/delivery" element={<TenantDeliveryPage />} />
+              <Route path="delivery" element={<TenantDeliveryPage />} />
+              <Route path="contracts" element={<TenantContractsPage />} />
+              <Route path="notifications" element={<TenantNotificationsPage />} />
+              <Route path="ratings" element={<TenantReviewsPage />} />
+              <Route path="insurance" element={<TenantInsurancePage />} />
+              <Route path="settings" element={<TenantSettingsPage />} />
             </Route>
+
             {/* Owner Dashboard Routes */}
             <Route
               path="/owner"
@@ -71,13 +89,13 @@ export default function App() {
               <Route path="equipment/add" element={<OwnerAddEquipment />} />
               <Route path="requests" element={<OwnerRequests />} />
               <Route path="rentals" element={<OwnerRentals />} />
-              <Route path="delivery" element={<DeliveryPage />} />
-              <Route path="insurance" element={<InsurancePage />} />
+              <Route path="delivery" element={<OwnerDeliveryPage />} />
+              <Route path="insurance" element={<OwnerInsurancePage />} />
               <Route path="earnings" element={<OwnerEarnings />} />
-              <Route path="contracts" element={<ContractsPage />} />
-              <Route path="notifications" element={<NotificationsPage />} />
-              <Route path="reviews" element={<ReviewsPage />} />
-              <Route path="profile" element={<SettingsPage />} />
+              <Route path="contracts" element={<OwnerContractsPage />} />
+              <Route path="notifications" element={<OwnerNotificationsPage />} />
+              <Route path="reviews" element={<OwnerReviewsPage />} />
+              <Route path="profile" element={<OwnerSettingsPage />} />
             </Route>
           </Routes>
           <Toaster position="top-center" richColors />

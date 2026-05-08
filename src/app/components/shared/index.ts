@@ -8,3 +8,10 @@ export { LoadingState, SkeletonBlock, SkeletonGrid } from './LoadingState';
 export { MoneyText, formatMoney } from './MoneyText';
 export { PageHeader, type PageHeaderProps } from './PageHeader';
 export { StatusBadge, getStatusMeta, type StatusMeta } from './StatusBadge';
+
+// Owner shared (moved from pages/Owner/shared/)
+export { default as BaseModal } from './BaseModal';
+export { default as ConfirmModal } from './ConfirmModal';
+export { default as DetailsModal } from './DetailsModal';
+export { default as KPICard } from './KPICard';
+export { KPICardSkeleton, ChartSkeleton, EquipmentCardSkeleton } from './OwnerSkeletons';

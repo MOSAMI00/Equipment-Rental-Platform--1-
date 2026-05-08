@@ -269,10 +269,10 @@ function DeliveryDetailPanel({
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
-export default function DeliveryPage() {
+export default function DeliveryPage({ role: roleProp }) {
   const { user } = useAuth();
   const { id: routeRentalId } = useParams();
-  const role = user?.type || 'tenant';
+  const role = roleProp || user?.type || 'tenant';
   const config = getDeliveryConfig(role);
   const userId = user?.id || (role === 'owner' ? 'owner-1' : 'tenant-1');
   const {

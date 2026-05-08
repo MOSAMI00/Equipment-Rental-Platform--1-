@@ -10,7 +10,7 @@ import { SecurityForm } from "./tabs/SecurityForm";
 import { KYCUploaders } from "./tabs/KYCUploaders";
 
 // Owner Forms
-import ProfileInfoTab from "../../components/owner/pages/profile/ProfileInfoTab";
+import ProfileInfoTab from "../../pages/Owner/Settings/ProfileInfoTab";
 
 const ICONS = {
   User: <User size={18} />,
@@ -19,9 +19,9 @@ const ICONS = {
   Bell: <Bell size={18} />,
 };
 
-export default function SettingsPage() {
+export default function SettingsPage({ role: roleProp }) {
   const { user } = useAuth();
-  const role = user?.type || "tenant";
+  const role = roleProp || user?.type || "tenant";
   const config = getSettingsConfig(role);
   const [activeTab, setActiveTab] = useState(config.tabs[0].id);
 

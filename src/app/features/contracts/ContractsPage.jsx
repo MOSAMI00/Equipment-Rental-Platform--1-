@@ -37,9 +37,9 @@ function normalizeOwnerContracts() {
   }));
 }
 
-export default function ContractsPage({ contracts: contractsProp }) {
+export default function ContractsPage({ contracts: contractsProp, role: roleProp }) {
   const { user } = useAuth();
-  const role = user?.type || "tenant";
+  const role = roleProp || user?.type || "tenant";
   const config = getContractConfig(role);
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState(config.tabs[0]);
