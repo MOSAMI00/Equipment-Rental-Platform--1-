@@ -6,11 +6,10 @@ import { TenantLayout } from './layouts/tenant/TenantLayout';
 import OwnerLayout from './layouts/owner/OwnerLayout';
 
 // ─── Public Pages (from features) ───────────────────────────────────────────
-import { HomePage } from './features/home/HomePage';
-import { LoginPage } from './features/auth/login/LoginPage';
-import { RegisterPage } from './features/auth/register/RegisterPage';
-import { ProductDetailPage } from './features/product-details/ProductDetailPage';
-import { CartPage } from './features/cart/CartPage';
+import { HomePage } from './features/home';
+import { LoginPage, RegisterPage } from './features/auth';
+import { ProductDetailPage } from './features/product-details';
+import { CartPage } from './features/cart';
 
 // ─── Tenant Pages ───────────────────────────────────────────────────────────
 import { MyOrdersPage } from './pages/Tenant/Orders/MyOrders/MyOrdersPage';
