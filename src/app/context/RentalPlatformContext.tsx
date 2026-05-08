@@ -1,8 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { products } from '../data/products';
-import type { ProductCardProps } from '../components/pages/Home/Main/EquipmentSection/ProductCard';
-import type { RentalOperation, RentalStatus } from '../components/tenant/Dashboard/shared/OrderTypes';
+import type { ProductCardProps } from '../features/home/Main/EquipmentSection/ProductCard';
+import type { RentalOperation, RentalStatus } from '../types/orderTypes';
 import { useAuth } from '../auth/AuthContext';
 
 const SERVICE_FEE_RATE = 0.05;
@@ -13,6 +13,7 @@ const STORAGE_KEYS = {
   cart: 'equipment-platform.cart',
   handovers: 'equipment-platform.handovers',
   disputes: 'equipment-platform.disputes',
+  compensationRequests: 'equipment-platform.compensation-requests',
   reviews: 'equipment-platform.reviews',
   notifications: 'equipment-platform.notifications',
   ownerNotifications: 'equipment-platform.owner-notifications',
@@ -23,6 +24,7 @@ export type PaymentStatus = 'unpaid' | 'paid' | 'refunded';
 export type EscrowStatus = 'not_started' | 'held' | 'released' | 'refunded';
 export type HandoverPhase = 'delivery' | 'return';
 export type DisputeStatus = 'open' | 'under_review' | 'resolved';
+export type CompensationStatus = 'none' | 'requested' | 'accepted' | 'rejected' | 'disputed';
 export type ReviewTargetType = 'user' | 'equipment';
 export type NotificationType = 'payment' | 'order' | 'return' | 'review' | 'dispute' | 'system';
 
@@ -124,6 +126,20 @@ export interface Dispute {
   resolvedAt?: string;
 }
 
+export interface CompensationRequest {
+  id: string;
+  rentalOpId: string;
+  handoverId: string;
+  requestedById: string;
+  requestedAmount: number;
+  notes: string;
+  evidencePhotos: string[];
+  status: CompensationStatus;
+  tenantResponse?: string;
+  createdAt: string;
+  respondedAt?: string;
+}
+
 export interface Review {
   id: string;
   reviewerId: string;
@@ -179,6 +195,7 @@ interface RentalPlatformContextValue {
   cartItems: CartRentalItem[];
   handoverReports: HandoverReport[];
   disputes: Dispute[];
+  compensationRequests: CompensationRequest[];
   reviews: Review[];
   notifications: TenantNotification[];
   ownerNotifications: OwnerNotification[];
@@ -209,6 +226,15 @@ interface RentalPlatformContextValue {
   confirmHandoverReport: (handoverId: string, ownerId: string) => void;
   updateDisputeOwnerNotes: (disputeId: string, ownerNotes: string, proposedSolution?: string) => void;
   submitTenantDisputeResponse: (disputeId: string, tenantResponse: string) => void;
+  requestCompensation: (input: {
+    rentalOpId: string;
+    handoverId: string;
+    requestedAmount: number;
+    notes: string;
+    evidencePhotos: string[];
+  }) => CompensationRequest | null;
+  respondToCompensation: (compensationId: string, response: 'accepted' | 'rejected') => void;
+  openCompensationDispute: (compensationId: string, tenantClaim: string, requestedAmount: number) => void;
   createDispute: (input: {
     rentalOpId: string;
     equipmentHandoverId?: string;
@@ -232,6 +258,7 @@ interface RentalPlatformContextValue {
   getRentalById: (id?: string) => TenantRental | undefined;
   getHandoverReportsForRental: (rentalOpId?: string) => HandoverReport[];
   getDisputesForRental: (rentalOpId?: string) => Dispute[];
+  getCompensationForRental: (rentalOpId?: string) => CompensationRequest | undefined;
   getReviewsForRental: (rentalOpId?: string) => Review[];
   resolveDispute: (disputeId: string) => void;
   escalateDispute: (disputeId: string) => void;
@@ -812,6 +839,9 @@ export function RentalPlatformProvider({ children }: { children: ReactNode }) {
     const raw = readStorage<Dispute[]>(STORAGE_KEYS.disputes, INITIAL_DISPUTES);
     return raw.filter(d => d.rentalOpId !== '6');
   });
+  const [compensationRequests, setCompensationRequests] = useState<CompensationRequest[]>(
+    () => readStorage(STORAGE_KEYS.compensationRequests, []),
+  );
   const [reviews, setReviews] = useState<Review[]>(() => readStorage(STORAGE_KEYS.reviews, INITIAL_REVIEWS));
   const [notifications, setNotifications] = useState<TenantNotification[]>(() => {
     const raw = readStorage<TenantNotification[]>(STORAGE_KEYS.notifications, INITIAL_NOTIFICATIONS);
@@ -826,6 +856,7 @@ export function RentalPlatformProvider({ children }: { children: ReactNode }) {
   useEffect(() => writeStorage(STORAGE_KEYS.cart, cartItems), [cartItems]);
   useEffect(() => writeStorage(STORAGE_KEYS.handovers, handoverReports), [handoverReports]);
   useEffect(() => writeStorage(STORAGE_KEYS.disputes, disputes), [disputes]);
+  useEffect(() => writeStorage(STORAGE_KEYS.compensationRequests, compensationRequests), [compensationRequests]);
   useEffect(() => writeStorage(STORAGE_KEYS.reviews, reviews), [reviews]);
   useEffect(() => writeStorage(STORAGE_KEYS.notifications, notifications), [notifications]);
   useEffect(() => writeStorage(STORAGE_KEYS.ownerNotifications, ownerNotifications), [ownerNotifications]);
@@ -847,6 +878,9 @@ export function RentalPlatformProvider({ children }: { children: ReactNode }) {
       if (event.key === STORAGE_KEYS.disputes) {
         const raw = readStorage<Dispute[]>(STORAGE_KEYS.disputes, INITIAL_DISPUTES);
         setDisputes(raw.filter(d => d.rentalOpId !== '6'));
+      }
+      if (event.key === STORAGE_KEYS.compensationRequests) {
+        setCompensationRequests(readStorage(STORAGE_KEYS.compensationRequests, []));
       }
       if (event.key === STORAGE_KEYS.reviews) setReviews(readStorage(STORAGE_KEYS.reviews, INITIAL_REVIEWS));
       if (event.key === STORAGE_KEYS.notifications) {
@@ -893,9 +927,89 @@ export function RentalPlatformProvider({ children }: { children: ReactNode }) {
       return disputes.filter((dispute) => dispute.rentalOpId === rentalOpId);
     };
 
+    const getCompensationForRental = (rentalOpId?: string) => {
+      if (!rentalOpId) return undefined;
+      return compensationRequests.find((compensation) => compensation.rentalOpId === rentalOpId);
+    };
+
     const getReviewsForRental = (rentalOpId?: string) => {
       if (!rentalOpId) return [];
       return reviews.filter((review) => review.rentalOpId === rentalOpId);
+    };
+
+    const createDisputeInternal = (input: {
+      rentalOpId: string;
+      equipmentHandoverId?: string;
+      reason: string;
+      details: string;
+      openedByRole?: 'tenant' | 'owner';
+      tenantClaim?: string;
+      requestedAmount?: number;
+    }) => {
+      const rental = getRentalByIdFromState(input.rentalOpId);
+      if (!rental) return null;
+
+      const openedByRole = input.openedByRole ?? 'tenant';
+      const dispute: Dispute = {
+        id: numericId('dispute'),
+        rentalOpId: input.rentalOpId,
+        equipmentHandoverId: input.equipmentHandoverId,
+        openedById: openedByRole === 'owner' ? rental.ownerId : DEFAULT_TENANT_ID,
+        openedByRole,
+        reason: input.reason,
+        details: input.details,
+        tenantClaim: input.tenantClaim,
+        requestedAmount: input.requestedAmount,
+        status: 'open',
+        createdAt: new Date().toISOString(),
+      };
+
+      setDisputes((existing) => [dispute, ...existing]);
+      setRentals((existing) =>
+        existing.map((item) => (item.id === input.rentalOpId ? { ...item, status: 'disputed' } : item)),
+      );
+
+      if (openedByRole === 'owner') {
+        addNotification({
+          type: 'dispute',
+          emoji: '⚠️',
+          title: 'نزاع من المؤجر',
+          message: `أبلغ المؤجر عن نزاع على الطلب #${rental.orderNum}. راجع التفاصيل وقدّم ردك أو اعتراضك من صفحة التسليم والإرجاع.`,
+          referenceType: 'dispute',
+          referenceId: dispute.id,
+          action: { label: 'الرد على النزاع', href: `/dashboard/order/${rental.id}/delivery` },
+        });
+        addOwnerNotification({
+          type: 'dispute',
+          emoji: '⚠️',
+          title: 'تم تسجيل النزاع',
+          message: `تم تسجيل نزاعك على الطلب #${rental.orderNum}.`,
+          referenceType: 'dispute',
+          referenceId: dispute.id,
+          action: { label: 'متابعة', href: '/owner/delivery' },
+        });
+      } else {
+        addNotification({
+          type: 'dispute',
+          emoji: '⚠️',
+          title: 'تم فتح نزاع',
+          message: `تم فتح نزاع على الطلب #${rental.orderNum}. سيتم مراجعته من قبل الإدارة.`,
+          referenceType: 'dispute',
+          referenceId: dispute.id,
+          action: { label: 'عرض النزاع', href: `/dashboard/order/${rental.id}/delivery` },
+        });
+        addOwnerNotification({
+          type: 'dispute',
+          emoji: '⚠️',
+          title: 'مطالبة من مستأجر',
+          message: `تم فتح نزاع على الطلب #${rental.orderNum} من قِبل المستأجر. يرجى الرد على المطالبة.`,
+          referenceType: 'dispute',
+          referenceId: dispute.id,
+          action: { label: 'عرض النزاع', href: '/owner/requests' },
+        });
+      }
+
+      return dispute;
     };
 
     return {
@@ -903,6 +1017,7 @@ export function RentalPlatformProvider({ children }: { children: ReactNode }) {
       cartItems,
       handoverReports,
       disputes,
+      compensationRequests,
       reviews,
       notifications,
       ownerNotifications,
@@ -1160,71 +1275,107 @@ export function RentalPlatformProvider({ children }: { children: ReactNode }) {
           action: { label: 'عرض النزاع', href: `/dashboard/order/${rental.id}/delivery` },
         });
       },
-      createDispute: (input) => {
+      requestCompensation: (input) => {
         const rental = getRentalByIdFromState(input.rentalOpId);
         if (!rental) return null;
 
-        const openedByRole = input.openedByRole ?? 'tenant';
-        const dispute: Dispute = {
-          id: numericId('dispute'),
+        const compensation: CompensationRequest = {
+          id: numericId('comp'),
           rentalOpId: input.rentalOpId,
-          equipmentHandoverId: input.equipmentHandoverId,
-          openedById: openedByRole === 'owner' ? rental.ownerId : DEFAULT_TENANT_ID,
-          openedByRole,
-          reason: input.reason,
-          details: input.details,
-          tenantClaim: input.tenantClaim,
+          handoverId: input.handoverId,
+          requestedById: rental.ownerId,
           requestedAmount: input.requestedAmount,
-          status: 'open',
+          notes: input.notes,
+          evidencePhotos: input.evidencePhotos,
+          status: 'requested',
           createdAt: new Date().toISOString(),
         };
 
-        setDisputes((existing) => [dispute, ...existing]);
-        setRentals((existing) =>
-          existing.map((item) => (item.id === input.rentalOpId ? { ...item, status: 'disputed' } : item)),
+        setCompensationRequests((existing) => [compensation, ...existing]);
+        addNotification({
+          type: 'payment',
+          emoji: '💰',
+          title: 'طلب تعويض من المؤجر',
+          message: `طالب المؤجر بتعويض ${formatCurrency(input.requestedAmount)} ر.ي على الطلب #${rental.orderNum}. يرجى مراجعة الطلب والرد.`,
+          referenceType: 'rental_operation',
+          referenceId: rental.id,
+          action: { label: 'الرد على الطلب', href: `/dashboard/order/${rental.id}/delivery` },
+        });
+        addOwnerNotification({
+          type: 'payment',
+          emoji: '📩',
+          title: 'تم إرسال طلب التعويض',
+          message: `تم إرسال طلب التعويض للطلب #${rental.orderNum}. بانتظار رد المستأجر.`,
+          referenceType: 'rental_operation',
+          referenceId: rental.id,
+          action: { label: 'متابعة', href: '/owner/delivery' },
+        });
+
+        return compensation;
+      },
+      respondToCompensation: (compensationId, response) => {
+        const compensation = compensationRequests.find((item) => item.id === compensationId);
+        if (!compensation) return;
+
+        setCompensationRequests((existing) =>
+          existing.map((item) =>
+            item.id === compensationId
+              ? { ...item, status: response, respondedAt: new Date().toISOString() }
+              : item,
+          ),
         );
-        if (openedByRole === 'owner') {
-          addNotification({
-            type: 'dispute',
-            emoji: '⚠️',
-            title: 'نزاع من المؤجر',
-            message: `أبلغ المؤجر عن نزاع على الطلب #${rental.orderNum}. راجع التفاصيل وقدّم ردك أو اعتراضك من صفحة التسليم والإرجاع.`,
-            referenceType: 'dispute',
-            referenceId: dispute.id,
-            action: { label: 'الرد على النزاع', href: `/dashboard/order/${rental.id}/delivery` },
-          });
+
+        const rental = getRentalByIdFromState(compensation.rentalOpId);
+        if (!rental) return;
+
+        if (response === 'accepted') {
           addOwnerNotification({
-            type: 'dispute',
-            emoji: '⚠️',
-            title: 'تم تسجيل النزاع',
-            message: `تم تسجيل نزاعك على الطلب #${rental.orderNum}.`,
-            referenceType: 'dispute',
-            referenceId: dispute.id,
-            action: { label: 'متابعة', href: '/owner/delivery' },
+            type: 'payment',
+            emoji: '✅',
+            title: 'قبل المستأجر التعويض',
+            message: `وافق المستأجر على طلب التعويض ${formatCurrency(compensation.requestedAmount)} ر.ي للطلب #${rental.orderNum}.`,
+            referenceType: 'rental_operation',
+            referenceId: rental.id,
           });
         } else {
-          addNotification({
-            type: 'dispute',
-            emoji: '⚠️',
-            title: 'تم فتح نزاع',
-            message: `تم فتح نزاع على الطلب #${rental.orderNum}. سيتم مراجعته من قبل الإدارة.`,
-            referenceType: 'dispute',
-            referenceId: dispute.id,
-            action: { label: 'عرض النزاع', href: `/dashboard/order/${rental.id}/delivery` },
-          });
           addOwnerNotification({
             type: 'dispute',
-            emoji: '⚠️',
-            title: 'مطالبة من مستأجر',
-            message: `تم فتح نزاع على الطلب #${rental.orderNum} من قِبل المستأجر. يرجى الرد على المطالبة.`,
-            referenceType: 'dispute',
-            referenceId: dispute.id,
-            action: { label: 'عرض النزاع', href: '/owner/requests' },
+            emoji: '❌',
+            title: 'رفض المستأجر التعويض',
+            message: `رفض المستأجر طلب التعويض للطلب #${rental.orderNum}.`,
+            referenceType: 'rental_operation',
+            referenceId: rental.id,
           });
         }
-
-        return dispute;
       },
+      openCompensationDispute: (compensationId, tenantClaim, requestedAmount) => {
+        const compensation = compensationRequests.find((item) => item.id === compensationId);
+        if (!compensation) return;
+
+        setCompensationRequests((existing) =>
+          existing.map((item) =>
+            item.id === compensationId
+              ? {
+                  ...item,
+                  status: 'disputed',
+                  tenantResponse: tenantClaim,
+                  respondedAt: new Date().toISOString(),
+                }
+              : item,
+          ),
+        );
+
+        createDisputeInternal({
+          rentalOpId: compensation.rentalOpId,
+          equipmentHandoverId: compensation.handoverId,
+          reason: 'damage',
+          details: tenantClaim,
+          openedByRole: 'tenant',
+          tenantClaim,
+          requestedAmount,
+        });
+      },
+      createDispute: createDisputeInternal,
       submitTenantDisputeResponse: (disputeId, tenantResponse) => {
         const before = disputes.find((x) => x.id === disputeId);
         setDisputes((existing) =>
@@ -1324,9 +1475,10 @@ export function RentalPlatformProvider({ children }: { children: ReactNode }) {
       getRentalById: getRentalByIdFromState,
       getHandoverReportsForRental,
       getDisputesForRental,
+      getCompensationForRental,
       getReviewsForRental,
     };
-  }, [cartItems, disputes, handoverReports, notifications, ownerNotifications, rentals, reviews]);
+  }, [cartItems, compensationRequests, disputes, handoverReports, notifications, ownerNotifications, rentals, reviews]);
 
   return <RentalPlatformContext.Provider value={value}>{children}</RentalPlatformContext.Provider>;
 }
