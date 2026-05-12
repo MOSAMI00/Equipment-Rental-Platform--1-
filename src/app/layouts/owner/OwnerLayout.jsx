@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Outlet } from 'react-router';
-import { useAuth } from '../../auth/AuthContext';
+import { usePage } from '@inertiajs/react';
 import { visit } from '../../inertia/navigation';
 import { useOwnerPageProps } from '../../inertia/owner-page-props';
 import OwnerBottomNav from './OwnerBottomNav';
@@ -8,15 +7,16 @@ import OwnerSidebar from './OwnerSidebar';
 import OwnerTopbar from './OwnerTopbar';
 import { createOwnerNavItems, getOwnerPageTitle, ownerBottomNavItems } from './navigation';
 
-const OwnerLayout = () => {
+const OwnerLayout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { props, url } = usePage();
+  const user = props.auth?.user ?? null;
   const { rentals, ownerNotifications } = useOwnerPageProps();
-  const pathname = window.location.pathname;
-  const pendingRequests = rentals.filter((rental) => rental.ownerId === user?.id && rental.status === 'pending').length;
+  const pathname = url;
+  const pendingRequests = rentals.filter((rental) => rental.owner_id === user?.id && rental.status === 'pending').length;
   const unreadOwnerNotifs = ownerNotifications.filter((n) => !n.read).length;
-  const ownerInitial = (user?.fullName ?? '؟').charAt(0);
+  const ownerInitial = (user?.full_name ?? user?.fullName ?? '؟').charAt(0);
   const navItems = createOwnerNavItems({ pendingRequests, unreadOwnerNotifs });
   const pageTitle = getOwnerPageTitle(pathname, navItems);
 
@@ -24,6 +24,10 @@ const OwnerLayout = () => {
     setIsSidebarOpen(false);
     setIsProfileOpen(false);
     visit(path);
+  };
+
+  const handleLogout = () => {
+    visit('/logout', { method: 'post' });
   };
 
   return (
@@ -39,7 +43,7 @@ const OwnerLayout = () => {
         user={user}
         ownerInitial={ownerInitial}
         onNavigate={handleNavigate}
-        onLogout={logout}
+        onLogout={handleLogout}
       />
 
       <div className="owner-main">
@@ -52,11 +56,11 @@ const OwnerLayout = () => {
           onMenuClick={() => setIsSidebarOpen((current) => !current)}
           onToggleProfile={() => setIsProfileOpen((current) => !current)}
           onNavigate={handleNavigate}
-          onLogout={logout}
+          onLogout={handleLogout}
         />
 
         <div className="owner-content">
-          <Outlet />
+          {children}
         </div>
       </div>
 

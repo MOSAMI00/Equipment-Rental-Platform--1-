@@ -1,6 +1,6 @@
 import React from 'react';
 import { StatusBadge } from '../../../components/shared';
-import { formatRentalDate } from '../../../data/mock-api';
+import { formatRentalDate } from '../../../utils/formatters';
 import { STAGE_META, STATUS_META } from '../lib/deliveryConfig';
 import { DeliveryStageForm } from './DeliveryStageForm';
 import { OwnerCompensationCard } from './OwnerCompensationCard';

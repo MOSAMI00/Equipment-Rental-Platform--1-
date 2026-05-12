@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatCurrency, formatRentalDateRange } from '../../../../data/mock-api';
+import { formatCurrency, formatRentalDateRange } from '../../../../utils/formatters';
 
 const RentalDetailsPanel = ({
   rental,

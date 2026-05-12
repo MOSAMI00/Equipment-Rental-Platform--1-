@@ -1,6 +1,6 @@
 import React from 'react';
 import { Edit2, EyeOff, MapPin, Star, Trash2 } from 'lucide-react';
-import { formatCurrency } from '../../../../data/mock-api';
+import { formatCurrency } from '../../../../utils/formatters';
 import { AppButton, MoneyText, StatusBadge } from '../../../../components/shared';
 
 const EquipmentCard = ({ equipment }) => (

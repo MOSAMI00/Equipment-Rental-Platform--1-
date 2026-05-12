@@ -1,30 +1,20 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router';
-import { useAuth } from '../../auth/AuthContext';
-import { useRentalPlatform } from '../../data/mock-api';
+import { usePage, router } from '@inertiajs/react';
+import { visit } from '../../inertia/navigation';
 import { getNotificationsConfig } from './lib/notificationsConfig';
 import { TenantNotificationsList } from './ui/TenantNotificationsList';
 import { OwnerNotificationsList } from './ui/OwnerNotificationsList';
 import { PageHeader, FilterTabs } from '../../components/shared';
 
 export default function NotificationsPage({ role: roleProp }) {
-  const { user } = useAuth();
+  const { props } = usePage();
+  const user = props.auth?.user ?? null;
   const role = roleProp || user?.type || 'tenant';
   const config = getNotificationsConfig(role);
-  const navigate = useNavigate();
 
-  const {
-    notifications: tenantNotifs,
-    ownerNotifications,
-    markNotificationRead,
-    markAllNotificationsRead,
-    markOwnerNotificationRead,
-    markAllOwnerNotificationsRead,
-  } = useRentalPlatform();
-
+  const allNotifications = props.notifications ?? props.owner_notifications ?? [];
   const [activeTab, setActiveTab] = useState(config.tabs[0]);
 
-  const allNotifications = role === 'owner' ? ownerNotifications : tenantNotifs;
   const unreadCount = allNotifications.filter((n) => !n.read).length;
 
   const displayed = activeTab === config.tabs[1]
@@ -32,23 +22,20 @@ export default function NotificationsPage({ role: roleProp }) {
     : allNotifications;
 
   const handleMarkAllRead = () => {
-    if (role === 'owner') {
-      markAllOwnerNotificationsRead();
-    } else {
-      markAllNotificationsRead();
-    }
+    router.post('/notifications/mark-all-read', {}, {
+      preserveScroll: true,
+    });
   };
 
   const handleOpenNotification = (notification) => {
-    if (role === 'owner') {
-      markOwnerNotificationRead(notification.id);
-    } else {
-      markNotificationRead(notification.id);
-    }
-    
-    if (config.actions?.hasExternalLinks && notification.action?.href) {
-      navigate(notification.action.href);
-    }
+    router.post(`/notifications/${notification.id}/read`, {}, {
+      preserveScroll: true,
+      onSuccess: () => {
+        if (config.actions?.hasExternalLinks && notification.action?.href) {
+          visit(notification.action.href);
+        }
+      },
+    });
   };
 
   return (

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../../../auth/AuthContext';
+import { usePage } from '@inertiajs/react';
 import { visit } from '../../../inertia/navigation';
 import { useOwnerPageProps } from '../../../inertia/owner-page-props';
 import EquipmentGrid from './components/EquipmentGrid';
@@ -7,7 +7,8 @@ import EquipmentToolbar from './components/EquipmentToolbar';
 import { useOwnerEquipmentCatalog } from './useOwnerEquipmentCatalog';
 
 const MyEquipment = () => {
-  const { user } = useAuth();
+  const { props } = usePage();
+  const user = props.auth?.user ?? null;
   const { rentals } = useOwnerPageProps();
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');

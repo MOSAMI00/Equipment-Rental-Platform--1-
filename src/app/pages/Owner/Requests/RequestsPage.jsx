@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { useAuth } from '../../../auth/AuthContext';
-import { useRentalPlatform } from '../../../data/mock-api';
+import { usePage, router } from '@inertiajs/react';
 import { useOwnerPageProps } from '../../../inertia/owner-page-props';
 import { PageHeader } from '../../../components/shared';
 import ConfirmModal from '../../../components/shared/ConfirmModal';
@@ -13,11 +12,8 @@ import RejectRequestModal from './components/RejectRequestModal';
 import { useOwnerRequests } from './useOwnerRequests';
 
 const Requests = () => {
-  const { user } = useAuth();
-  const {
-    approveRentalRequest,
-    rejectRentalRequest,
-  } = useRentalPlatform();
+  const { props } = usePage();
+  const user = props.auth?.user ?? null;
   const { rentals } = useOwnerPageProps();
   const [activeTab, setActiveTab] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
@@ -48,16 +44,22 @@ const Requests = () => {
 
   const confirmApprove = () => {
     if (!selectedRental?.id) return;
-    approveRentalRequest(selectedRental.id);
-    toast.success('تم قبول الطلب وإشعار المستأجر لإتمام الدفع');
-    closeModal();
+    router.post(`/rentals/${selectedRental.id}/approve`, {}, {
+      onSuccess: () => {
+        toast.success('تم قبول الطلب وإشعار المستأجر لإتمام الدفع');
+        closeModal();
+      },
+    });
   };
 
   const confirmReject = () => {
     if (!selectedRental?.id) return;
-    rejectRentalRequest(selectedRental.id);
-    toast.success('تم رفض الطلب وإشعار المستأجر');
-    closeModal();
+    router.post(`/rentals/${selectedRental.id}/reject`, {}, {
+      onSuccess: () => {
+        toast.success('تم رفض الطلب وإشعار المستأجر');
+        closeModal();
+      },
+    });
   };
 
   return (

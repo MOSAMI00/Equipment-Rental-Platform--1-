@@ -1,10 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { useAuth } from '../../auth/AuthContext';
-import {
-  getEquipmentSnapshot,
-  getTenantProfile,
-  useRentalPlatform,
-} from '../../data/mock-api';
+import { usePage } from '@inertiajs/react';
 import {
   AppInput,
   EmptyState,
@@ -15,41 +10,14 @@ import { getInsuranceConfig } from './lib/insuranceConfig';
 import { TenantInsuranceTable } from './ui/TenantInsuranceTable';
 import { OwnerInsuranceTable } from './ui/OwnerInsuranceTable';
 
-function normalizeInsuranceRows({ rentals, role, userId }) {
-  return rentals
-    .filter((rental) => {
-      if (role === 'owner') return rental.ownerId === userId;
-      return rental.tenantId === userId;
-    })
-    .map((rental) => {
-      const equipment = getEquipmentSnapshot(rental.equipmentId);
-      const tenant = getTenantProfile(rental.tenantId);
-      const status = rental.status === 'disputed' ? 'disputed' : rental.escrowStatus;
-      return {
-        id: rental.id,
-        orderNum: rental.orderNum,
-        equipment: equipment.name,
-        partnerName: role === 'owner' ? tenant.name : equipment.ownerName,
-        amount: rental.insuranceAmount,
-        deduction: status === 'disputed' ? 'قيد المراجعة' : 'لا',
-        status,
-      };
-    });
-}
-
 export default function InsurancePage({ role: roleProp }) {
-  const { user } = useAuth();
+  const { props } = usePage();
+  const user = props.auth?.user ?? null;
   const role = roleProp || user?.type || 'tenant';
   const config = getInsuranceConfig(role);
-  const { rentals } = useRentalPlatform();
+  const rows = props.insurance_policies ?? [];
   const [activeTab, setActiveTab] = useState('all');
   const [search, setSearch] = useState('');
-
-  const rows = useMemo(() => normalizeInsuranceRows({
-    rentals,
-    role,
-    userId: user?.id,
-  }), [rentals, role, user?.id]);
 
   const filteredRows = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -57,9 +25,9 @@ export default function InsurancePage({ role: roleProp }) {
       .filter((row) => activeTab === 'all' || row.status === activeTab)
       .filter((row) => (
         term.length === 0 ||
-        row.orderNum.toLowerCase().includes(term) ||
-        row.partnerName.toLowerCase().includes(term) ||
-        row.equipment.toLowerCase().includes(term)
+        (row.order_num ?? row.orderNum ?? '').toLowerCase().includes(term) ||
+        (row.partner_name ?? row.partnerName ?? '').toLowerCase().includes(term) ||
+        (row.equipment ?? '').toLowerCase().includes(term)
       ));
   }, [activeTab, rows, search]);
 

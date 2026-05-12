@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatRentalDate } from '../../../data/mock-api';
+import { formatRentalDate } from '../../../utils/formatters';
 
 export function DeliveryReportModal({ report, onClose }) {
   if (!report) return null;

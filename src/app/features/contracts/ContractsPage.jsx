@@ -1,44 +1,19 @@
 import React, { useMemo, useState } from "react";
-import { useAuth } from "../../auth/AuthContext";
+import { usePage } from '@inertiajs/react';
 import {
   AppInput,
   EmptyState,
   FilterTabs,
   PageHeader,
 } from "../../components/shared";
-import { CONTRACTS } from "./lib/contractTypes";
 import { getContractConfig } from "./lib/contractsConfig";
 import { TenantContractsTable } from "./ui/TenantContractsTable";
 import { OwnerContractsTable } from "./ui/OwnerContractsTable";
 import { ContractDetailModal } from "./ui/ContractDetailModal";
-import { ownerContractRows } from "./lib/contractsSeed";
 
-function normalizeTenantContracts() {
-  return CONTRACTS.map((item) => ({
-    id: item.id,
-    number: item.contractNum,
-    partnerName: item.owner,
-    equipment: item.equipment,
-    amount: `${item.amount} ر.ي`,
-    status: item.status,
-    statusLabel: undefined,
-  }));
-}
-
-function normalizeOwnerContracts() {
-  return ownerContractRows.map((item) => ({
-    id: item.id,
-    number: item.number,
-    partnerName: item.tenant,
-    equipment: item.equipment,
-    amount: item.total,
-    status: "active",
-    statusLabel: "نشط",
-  }));
-}
-
-export default function ContractsPage({ contracts: contractsProp, role: roleProp }) {
-  const { user } = useAuth();
+export default function ContractsPage({ role: roleProp }) {
+  const { props } = usePage();
+  const user = props.auth?.user ?? null;
   const role = roleProp || user?.type || "tenant";
   const config = getContractConfig(role);
   const [search, setSearch] = useState("");
@@ -46,11 +21,8 @@ export default function ContractsPage({ contracts: contractsProp, role: roleProp
   const [selectedContract, setSelectedContract] = useState(null);
 
   const contracts = useMemo(() => {
-    if (Array.isArray(contractsProp)) return contractsProp;
-    return role === "owner"
-      ? normalizeOwnerContracts()
-      : normalizeTenantContracts();
-  }, [contractsProp, role]);
+    return props.contracts ?? [];
+  }, [props.contracts]);
 
   const filtered = useMemo(() => {
     const allowedStatuses = config.statusesByTab[activeTab] || [];
@@ -62,9 +34,9 @@ export default function ContractsPage({ contracts: contractsProp, role: roleProp
         allowedStatuses.includes(contract.status);
       const matchesSearch =
         lowered.length === 0 ||
-        contract.number.includes(lowered) ||
-        contract.partnerName.includes(lowered) ||
-        contract.equipment.includes(lowered);
+        (contract.number ?? contract.contract_num ?? '').includes(lowered) ||
+        (contract.partnerName ?? contract.partner_name ?? '').includes(lowered) ||
+        (contract.equipment ?? '').includes(lowered);
       return matchesTab && matchesSearch;
     });
   }, [activeTab, config.statusesByTab, contracts, search]);

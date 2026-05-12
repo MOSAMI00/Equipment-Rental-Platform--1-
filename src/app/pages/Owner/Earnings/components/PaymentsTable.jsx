@@ -1,6 +1,6 @@
 import React from 'react';
 import { Download } from 'lucide-react';
-import { formatCurrency } from '../../../../data/mock-api';
+import { formatCurrency } from '../../../../utils/formatters';
 import { DataTable, StatusBadge } from '../../../../components/shared';
 
 const escrowStatusMeta = {

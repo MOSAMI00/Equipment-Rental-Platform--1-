@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { formatCurrency } from '../../../data/mock-api';
+import { formatCurrency } from '../../../utils/formatters';
 
 function canRenderPhoto(photo) {
   return /^(data:|blob:|https?:\/\/|\/)/.test(photo);

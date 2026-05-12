@@ -1,6 +1,6 @@
 import React from 'react';
 import { DollarSign, TrendingUp } from 'lucide-react';
-import { formatCurrency } from '../../../../data/mock-api';
+import { formatCurrency } from '../../../../utils/formatters';
 import KPICard from '../../../../components/shared/KPICard';
 import { KPICardSkeleton } from '../../../../components/shared/OwnerSkeletons';
 

@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
-import { useAuth } from '../../../auth/AuthContext';
-import { getOwnerEquipmentSnapshots } from '../../../data/mock-api';
+import { usePage } from '@inertiajs/react';
 import { useOwnerPageProps } from '../../../inertia/owner-page-props';
 
 const ORDER_COLORS = {
@@ -22,10 +21,10 @@ const buildMonthlyEarnings = (ownerRentals) => {
     const year = date.getFullYear();
     const amount = ownerRentals
       .filter((rental) => {
-        const created = new Date(rental.createdAt);
+        const created = new Date(rental.created_at ?? rental.createdAt);
         return created.getMonth() === month && created.getFullYear() === year;
       })
-      .reduce((total, rental) => total + rental.rentalAmount, 0);
+      .reduce((total, rental) => total + (rental.rental_amount ?? rental.rentalAmount ?? 0), 0);
     rows.push({ name: formatter.format(date), amount });
   }
   return rows;
@@ -46,21 +45,19 @@ const buildOrderStatusData = (ownerRentals) => {
 };
 
 export const useOwnerOverview = () => {
-  const { user } = useAuth();
+  const { props } = usePage();
+  const user = props.auth?.user ?? null;
   const { rentals, reviews } = useOwnerPageProps();
 
   const ownerRentals = useMemo(
-    () => rentals.filter((rental) => rental.ownerId === user?.id),
+    () => rentals.filter((rental) => (rental.owner_id ?? rental.ownerId) === user?.id),
     [rentals, user?.id],
   );
 
-  const equipment = useMemo(
-    () => getOwnerEquipmentSnapshots(user?.id),
-    [user?.id],
-  );
+  const equipment = props.equipment ?? [];
 
   const ownerReviews = useMemo(
-    () => reviews.filter((review) => review.targetId === user?.id),
+    () => reviews.filter((review) => (review.target_id ?? review.targetId) === user?.id),
     [reviews, user?.id],
   );
 
@@ -84,7 +81,7 @@ export const useOwnerOverview = () => {
 
   const recentRentals = ownerRentals
     .slice()
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .sort((a, b) => new Date(b.created_at ?? b.createdAt).getTime() - new Date(a.created_at ?? a.createdAt).getTime())
     .slice(0, 5);
   const activeOrders = ownerRentals.filter((item) => ['pending', 'confirmed', 'in_use'].includes(item.status)).length;
 

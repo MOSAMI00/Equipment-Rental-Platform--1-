@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatCurrency } from '../../../data/mock-api';
+import { formatCurrency } from '../../../utils/formatters';
 import { AppButton } from '../../../components/shared';
 
 const COMPENSATION_STATUS_LABELS = {

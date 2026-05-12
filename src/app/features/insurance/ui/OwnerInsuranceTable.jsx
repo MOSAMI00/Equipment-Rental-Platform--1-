@@ -1,6 +1,6 @@
 import React from 'react';
 import { DataTable, StatusBadge } from '../../../components/shared';
-import { formatCurrency } from '../../../data/mock-api';
+import { formatCurrency } from '../../../utils/formatters';
 import { INSURANCE_STATUS_META } from '../lib/insuranceConfig';
 
 export function OwnerInsuranceTable({ rows }) {

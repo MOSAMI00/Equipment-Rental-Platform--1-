@@ -1,6 +1,6 @@
 import React from 'react';
 import { CheckCircle, Eye, XCircle } from 'lucide-react';
-import { formatCurrency } from '../../../../data/mock-api';
+import { formatCurrency } from '../../../../utils/formatters';
 import { AppButton, DataTable, StatusBadge } from '../../../../components/shared';
 
 const fallbackEquipment = (rental) => rental?.equipment ?? { name: 'معدة غير معروفة', image: '', location: '—' };

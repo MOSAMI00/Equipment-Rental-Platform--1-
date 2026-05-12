@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useAuth } from '../../../auth/AuthContext';
+import { usePage } from '@inertiajs/react';
 import { useOwnerPageProps } from '../../../inertia/owner-page-props';
 import { PageHeader } from '../../../components/shared';
 import EarningsKpis from './components/EarningsKpis';
@@ -11,7 +11,8 @@ import PayoutMethodModal from './PayoutMethodModal';
 const Earnings = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const { user } = useAuth();
+  const { props } = usePage();
+  const user = props.auth?.user ?? null;
   const { rentals } = useOwnerPageProps();
 
   useEffect(() => {
@@ -20,7 +21,7 @@ const Earnings = () => {
   }, []);
 
   const ownerRentals = useMemo(
-    () => rentals.filter((rental) => rental.ownerId === user?.id),
+    () => rentals.filter((rental) => (rental.owner_id ?? rental.ownerId) === user?.id),
     [rentals, user?.id],
   );
 
@@ -34,24 +35,24 @@ const Earnings = () => {
       const year = date.getFullYear();
       const amount = ownerRentals
         .filter((rental) => {
-          const created = new Date(rental.createdAt);
+          const created = new Date(rental.created_at ?? rental.createdAt);
           return created.getMonth() === month && created.getFullYear() === year;
         })
-        .reduce((total, rental) => total + rental.rentalAmount, 0);
+        .reduce((total, rental) => total + (rental.rental_amount ?? rental.rentalAmount ?? 0), 0);
       rows.push({ name: formatter.format(date), amount });
     }
     return rows;
   }, [ownerRentals]);
 
   const thisMonth = dataEarnings[dataEarnings.length - 1]?.amount ?? 0;
-  const total = ownerRentals.reduce((sum, rental) => sum + rental.rentalAmount, 0);
+  const total = ownerRentals.reduce((sum, rental) => sum + (rental.rental_amount ?? rental.rentalAmount ?? 0), 0);
   const pendingTransfer = ownerRentals
-    .filter((rental) => rental.paymentStatus === 'paid' && rental.escrowStatus === 'held')
-    .reduce((sum, rental) => sum + rental.rentalAmount, 0);
+    .filter((rental) => (rental.payment_status ?? rental.paymentStatus) === 'paid' && (rental.escrow_status ?? rental.escrowStatus) === 'held')
+    .reduce((sum, rental) => sum + (rental.rental_amount ?? rental.rentalAmount ?? 0), 0);
   const transferred = Math.max(0, total - pendingTransfer);
   const paymentsRows = ownerRentals
     .slice()
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .sort((a, b) => new Date(b.created_at ?? b.createdAt).getTime() - new Date(a.created_at ?? a.createdAt).getTime())
     .slice(0, 8);
 
   return (

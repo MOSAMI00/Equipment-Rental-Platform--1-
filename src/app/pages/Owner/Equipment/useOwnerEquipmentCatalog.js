@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { getOwnerEquipmentSnapshots } from '../../../data/mock-api';
 
 const getDisplayStatus = (latestRental) => {
   if (latestRental?.status === 'confirmed') return 'confirmed';

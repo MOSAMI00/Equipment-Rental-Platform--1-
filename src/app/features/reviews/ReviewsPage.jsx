@@ -1,106 +1,95 @@
 import React, { useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router';
-import { useAuth } from '../../auth/AuthContext';
-import {
-  useRentalPlatform,
-  getEquipmentSnapshot,
-  getTenantProfile,
-  formatRentalDate,
-} from '../../data/mock-api';
+import { usePage, router } from '@inertiajs/react';
+import { formatRentalDate } from '../../utils/formatters';
 import { getReviewsConfig } from './lib/reviewsConfig';
 import { ReviewSummary } from './ui/ReviewSummary';
 import { TenantReviewsList } from './ui/TenantReviewsList';
 import { OwnerReviewsList } from './ui/OwnerReviewsList';
 import { PageHeader, FilterTabs } from '../../components/shared';
 
-const RECEIVED_MOCK = [
-  { id: 'received-1', equipment: 'مولد كهرباء', person: 'محمد سالم (مؤجر)', stars: 5, comment: 'مستأجر ممتاز، يحترم المواعيد ويعامل المعدة بعناية.', date: '04 مايو 2026', image: '👤' },
-  { id: 'received-2', equipment: 'رافعة شوكية', person: 'علي حسن (مؤجر)', stars: 4, comment: 'مستأجر جيد، أعاد المعدة بحالة ممتازة.', date: '25 أبريل 2026', image: '👤' },
-];
-
-function mapReviewCard({ review, rentals, role, direction }) {
-  const rental = rentals.find((item) => item.id === review.rentalOpId);
-  const equipment = rental ? getEquipmentSnapshot(rental.equipmentId) : undefined;
-  const tenant = rental ? getTenantProfile(rental.tenantId) : undefined;
-  const isOwner = role === 'owner';
-
-  return {
-    id: review.id,
-    equipment: equipment?.name ?? 'طلب إيجار',
-    person: direction === 'received'
-      ? (isOwner ? tenant?.name || review.reviewerId || 'مستأجر' : equipment?.ownerName || review.reviewerId || 'مؤجر')
-      : (isOwner ? tenant?.name || review.targetId || 'مستأجر' : equipment?.ownerName || review.targetId || 'مؤجر'),
-    stars: review.rating,
-    comment: review.reviewText,
-    date: formatRentalDate(review.createdAt),
-    image: equipment?.image ?? '⭐',
-  };
-}
-
 export default function ReviewsPage({ role: roleProp }) {
-  const { user } = useAuth();
+  const { props } = usePage();
+  const user = props.auth?.user ?? null;
   const role = roleProp || user?.type || 'tenant';
   const config = getReviewsConfig(role);
-  const [searchParams] = useSearchParams();
-  const selectedOrderId = searchParams.get('orderId');
   const [activeTab, setActiveTab] = useState(config.tabs[0]);
 
-  const { rentals, reviews, submitReview } = useRentalPlatform();
-  const userId = user?.id || (role === 'owner' ? 'owner-1' : 'tenant-1');
+  const reviews = props.reviews ?? [];
+  const rentals = props.rentals ?? [];
+  const userId = user?.id;
 
   const sentReviews = useMemo(() => {
     return reviews
-      .filter((review) => review.reviewerId === userId)
-      .map((review) => mapReviewCard({ review, rentals, role, direction: 'sent' }));
-  }, [reviews, rentals, role, userId]);
+      .filter((review) => (review.reviewer_id ?? review.reviewerId) === userId)
+      .map((review) => ({
+        id: review.id,
+        equipment: review.equipment_name ?? review.equipmentName ?? 'طلب إيجار',
+        person: review.target_name ?? review.targetName ?? 'مستخدم',
+        stars: review.rating,
+        comment: review.review_text ?? review.reviewText,
+        date: formatRentalDate(review.created_at ?? review.createdAt),
+        image: review.equipment_image ?? '⭐',
+      }));
+  }, [reviews, userId]);
 
   const receivedReviews = useMemo(() => {
-    const received = reviews
-      .filter((review) => review.targetId === userId)
-      .map((review) => mapReviewCard({ review, rentals, role, direction: 'received' }));
-
-    return role === 'tenant' && received.length === 0 ? RECEIVED_MOCK : received;
-  }, [reviews, rentals, role, userId]);
+    return reviews
+      .filter((review) => (review.target_id ?? review.targetId) === userId)
+      .map((review) => ({
+        id: review.id,
+        equipment: review.equipment_name ?? review.equipmentName ?? 'طلب إيجار',
+        person: review.reviewer_name ?? review.reviewerName ?? 'مستخدم',
+        stars: review.rating,
+        comment: review.review_text ?? review.reviewText,
+        date: formatRentalDate(review.created_at ?? review.createdAt),
+        image: review.equipment_image ?? '👤',
+      }));
+  }, [reviews, userId]);
 
   const pendingReviews = useMemo(() => {
     const reviewedRentalIds = new Set(
       reviews
-        .filter((review) => review.reviewerId === userId)
-        .map((review) => review.rentalOpId)
+        .filter((review) => (review.reviewer_id ?? review.reviewerId) === userId)
+        .map((review) => review.rental_op_id ?? review.rentalOpId)
     );
-    const pending = rentals
+    return rentals
       .filter((rental) => {
         if (rental.status !== 'completed' || reviewedRentalIds.has(rental.id)) return false;
-        return role === 'owner' ? rental.ownerId === userId : rental.tenantId === userId;
+        return role === 'owner'
+          ? (rental.owner_id ?? rental.ownerId) === userId
+          : (rental.tenant_id ?? rental.tenantId) === userId;
       })
-      .map((rental) => {
-        const equipment = getEquipmentSnapshot(rental.equipmentId);
-        const tenant = getTenantProfile(rental.tenantId);
-        return {
-          id: rental.id,
-          orderNum: rental.orderNum,
-          equipment: equipment.name,
-          partnerName: role === 'owner' ? tenant.name : equipment.ownerName,
-          targetId: role === 'owner' ? rental.tenantId : equipment.ownerId,
-          image: role === 'owner' ? '👤' : equipment.image,
-          date: formatRentalDate(rental.endDate),
-        };
-      });
-
-    if (!selectedOrderId) return pending;
-    return pending.sort((a, b) => (a.id === selectedOrderId ? -1 : b.id === selectedOrderId ? 1 : 0));
-  }, [rentals, reviews, selectedOrderId, role, userId]);
+      .map((rental) => ({
+        id: rental.id,
+        orderNum: rental.order_num ?? rental.orderNum,
+        equipment: rental.equipment?.name ?? 'معدة',
+        partnerName: role === 'owner'
+          ? (rental.tenant?.name ?? 'مستأجر')
+          : (rental.equipment?.owner_name ?? rental.equipment?.ownerName ?? 'مؤجر'),
+        targetId: role === 'owner'
+          ? (rental.tenant_id ?? rental.tenantId)
+          : (rental.equipment?.owner_id ?? rental.equipment?.ownerId),
+        image: rental.equipment?.image ?? (role === 'owner' ? '👤' : '⭐'),
+        date: formatRentalDate(rental.end_date ?? rental.endDate),
+      }));
+  }, [rentals, reviews, role, userId]);
 
   const [ratingValues, setRatingValues] = useState({});
   const [comments, setComments] = useState({});
 
   const handlePendingSubmit = (item) => {
-    submitReview({
-      rentalOpId: item.id,
-      targetType: 'user',
-      targetId: item.targetId,
+    router.post('/reviews', {
+      rental_op_id: item.id,
+      target_type: 'user',
+      target_id: item.targetId,
       rating: ratingValues[item.id],
-      reviewText: comments[item.id] || '',
+      review_text: comments[item.id] || '',
+    }, {
+      preserveScroll: true,
+      onSuccess: () => {
+        setRatingValues((prev) => { const n = { ...prev }; delete n[item.id]; return n; });
+        setComments((prev) => { const n = { ...prev }; delete n[item.id]; return n; });
+      },
     });
   };
 

@@ -1,11 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router';
-import { useAuth } from '../../auth/AuthContext';
-import {
-  getEquipmentSnapshot,
-  getTenantProfile,
-  useRentalPlatform,
-} from '../../data/mock-api';
+import { usePage, router } from '@inertiajs/react';
+
 import {
   EmptyState,
   FilterTabs,
@@ -53,18 +48,14 @@ function getStageFeedback({ role, stage }) {
 function normalizeDeliveryRows({ rentals, role, userId }) {
   return rentals
     .filter((rental) => {
-      if (role === 'owner') return rental.ownerId === userId;
-      return rental.tenantId === userId;
+      if (role === 'owner') return (rental.owner_id ?? rental.ownerId) === userId;
+      return (rental.tenant_id ?? rental.tenantId) === userId;
     })
     .filter((rental) => ['confirmed', 'in_use', 'disputed', 'completed'].includes(rental.status))
     .map((rental) => {
-      const equipment = getEquipmentSnapshot(rental.equipmentId);
-      const tenant = getTenantProfile(rental.tenantId);
-
       return {
         ...rental,
-        equipment,
-        partnerName: role === 'owner' ? tenant.name : equipment.ownerName,
+        partnerName: role === 'owner' ? (rental.tenant?.name ?? 'المستأجر') : (rental.equipment?.owner_name ?? rental.equipment?.ownerName ?? 'المؤجر'),
         partnerLabel: role === 'owner' ? 'المستأجر' : 'المؤجر',
       };
     });
@@ -75,10 +66,10 @@ function getWorkflowStage(rental, reports) {
   if (rental.status === 'disputed') return 'disputes';
   if (rental.status === 'completed') return 'completed';
 
-  const ownerDelivery = reports.some((report) => report.phase === 'delivery' && report.submittedByRole === 'owner');
-  const tenantDelivery = reports.some((report) => report.phase === 'delivery' && report.submittedByRole === 'tenant');
-  const tenantReturn = reports.some((report) => report.phase === 'return' && report.submittedByRole === 'tenant');
-  const ownerReturn = reports.some((report) => report.phase === 'return' && report.submittedByRole === 'owner');
+  const ownerDelivery = reports.some((report) => report.phase === 'delivery' && (report.submitted_by_role ?? report.submittedByRole) === 'owner');
+  const tenantDelivery = reports.some((report) => report.phase === 'delivery' && (report.submitted_by_role ?? report.submittedByRole) === 'tenant');
+  const tenantReturn = reports.some((report) => report.phase === 'return' && (report.submitted_by_role ?? report.submittedByRole) === 'tenant');
+  const ownerReturn = reports.some((report) => report.phase === 'return' && (report.submitted_by_role ?? report.submittedByRole) === 'owner');
 
   if (rental.status === 'confirmed' && !ownerDelivery) return 'delivery';
   if (rental.status === 'confirmed' && ownerDelivery && !tenantDelivery) return 'handover';
@@ -107,22 +98,19 @@ function getFormSpec({ role, stage }) {
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
 export default function DeliveryPage({ role: roleProp }) {
-  const { user } = useAuth();
-  const { id: routeRentalId } = useParams();
+  const { props } = usePage();
+  const user = props.auth?.user ?? null;
   const role = roleProp || user?.type || 'tenant';
   const config = getDeliveryConfig(role);
-  const userId = user?.id || (role === 'owner' ? 'owner-1' : 'tenant-1');
-  const {
-    rentals,
-    createHandoverReport,
-    getHandoverReportsForRental,
-    getDisputesForRental,
-    getCompensationForRental,
-    requestCompensation,
-    respondToCompensation,
-    openCompensationDispute,
-    submitReview,
-  } = useRentalPlatform();
+  const userId = user?.id;
+
+  const rentals = props.rentals ?? [];
+  const handoverReports = props.handover_reports ?? [];
+  const allDisputes = props.disputes ?? [];
+  const allCompensations = props.compensations ?? [];
+
+  const routeRentalId = new URLSearchParams(window.location.search).get('id');
+
   const [activeTab, setActiveTab] = useState(config.tabs[0].id);
   const [selectedRentalId, setSelectedRentalId] = useState(routeRentalId || null);
   const [selectedReport, setSelectedReport] = useState(null);
@@ -139,8 +127,8 @@ export default function DeliveryPage({ role: roleProp }) {
     userId,
   }).map((rental) => ({
     ...rental,
-    workflowStage: getWorkflowStage(rental, getHandoverReportsForRental(rental.id)),
-  })), [rentals, role, userId, getHandoverReportsForRental]);
+    workflowStage: getWorkflowStage(rental, handoverReports.filter(h => (h.rental_id ?? h.rentalId) === rental.id)),
+  })), [rentals, role, userId, handoverReports]);
 
   const filteredRows = useMemo(() => rows.filter((row) => {
     if (activeTab === 'all') return true;
@@ -148,14 +136,15 @@ export default function DeliveryPage({ role: roleProp }) {
   }), [activeTab, rows]);
 
   const selectedRental = useMemo(() => {
-    if (selectedRentalId) return rows.find((row) => row.id === selectedRentalId) || filteredRows[0];
+    if (selectedRentalId) return rows.find((row) => String(row.id) === String(selectedRentalId)) || filteredRows[0];
     return filteredRows[0];
   }, [filteredRows, rows, selectedRentalId]);
 
-  const reports = selectedRental ? getHandoverReportsForRental(selectedRental.id) : [];
-  const disputes = selectedRental ? getDisputesForRental(selectedRental.id) : [];
-  const compensation = selectedRental ? getCompensationForRental(selectedRental.id) : undefined;
-  const ownerReturnReport = reports.find((report) => report.phase === 'return' && report.submittedByRole === 'owner');
+  const reports = selectedRental ? handoverReports.filter(h => (h.rental_id ?? h.rentalId) === selectedRental.id) : [];
+  const disputes = selectedRental ? allDisputes.filter(d => (d.rental_id ?? d.rentalId) === selectedRental.id) : [];
+  const compensation = selectedRental ? allCompensations.find(c => (c.rental_id ?? c.rentalId) === selectedRental.id) : undefined;
+  
+  const ownerReturnReport = reports.find((report) => report.phase === 'return' && (report.submitted_by_role ?? report.submittedByRole) === 'owner');
   const selectedStage = selectedRental?.workflowStage || 'delivery';
   const formSpec = getFormSpec({ role, stage: selectedStage });
   const activeForm = selectedRental ? { ...DEFAULT_FORM, ...(forms[selectedRental.id] || {}) } : DEFAULT_FORM;
@@ -184,18 +173,20 @@ export default function DeliveryPage({ role: roleProp }) {
   const handleSubmitStage = () => {
     if (!selectedRental || !formSpec) return;
 
-    createHandoverReport({
-      rentalOpId: selectedRental.id,
+    router.post(`/rentals/${selectedRental.id}/handover`, {
       phase: formSpec.phase,
-      submittedByRole: formSpec.submitter,
-      conditionStatus: formSpec.phase === 'delivery' ? activeForm.conditionStatus : undefined,
-      hasDamage: formSpec.phase === 'return' ? activeForm.hasDamage === 'true' : undefined,
-      hasIssues: formSpec.phase === 'return' ? activeForm.hasDamage === 'true' : activeForm.conditionStatus === 'damaged',
+      submitted_by_role: formSpec.submitter,
+      condition_status: formSpec.phase === 'delivery' ? activeForm.conditionStatus : undefined,
+      has_damage: formSpec.phase === 'return' ? activeForm.hasDamage === 'true' : undefined,
+      has_issues: formSpec.phase === 'return' ? activeForm.hasDamage === 'true' : activeForm.conditionStatus === 'damaged',
       notes: activeForm.notes,
-      evidencePhotos: activeForm.evidencePhotos,
+      evidence_photos: activeForm.evidencePhotos,
+    }, {
+      preserveScroll: true,
+      onSuccess: () => {
+        setForms((current) => ({ ...current, [selectedRental.id]: DEFAULT_FORM }));
+      }
     });
-
-    setForms((current) => ({ ...current, [selectedRental.id]: DEFAULT_FORM }));
   };
 
   const updateCompensationForm = (key, value) => {
@@ -217,30 +208,40 @@ export default function DeliveryPage({ role: roleProp }) {
     const amount = Number(activeCompensationForm.amount || 0);
     if (!amount || !activeCompensationForm.notes.trim()) return;
 
-    requestCompensation({
-      rentalOpId: selectedRental.id,
-      handoverId: ownerReturnReport.id,
-      requestedAmount: amount,
+    router.post(`/rentals/${selectedRental.id}/compensation`, {
+      handover_id: ownerReturnReport.id,
+      requested_amount: amount,
       notes: activeCompensationForm.notes.trim(),
-      evidencePhotos: activeCompensationForm.photos,
+      evidence_photos: activeCompensationForm.photos,
+    }, {
+      preserveScroll: true,
+      onSuccess: () => {
+        setCompensationForms((current) => ({
+          ...current,
+          [selectedRental.id]: { amount: '', notes: '', photos: [] },
+        }));
+      }
     });
+  };
 
-    setCompensationForms((current) => ({
-      ...current,
-      [selectedRental.id]: { amount: '', notes: '', photos: [] },
-    }));
+  const respondToCompensation = (compensationId, action) => {
+    router.post(`/compensations/${compensationId}/respond`, { action }, { preserveScroll: true });
+  };
+
+  const openCompensationDispute = (compensationId) => {
+    router.post(`/compensations/${compensationId}/dispute`, {}, { preserveScroll: true });
   };
 
   const handleSubmitRating = ({ rental, rating, comment }) => {
-    if (!rental || !submitReview) return;
+    if (!rental) return;
     const equipment = rental.equipment;
-    submitReview({
-      rentalOpId: rental.id,
-      targetType: 'user',
-      targetId: role === 'owner' ? rental.tenantId : equipment?.ownerId,
+    router.post('/reviews', {
+      rental_op_id: rental.id,
+      target_type: 'user',
+      target_id: role === 'owner' ? (rental.tenant_id ?? rental.tenantId) : (equipment?.owner_id ?? equipment?.ownerId),
       rating,
-      reviewText: comment || '',
-    });
+      review_text: comment || '',
+    }, { preserveScroll: true });
   };
 
   return (

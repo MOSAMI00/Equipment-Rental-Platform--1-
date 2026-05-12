@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatCurrency, formatRentalDateRange } from '../../../../data/mock-api';
+import { formatCurrency, formatRentalDateRange } from '../../../../utils/formatters';
 import { StatusBadge } from '../../../../components/shared';
 import RequestDecisionActions from './RequestDecisionActions';
 import {

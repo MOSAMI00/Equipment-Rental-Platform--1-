@@ -1,8 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useAuth } from '../../../auth/AuthContext';
-import {
-  useRentalPlatform,
-} from '../../../data/mock-api';
+import { usePage } from '@inertiajs/react';
 import { useOwnerPageProps } from '../../../inertia/owner-page-props';
 import {
   AppInput,
@@ -15,8 +12,9 @@ import { RENTAL_TABS } from './rentalHelpers';
 import { useOwnerRentals } from './useOwnerRentals';
 
 const Rentals = () => {
-  const { user } = useAuth();
-  const { getHandoverReportsForRental } = useRentalPlatform();
+  const { props } = usePage();
+  const user = props.auth?.user ?? null;
+  const handoverReports = props.handover_reports ?? [];
   const { rentals } = useOwnerPageProps();
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
@@ -41,7 +39,7 @@ const Rentals = () => {
     activeTab,
     search,
     selectedRentalId,
-    getHandoversForRental: getHandoverReportsForRental,
+    getHandoversForRental: (rentalId) => handoverReports.filter(h => h.rental_id === rentalId),
   });
 
   const toggleRental = useCallback((rentalId) => {
