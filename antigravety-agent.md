@@ -88,8 +88,6 @@ Always refer to these before making decisions.
 
 🛠️ Default Tech Stack (if not specified)
 * Frontend: React
-* Backend: Node.js (Express)
-* Database: PostgreSQL
 * Styling: Tailwind CSS
 
 🎬 Special Instruction (For Demo / Teaching Projects)
